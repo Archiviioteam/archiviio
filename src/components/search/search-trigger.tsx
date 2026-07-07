@@ -2,7 +2,7 @@
 
 import type { MouseEvent, PointerEvent } from "react";
 import { Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { useLayout } from "@/components/layout/layout-provider";
 import { getCommandPaletteShortcutLabel } from "@/lib/layout/keyboard-shortcuts";
 import { responsive } from "@/lib/layout/responsive";
@@ -69,12 +69,12 @@ export function SearchTrigger({
 
   return (
     <>
-      <Button
-        variant="outline"
-        size="icon"
+      <button
+        type="button"
         data-tauri-drag-region-exclude
         data-no-drag
         className={cn(
+          buttonVariants({ variant: "outline", size: "icon" }),
           radius.pill,
           "size-8 text-muted-foreground sm:hidden",
           className
@@ -84,16 +84,16 @@ export function SearchTrigger({
         aria-label={t(language, "search.open")}
       >
         <Search className="size-4" />
-      </Button>
+      </button>
 
-      <Button
-        variant="outline"
-        size="sm"
+      <button
+        type="button"
         data-tauri-drag-region-exclude
         data-no-drag
         className={cn(
+          buttonVariants({ variant: "outline", size: "sm" }),
           radius.pill,
-          "hidden h-8 gap-2 px-4 text-muted-foreground sm:flex",
+          "hidden h-8 gap-2 px-4 text-muted-foreground sm:inline-flex",
           className
         )}
         onPointerDown={(event) => event.stopPropagation()}
@@ -111,7 +111,7 @@ export function SearchTrigger({
         >
           {getCommandPaletteShortcutLabel()}
         </kbd>
-      </Button>
+      </button>
     </>
   );
 }
