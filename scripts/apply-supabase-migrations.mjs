@@ -68,6 +68,21 @@ async function pgTableExists(client, table) {
   return rows[0]?.exists === true;
 }
 
+async function pgFunctionExists(client, functionName) {
+  const { rows } = await client.query(
+    `select exists (
+      select 1
+      from pg_proc p
+      join pg_namespace n on n.oid = p.pronamespace
+      where n.nspname = 'public'
+        and p.proname = $1
+    ) as exists`,
+    [functionName]
+  );
+
+  return rows[0]?.exists === true;
+}
+
 async function checkSchemaViaPg(client) {
   const coreReady = await pgTableExists(client, "workspaces");
 
@@ -101,6 +116,12 @@ async function checkSchemaViaPg(client) {
       (await pgColumnExists(client, "users", "first_name")) &&
       (await pgColumnExists(client, "users", "avatar_url")),
     workspace_invitations: await pgTableExists(client, "workspace_invitations"),
+    workspace_invitation_tokens: await pgColumnExists(
+      client,
+      "workspace_invitations",
+      "token"
+    ),
+    invitation_token_function: await pgFunctionExists(client, "new_invitation_token"),
     documents_bucket: await client
       .query(
         `select exists (
@@ -201,6 +222,17 @@ async function checkSchemaViaApi(supabase) {
         .limit(0);
       return !error;
     },
+    workspace_invitation_tokens: async () => {
+      const { error } = await supabase
+        .from("workspace_invitations")
+        .select("token")
+        .limit(0);
+      return !error;
+    },
+    invitation_token_function: async () => {
+      const { data, error } = await supabase.rpc("new_invitation_token");
+      return !error && typeof data === "string" && data.length > 0;
+    },
   };
 
   const status = { coreReady: true };
@@ -233,6 +265,12 @@ function migrationsForStatus(status) {
     needed.add("022_user_workspace_settings.sql");
   }
   if (!status.workspace_invitations) needed.add("023_workspace_invitations.sql");
+  if (!status.workspace_invitation_tokens) {
+    needed.add("025_workspace_invitation_tokens.sql");
+  }
+  if (!status.invitation_token_function) {
+    needed.add("026_fix_invitation_token_generation.sql");
+  }
 
   return files.filter((file) => needed.has(file));
 }

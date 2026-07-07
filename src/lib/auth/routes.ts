@@ -3,8 +3,10 @@ export function isPublicPath(pathname: string): boolean {
     pathname === "/" ||
     pathname.startsWith("/login") ||
     pathname.startsWith("/signup") ||
+    pathname.startsWith("/invite/") ||
     pathname.startsWith("/auth/callback") ||
-    pathname === "/api/signup"
+    pathname === "/api/signup" ||
+    pathname.startsWith("/api/invite/")
   );
 }
 

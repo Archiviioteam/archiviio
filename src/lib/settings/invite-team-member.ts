@@ -2,7 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { isValidEmail } from "@/lib/settings/validation";
 
 export type InviteTeamMemberResult =
-  | { ok: true }
+  | { ok: true; emailed: boolean; inviteUrl?: string }
   | { ok: false; error: string };
 
 function normalizeInviteError(message: string): string {
@@ -20,12 +20,26 @@ function normalizeInviteError(message: string): string {
     return "Enter a valid email address";
   }
 
+  if (lower.includes("rate limit")) {
+    return "RATE_LIMIT_FALLBACK";
+  }
+
+  if (lower.includes("auth/v1/invite") || lower.includes("failed to invite user")) {
+    return "RATE_LIMIT_FALLBACK";
+  }
+
   return message;
 }
 
+type InviteApiPayload = {
+  error?: string;
+  emailed?: boolean;
+  inviteUrl?: string;
+};
+
 async function inviteViaApiRoute(
   email: string
-): Promise<InviteTeamMemberResult & { emailed?: boolean; unavailable?: boolean }> {
+): Promise<InviteTeamMemberResult & { unavailable?: boolean }> {
   let response: Response;
 
   try {
@@ -38,63 +52,48 @@ async function inviteViaApiRoute(
     return { ok: false, error: "Failed to send invitation", unavailable: true };
   }
 
-  let data: unknown = null;
+  let data: InviteApiPayload | null = null;
   try {
-    data = await response.json();
+    data = (await response.json()) as InviteApiPayload;
   } catch {
     data = null;
   }
 
   const message =
-    data &&
-    typeof data === "object" &&
-    "error" in data &&
-    typeof data.error === "string"
+    data?.error && typeof data.error === "string"
       ? data.error
       : "Failed to send invitation";
-
-  if (response.status === 503) {
-    return { ok: false, error: message, unavailable: true };
-  }
 
   if (!response.ok) {
     return { ok: false, error: normalizeInviteError(message) };
   }
 
-  return { ok: true, emailed: true };
-}
-
-async function inviteViaEdgeFunction(
-  supabase: SupabaseClient,
-  email: string
-): Promise<InviteTeamMemberResult> {
-  const { data, error } = await supabase.functions.invoke("invite-team-member", {
-    body: { email },
-  });
-
-  if (error) {
-    return { ok: false, error: error.message };
-  }
-
-  if (data && typeof data === "object" && "error" in data) {
-    const message =
-      typeof data.error === "string" ? data.error : "Failed to send invitation";
-    return { ok: false, error: normalizeInviteError(message) };
-  }
-
-  return { ok: true };
+  return {
+    ok: true,
+    emailed: data?.emailed === true,
+    inviteUrl: typeof data?.inviteUrl === "string" ? data.inviteUrl : undefined,
+  };
 }
 
 async function inviteViaRpc(
   supabase: SupabaseClient,
   email: string
-): Promise<InviteTeamMemberResult & { emailed?: boolean }> {
-  const { error } = await supabase.rpc("invite_workspace_member", {
+): Promise<InviteTeamMemberResult> {
+  const { data: inviteToken, error } = await supabase.rpc("invite_workspace_member", {
     invitee_email: email,
   });
 
   if (error) {
     return { ok: false, error: normalizeInviteError(error.message) };
+  }
+
+  if (typeof inviteToken === "string" && inviteToken.trim()) {
+    const inviteUrl =
+      typeof window !== "undefined"
+        ? `${window.location.origin}/invite/${inviteToken}`
+        : undefined;
+
+    return { ok: true, emailed: false, inviteUrl };
   }
 
   return { ok: true, emailed: false };
@@ -103,7 +102,7 @@ async function inviteViaRpc(
 export async function inviteTeamMember(
   supabase: SupabaseClient,
   email: string
-): Promise<InviteTeamMemberResult & { emailed?: boolean }> {
+): Promise<InviteTeamMemberResult> {
   const normalizedEmail = email.trim().toLowerCase();
 
   if (!isValidEmail(normalizedEmail)) {
@@ -115,22 +114,12 @@ export async function inviteTeamMember(
     return apiResult;
   }
 
-  if (!apiResult.unavailable) {
+  const shouldFallbackToRpc =
+    apiResult.unavailable ||
+    apiResult.error === "RATE_LIMIT_FALLBACK";
+
+  if (!shouldFallbackToRpc) {
     return apiResult;
-  }
-
-  const edgeResult = await inviteViaEdgeFunction(supabase, normalizedEmail);
-  if (edgeResult.ok) {
-    return { ...edgeResult, emailed: true };
-  }
-
-  const edgeUnavailable =
-    edgeResult.error.includes("Failed to send a request to the Edge Function") ||
-    edgeResult.error.includes("Function not found") ||
-    edgeResult.error.includes("404");
-
-  if (!edgeUnavailable) {
-    return edgeResult;
   }
 
   return inviteViaRpc(supabase, normalizedEmail);

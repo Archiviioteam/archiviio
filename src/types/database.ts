@@ -33,6 +33,7 @@ export interface WorkspaceInvitation {
   workspace_id: string;
   email: string;
   invited_by: string;
+  token: string;
   status: "pending" | "accepted" | "revoked";
   created_at: string;
   updated_at: string;

@@ -96,6 +96,9 @@ export type TranslationKey =
   | "team.inviteByEmail"
   | "team.invitationSent"
   | "team.invitationSaved"
+  | "team.invitationLinkCopied"
+  | "team.invitationLinkReady"
+  | "team.copyInviteLink"
   | "common.cancel"
   | "common.delete"
   | "common.deleting"
@@ -389,6 +392,11 @@ const translations: Record<AppLanguage, Record<TranslationKey, string>> = {
     "team.inviteByEmail": "Invite by email",
     "team.invitationSent": "Invitation sent to {email}",
     "team.invitationSaved": "Invitation saved for {email}",
+    "team.invitationLinkCopied":
+      "Invitation link copied for {email}. Share it with your colleague.",
+    "team.invitationLinkReady":
+      "Invitation created for {email}. Copy the link below and send it to your colleague.",
+    "team.copyInviteLink": "Copy link",
     "common.cancel": "Cancel",
     "common.delete": "Delete",
     "common.deleting": "Deleting...",
@@ -708,6 +716,11 @@ const translations: Record<AppLanguage, Record<TranslationKey, string>> = {
     "team.inviteByEmail": "Invita via email",
     "team.invitationSent": "Invito inviato a {email}",
     "team.invitationSaved": "Invito salvato per {email}",
+    "team.invitationLinkCopied":
+      "Link invito copiato per {email}. Condividilo con il tuo collega.",
+    "team.invitationLinkReady":
+      "Invito creato per {email}. Copia il link qui sotto e mandalo al tuo collega.",
+    "team.copyInviteLink": "Copia link",
     "common.cancel": "Annulla",
     "common.delete": "Elimina",
     "common.deleting": "Eliminazione...",

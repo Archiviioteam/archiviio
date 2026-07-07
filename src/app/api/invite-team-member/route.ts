@@ -1,7 +1,11 @@
-import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
+import { sendWorkspaceInviteEmail } from "@/lib/email/send-workspace-invite-email";
+import {
+  getWorkspaceInvitePreview,
+  getWorkspaceInviteUrl,
+} from "@/lib/invitations/workspace-invite";
+import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
-import { getAuthCallbackUrl } from "@/lib/supabase/site-url";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -32,7 +36,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Email is required" }, { status: 400 });
   }
 
-  const { data: invitationId, error: inviteError } = await supabase.rpc(
+  const { data: inviteToken, error: inviteError } = await supabase.rpc(
     "invite_workspace_member",
     { invitee_email: email }
   );
@@ -41,46 +45,44 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: inviteError.message }, { status: 400 });
   }
 
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
-
-  if (!serviceRoleKey || !supabaseUrl) {
+  if (typeof inviteToken !== "string" || !inviteToken.trim()) {
     return NextResponse.json(
-      { error: "Email service not configured" },
-      { status: 503 }
+      { error: "Failed to create invitation link." },
+      { status: 500 }
     );
   }
 
-  const supabaseAdmin = createAdminClient(supabaseUrl, serviceRoleKey);
-  const redirectTo = getAuthCallbackUrl();
+  const inviteUrl = getWorkspaceInviteUrl(inviteToken);
 
-  const { error: emailError } = await supabaseAdmin.auth.admin.inviteUserByEmail(
-    email,
-    {
-      redirectTo,
-      data: {
-        workspace_invitation_id: invitationId,
-      },
-    }
-  );
-
-  if (emailError) {
-    console.error("inviteUserByEmail failed", {
-      message: emailError.message,
-      status: "status" in emailError ? emailError.status : undefined,
-      code: "code" in emailError ? emailError.code : undefined,
-      name: "name" in emailError ? emailError.name : undefined,
-      error: emailError,
+  const supabaseAdmin = getSupabaseAdmin();
+  if (!supabaseAdmin) {
+    return NextResponse.json({
+      inviteToken,
+      inviteUrl,
+      emailed: false,
     });
-
-    const rawMessage =
-      typeof emailError.message === "string" ? emailError.message.trim() : "";
-    const fallbackMessage =
-      "Unable to send invitation email. Check Supabase Auth email/SMTP settings.";
-    const message = rawMessage && rawMessage !== "{}" ? rawMessage : fallbackMessage;
-
-    return NextResponse.json({ error: message }, { status: 400 });
   }
 
-  return NextResponse.json({ invitationId, emailed: true });
+  const preview = await getWorkspaceInvitePreview(supabaseAdmin, inviteToken);
+  const workspaceName = preview?.workspaceName ?? "Workspace";
+
+  const emailResult = await sendWorkspaceInviteEmail({
+    to: email,
+    workspaceName,
+    inviteUrl,
+  });
+
+  if (!emailResult.sent) {
+    console.error("Workspace invite email failed", {
+      to: email,
+      error: emailResult.error,
+    });
+  }
+
+  return NextResponse.json({
+    inviteToken,
+    inviteUrl,
+    emailed: emailResult.sent,
+    ...(emailResult.error ? { emailError: emailResult.error } : {}),
+  });
 }

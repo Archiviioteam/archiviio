@@ -33,20 +33,36 @@ Optional for uploads:
 
 - `NEXT_PUBLIC_DOCUMENT_MAX_FILE_SIZE_MB`
 
-Required for team invitation emails (server-only):
+Required for team invitations (server-only):
 
 - `SUPABASE_SERVICE_ROLE_KEY` — Supabase Dashboard → Project Settings → API → `service_role` key. Add to `.env.local` locally and to Vercel environment variables in production. Never use a `NEXT_PUBLIC_` prefix.
 
-## Team invitation emails
+Optional for automatic invitation emails (use SMTP or Resend):
 
-When you invite someone from **Settings → Team**, the app saves the invitation and sends an email via Supabase Auth (`inviteUserByEmail`).
+- `SMTP_HOST` — e.g. `smtps.aruba.it`
+- `SMTP_PORT` — e.g. `465`
+- `SMTP_USER` — full email address (e.g. `info@tuodominio.it`)
+- `SMTP_PASS` — mailbox password
+- `SMTP_FROM` — sender header (e.g. `Archiviio <info@tuodominio.it>`)
+- `SMTP_SECURE` — `true` for port 465 (optional; defaults to true on port 465)
+- `RESEND_API_KEY` — alternative to SMTP
+- `RESEND_FROM_EMAIL` — verified Resend sender
 
-1. Set `SUPABASE_SERVICE_ROLE_KEY` in `.env.local` (and in Vercel for production).
-2. In Supabase Dashboard → **Authentication → URL configuration**, add your callback URL(s) (see section below).
-3. For reliable delivery in production, configure **Authentication → SMTP** (Resend, SendGrid, Google Workspace, etc.). Without custom SMTP, Supabase sends from its default address with rate limits; messages may land in spam.
-4. Local dev: run `npm run db:local` and `npm run env:local`, then open **Mailpit** at [http://127.0.0.1:54324](http://127.0.0.1:54324) to see test invitation emails.
+Production URL for invite links:
 
-If `SUPABASE_SERVICE_ROLE_KEY` is missing, the invite is still saved in the database but no email is sent (toast: “Invitation saved” instead of “Invitation sent”).
+- `NEXT_PUBLIC_SITE_URL` — e.g. `https://archiviio.vercel.app` (set on Vercel)
+
+## Team invitations
+
+When you invite someone from **Settings → Team**, the app saves the invitation and sends a link to `/invite/{token}`.
+
+Your colleague opens that page, sees **“Unisciti allo spazio di {workspace}”**, enters the invited email and a password, then clicks **Entra** to join your shared workspace.
+
+1. Apply migrations: `npm run db:migrate` (includes invitation token migrations).
+2. Set `SUPABASE_SERVICE_ROLE_KEY` in `.env.local` (and in Vercel for production).
+3. Set `NEXT_PUBLIC_SITE_URL` to your Vercel URL so invite links point to production.
+4. For automatic emails, add the **same Aruba SMTP credentials** used in Supabase to Vercel env vars (`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`).
+5. If email is not configured, the invite link is shown in the UI so you can share it manually.
 
 ## Supabase auth redirects (local + production)
 
@@ -69,8 +85,9 @@ The signup flow uses `emailRedirectTo` and sends users to `${NEXT_PUBLIC_SITE_UR
 4. In **Environment Variables** set at least:
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   - `NEXT_PUBLIC_SITE_URL` = your production URL (for example `https://your-app.vercel.app`)
-   - `SUPABASE_SERVICE_ROLE_KEY` = service role key (for invitation emails)
+   - `NEXT_PUBLIC_SITE_URL` = your production URL (for example `https://archiviio.vercel.app`)
+   - `SUPABASE_SERVICE_ROLE_KEY` = service role key
+   - `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` = Aruba SMTP (same as Supabase Auth SMTP)
 5. Deploy.
 6. After first deploy, add final production callback URLs in Supabase (see section above).
 
