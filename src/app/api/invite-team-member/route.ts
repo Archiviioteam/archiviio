@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { isSmtpConfigured } from "@/lib/email/send-smtp-email";
 import { sendWorkspaceInviteEmail } from "@/lib/email/send-workspace-invite-email";
 import {
   getWorkspaceInvitePreview,
@@ -6,6 +7,9 @@ import {
 } from "@/lib/invitations/workspace-invite";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+
+export const runtime = "nodejs";
+export const maxDuration = 30;
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -76,6 +80,7 @@ export async function POST(request: Request) {
     console.error("Workspace invite email failed", {
       to: email,
       error: emailResult.error,
+      smtpConfigured: isSmtpConfigured(),
     });
   }
 
@@ -83,6 +88,7 @@ export async function POST(request: Request) {
     inviteToken,
     inviteUrl,
     emailed: emailResult.sent,
-    ...(emailResult.error ? { emailError: emailResult.error } : {}),
+    emailError: emailResult.error ?? null,
+    smtpConfigured: isSmtpConfigured(),
   });
 }

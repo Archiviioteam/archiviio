@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "test:supabase": "node scripts/test-supabase-connection.mjs",
+    "test:smtp": "node scripts/test-smtp.mjs",
     "db:migrate": "node scripts/apply-supabase-migrations.mjs",
     "db:schema-bundle": "node scripts/build-full-schema.mjs",
     "db:reload-schema": "node scripts/reload-supabase-schema.mjs",

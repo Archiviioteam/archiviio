@@ -98,6 +98,7 @@ export type TranslationKey =
   | "team.invitationSaved"
   | "team.invitationLinkCopied"
   | "team.invitationLinkReady"
+  | "team.invitationEmailFailed"
   | "team.copyInviteLink"
   | "common.cancel"
   | "common.delete"
@@ -396,6 +397,8 @@ const translations: Record<AppLanguage, Record<TranslationKey, string>> = {
       "Invitation link copied for {email}. Share it with your colleague.",
     "team.invitationLinkReady":
       "Invitation created for {email}. Copy the link below and send it to your colleague.",
+    "team.invitationEmailFailed":
+      "Invitation saved for {email}, but the email could not be sent: {error}",
     "team.copyInviteLink": "Copy link",
     "common.cancel": "Cancel",
     "common.delete": "Delete",
@@ -720,6 +723,8 @@ const translations: Record<AppLanguage, Record<TranslationKey, string>> = {
       "Link invito copiato per {email}. Condividilo con il tuo collega.",
     "team.invitationLinkReady":
       "Invito creato per {email}. Copia il link qui sotto e mandalo al tuo collega.",
+    "team.invitationEmailFailed":
+      "Invito salvato per {email}, ma l'email non è stata inviata: {error}",
     "team.copyInviteLink": "Copia link",
     "common.cancel": "Annulla",
     "common.delete": "Elimina",

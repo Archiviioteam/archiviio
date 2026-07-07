@@ -31,6 +31,7 @@ export function InviteTeamMemberForm({
   const [email, setEmail] = useState("");
   const [sending, setSending] = useState(false);
   const [lastInviteUrl, setLastInviteUrl] = useState<string | null>(null);
+  const [lastInvitedEmail, setLastInvitedEmail] = useState<string | null>(null);
 
   const handleSubmit = useCallback(
     async (event: React.FormEvent) => {
@@ -39,6 +40,7 @@ export function InviteTeamMemberForm({
 
       setSending(true);
       setLastInviteUrl(null);
+      setLastInvitedEmail(null);
 
       const supabase = createClient();
       const result = await inviteTeamMember(supabase, email);
@@ -52,6 +54,7 @@ export function InviteTeamMemberForm({
 
       const invitedEmail = email.trim().toLowerCase();
       setEmail("");
+      setLastInvitedEmail(invitedEmail);
 
       if (result.inviteUrl) {
         setLastInviteUrl(result.inviteUrl);
@@ -62,15 +65,27 @@ export function InviteTeamMemberForm({
           t(language, "team.invitationSent").replace("{email}", invitedEmail)
         );
       } else if (result.inviteUrl) {
+        if (result.emailError) {
+          toast.error(
+            t(language, "team.invitationEmailFailed")
+              .replace("{email}", invitedEmail)
+              .replace("{error}", result.emailError)
+          );
+        }
+
         try {
           await navigator.clipboard.writeText(result.inviteUrl);
-          toast.success(
-            t(language, "team.invitationLinkCopied").replace("{email}", invitedEmail)
-          );
+          if (!result.emailError) {
+            toast.success(
+              t(language, "team.invitationLinkCopied").replace("{email}", invitedEmail)
+            );
+          }
         } catch {
-          toast.success(
-            t(language, "team.invitationLinkReady").replace("{email}", invitedEmail)
-          );
+          if (!result.emailError) {
+            toast.success(
+              t(language, "team.invitationLinkReady").replace("{email}", invitedEmail)
+            );
+          }
         }
       } else {
         toast.success(
@@ -134,7 +149,10 @@ export function InviteTeamMemberForm({
       {lastInviteUrl ? (
         <div className="flex flex-col gap-2 rounded-lg border border-border bg-muted/40 p-3">
           <p className={cn(textStyle.caption, "text-muted-foreground")}>
-            {t(language, "team.invitationLinkReady").replace("{email}", "")}
+            {t(language, "team.invitationLinkReady").replace(
+              "{email}",
+              lastInvitedEmail ?? ""
+            )}
           </p>
           <p className="break-all font-mono text-xs text-foreground">{lastInviteUrl}</p>
           <Button type="button" variant="outline" size="sm" onClick={() => void handleCopyLink()}>

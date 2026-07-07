@@ -2,7 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { isValidEmail } from "@/lib/settings/validation";
 
 export type InviteTeamMemberResult =
-  | { ok: true; emailed: boolean; inviteUrl?: string }
+  | { ok: true; emailed: boolean; inviteUrl?: string; emailError?: string | null }
   | { ok: false; error: string };
 
 function normalizeInviteError(message: string): string {
@@ -35,6 +35,7 @@ type InviteApiPayload = {
   error?: string;
   emailed?: boolean;
   inviteUrl?: string;
+  emailError?: string | null;
 };
 
 async function inviteViaApiRoute(
@@ -72,6 +73,7 @@ async function inviteViaApiRoute(
     ok: true,
     emailed: data?.emailed === true,
     inviteUrl: typeof data?.inviteUrl === "string" ? data.inviteUrl : undefined,
+    emailError: typeof data?.emailError === "string" ? data.emailError : null,
   };
 }
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { SearchTrigger } from "@/components/layout/search-trigger";
+import { SearchTrigger } from "@/components/search/search-trigger";
 import { useLayout } from "@/components/layout/layout-provider";
 import { getPageTitle } from "@/lib/layout/navigation";
 import { responsive } from "@/lib/layout/responsive";
