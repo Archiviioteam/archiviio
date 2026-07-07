@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getSafeRedirectPath } from "@/lib/auth/routes";
 import { createClient } from "@/lib/supabase/client";
+import { formatAuthError, formatClientError } from "@/lib/supabase/format-error";
 import { ensureUserWorkspace } from "@/lib/workspace";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,27 +44,32 @@ export function LoginForm() {
     setError(null);
     setLoading(true);
 
-    const supabase = createClient();
-    const { error: authError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const supabase = createClient();
+      const { error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    if (authError) {
-      setError(authError.message);
+      if (authError) {
+        setError(formatAuthError(authError, "Sign-in failed. Please try again."));
+        setLoading(false);
+        return;
+      }
+
+      const workspaceResult = await ensureUserWorkspace(supabase);
+      if ("error" in workspaceResult) {
+        setError(workspaceResult.error);
+        setLoading(false);
+        return;
+      }
+
+      router.push(getSafeRedirectPath(searchParams.get("next")));
+      router.refresh();
+    } catch (caughtError) {
+      setError(formatClientError(caughtError, "Sign-in failed. Please try again."));
       setLoading(false);
-      return;
     }
-
-    const workspaceResult = await ensureUserWorkspace(supabase);
-    if ("error" in workspaceResult) {
-      setError(workspaceResult.error);
-      setLoading(false);
-      return;
-    }
-
-    router.push(getSafeRedirectPath(searchParams.get("next")));
-    router.refresh();
   }
 
   return (

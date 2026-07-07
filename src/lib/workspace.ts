@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Workspace } from "@/types/database";
+import { formatRpcError } from "@/lib/supabase/format-error";
 
 let cachedWorkspaceId: string | null | undefined;
 
@@ -113,7 +114,9 @@ export async function setupWorkspaceForUser(
   });
 
   if (error) {
-    return { error: error.message };
+    return {
+      error: formatRpcError(error, "Failed to create workspace. Please try again."),
+    };
   }
 
   if (!workspaceId) {

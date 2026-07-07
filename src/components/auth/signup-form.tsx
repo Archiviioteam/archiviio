@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { formatAuthError, formatClientError } from "@/lib/supabase/format-error";
 import { getAuthCallbackUrl } from "@/lib/supabase/site-url";
 import { setupWorkspaceForUser } from "@/lib/workspace";
 import { Button } from "@/components/ui/button";
@@ -32,57 +33,70 @@ export function SignupForm() {
     setInfo(null);
     setLoading(true);
 
-    const supabase = createClient();
-    const normalizedEmail = email.trim().toLowerCase();
-    const resolvedWorkspaceName = workspaceName.trim() || "My studio";
-    const { data, error: authError } = await supabase.auth.signUp({
-      email: normalizedEmail,
-      password,
-      options: {
-        emailRedirectTo: getAuthCallbackUrl(),
-        data: {
-          workspace_name: resolvedWorkspaceName,
+    try {
+      const supabase = createClient();
+      const normalizedEmail = email.trim().toLowerCase();
+      const resolvedWorkspaceName = workspaceName.trim() || "My studio";
+      const { data, error: authError } = await supabase.auth.signUp({
+        email: normalizedEmail,
+        password,
+        options: {
+          emailRedirectTo: getAuthCallbackUrl(),
+          data: {
+            workspace_name: resolvedWorkspaceName,
+          },
         },
-      },
-    });
+      });
 
-    if (authError) {
-      setError(authError.message);
-      setLoading(false);
-      return;
-    }
+      if (authError) {
+        setError(formatAuthError(authError));
+        setLoading(false);
+        return;
+      }
 
-    const signedUpUser = data.user;
+      if (data.user && data.user.identities?.length === 0) {
+        setError(
+          "An account with this email already exists. Try signing in instead."
+        );
+        setLoading(false);
+        return;
+      }
 
-    if (!data.session) {
-      setInfo(
-        "We sent a confirmation link to your email. Open it to finish creating your workspace."
+      const signedUpUser = data.user;
+
+      if (!data.session) {
+        setInfo(
+          "We sent a confirmation link to your email. Open it to finish creating your workspace."
+        );
+        setLoading(false);
+        return;
+      }
+
+      if (!signedUpUser) {
+        setError("Could not complete sign-up. Please try again.");
+        setLoading(false);
+        return;
+      }
+
+      const result = await setupWorkspaceForUser(
+        supabase,
+        signedUpUser.id,
+        normalizedEmail,
+        resolvedWorkspaceName
       );
+
+      if ("error" in result) {
+        setError(result.error);
+        setLoading(false);
+        return;
+      }
+
+      router.push("/dashboard");
+      router.refresh();
+    } catch (caughtError) {
+      setError(formatClientError(caughtError, "Sign-up failed. Please try again."));
       setLoading(false);
-      return;
     }
-
-    if (!signedUpUser) {
-      setError("Could not complete sign-up. Please try again.");
-      setLoading(false);
-      return;
-    }
-
-    const result = await setupWorkspaceForUser(
-      supabase,
-      signedUpUser.id,
-      normalizedEmail,
-      resolvedWorkspaceName
-    );
-
-    if ("error" in result) {
-      setError(result.error);
-      setLoading(false);
-      return;
-    }
-
-    router.push("/dashboard");
-    router.refresh();
   }
 
   return (
