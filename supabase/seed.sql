@@ -1,0 +1,2 @@
+-- Optional seed data for local development.
+-- Add test workspaces/users here if needed.

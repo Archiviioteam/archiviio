@@ -1,36 +1,89 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Archiviio
 
-## Getting Started
+Next.js 16 app with Archiviio design system (Tailwind 4, App Router, TypeScript) and Supabase (auth, database, storage).
 
-First, run the development server:
+## Local setup
 
 ```bash
+cp .env.local.example .env.local
+npm install
+npm run db:migrate
+npm run test:supabase
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Use `.env.local.example` as reference.
 
-## Learn More
+Required for app runtime:
 
-To learn more about Next.js, take a look at the following resources:
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `NEXT_PUBLIC_SITE_URL` (required in Vercel/production, optional locally)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Optional for DB scripts:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `SUPABASE_DB_PASSWORD` (or `DATABASE_URL`)
+- `SUPABASE_DB_REGION`
 
-## Deploy on Vercel
+Optional for uploads:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `NEXT_PUBLIC_DOCUMENT_MAX_FILE_SIZE_MB`
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Required for team invitation emails (server-only):
+
+- `SUPABASE_SERVICE_ROLE_KEY` — Supabase Dashboard → Project Settings → API → `service_role` key. Add to `.env.local` locally and to Vercel environment variables in production. Never use a `NEXT_PUBLIC_` prefix.
+
+## Team invitation emails
+
+When you invite someone from **Settings → Team**, the app saves the invitation and sends an email via Supabase Auth (`inviteUserByEmail`).
+
+1. Set `SUPABASE_SERVICE_ROLE_KEY` in `.env.local` (and in Vercel for production).
+2. In Supabase Dashboard → **Authentication → URL configuration**, add your callback URL(s) (see section below).
+3. For reliable delivery in production, configure **Authentication → SMTP** (Resend, SendGrid, Google Workspace, etc.). Without custom SMTP, Supabase sends from its default address with rate limits; messages may land in spam.
+4. Local dev: run `npm run db:local` and `npm run env:local`, then open **Mailpit** at [http://127.0.0.1:54324](http://127.0.0.1:54324) to see test invitation emails.
+
+If `SUPABASE_SERVICE_ROLE_KEY` is missing, the invite is still saved in the database but no email is sent (toast: “Invitation saved” instead of “Invitation sent”).
+
+## Supabase auth redirects (local + production)
+
+In Supabase Dashboard, go to **Authentication → URL configuration** and set:
+
+- **Site URL**: your live domain (for example `https://your-app.vercel.app`)
+- **Additional Redirect URLs**:
+  - `http://localhost:3000/auth/callback`
+  - `http://127.0.0.1:3000/auth/callback`
+  - `https://your-app.vercel.app/auth/callback`
+  - `https://your-custom-domain.com/auth/callback` (if configured)
+
+The signup flow uses `emailRedirectTo` and sends users to `${NEXT_PUBLIC_SITE_URL}/auth/callback` in production.
+
+## Deploy to Vercel
+
+1. Push project to GitHub.
+2. In Vercel: **Add New → Project → Import Git Repository**.
+3. Keep default framework (`Next.js`) and build command (`npm run build`).
+4. In **Environment Variables** set at least:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `NEXT_PUBLIC_SITE_URL` = your production URL (for example `https://your-app.vercel.app`)
+   - `SUPABASE_SERVICE_ROLE_KEY` = service role key (for invitation emails)
+5. Deploy.
+6. After first deploy, add final production callback URLs in Supabase (see section above).
+
+## Build check
+
+```bash
+npm run build
+```
+
+Build must complete without errors before deploying.
+
+## Database notes
+
+- Migrations: `supabase/migrations/`
+- Full schema bundle: `npm run db:schema-bundle` -> `supabase/full_schema.sql`
+- Local Supabase: `npm run db:local` then `npm run env:local`
