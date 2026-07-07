@@ -22,4 +22,5 @@ export function getAuthCallbackUrl() {
 export const SUPABASE_AUTH_REDIRECT_URLS = [
   "http://localhost:3000/auth/callback",
   "http://127.0.0.1:3000/auth/callback",
+  "https://archiviio.vercel.app/auth/callback",
 ] as const;

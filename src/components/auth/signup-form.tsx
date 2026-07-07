@@ -34,11 +34,15 @@ export function SignupForm() {
 
     const supabase = createClient();
     const normalizedEmail = email.trim().toLowerCase();
+    const resolvedWorkspaceName = workspaceName.trim() || "My studio";
     const { data, error: authError } = await supabase.auth.signUp({
       email: normalizedEmail,
       password,
       options: {
         emailRedirectTo: getAuthCallbackUrl(),
+        data: {
+          workspace_name: resolvedWorkspaceName,
+        },
       },
     });
 
@@ -48,24 +52,14 @@ export function SignupForm() {
       return;
     }
 
-    let signedUpUser = data.user;
+    const signedUpUser = data.user;
 
     if (!data.session) {
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: normalizedEmail,
-        password,
-      });
-
-      if (signInError) {
-        setInfo("Check your email to confirm your account, then sign in.");
-        setLoading(false);
-        return;
-      }
-
-      const {
-        data: { user: currentUser },
-      } = await supabase.auth.getUser();
-      signedUpUser = currentUser ?? signedUpUser;
+      setInfo(
+        "We sent a confirmation link to your email. Open it to finish creating your workspace."
+      );
+      setLoading(false);
+      return;
     }
 
     if (!signedUpUser) {
@@ -78,7 +72,7 @@ export function SignupForm() {
       supabase,
       signedUpUser.id,
       normalizedEmail,
-      workspaceName.trim() || "My studio"
+      resolvedWorkspaceName
     );
 
     if ("error" in result) {

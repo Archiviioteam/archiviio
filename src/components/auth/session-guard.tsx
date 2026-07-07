@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { isPublicPath } from "@/lib/auth/routes";
 import { getSessionRedirect } from "@/lib/auth/session-route";
 import { createClient } from "@/lib/supabase/client";
 
@@ -13,34 +14,41 @@ export function SessionGuard({ children }: SessionGuardProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [initialCheckDone, setInitialCheckDone] = useState(false);
+  const search = searchParams.toString();
+  const isPublic = isPublicPath(pathname);
+  const [initialCheckDone, setInitialCheckDone] = useState(isPublic);
 
   useEffect(() => {
     let cancelled = false;
 
     async function enforceSessionRoute() {
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      try {
+        const supabase = createClient();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
 
-      if (cancelled) {
-        return;
+        if (cancelled) {
+          return;
+        }
+
+        const redirectTo = getSessionRedirect(
+          pathname,
+          search ? `?${search}` : "",
+          Boolean(user)
+        );
+
+        if (redirectTo) {
+          router.replace(redirectTo);
+          return;
+        }
+
+        setInitialCheckDone(true);
+      } catch {
+        if (!cancelled) {
+          setInitialCheckDone(true);
+        }
       }
-
-      const search = searchParams.toString();
-      const redirectTo = getSessionRedirect(
-        pathname,
-        search ? `?${search}` : "",
-        Boolean(user)
-      );
-
-      if (redirectTo) {
-        router.replace(redirectTo);
-        return;
-      }
-
-      setInitialCheckDone(true);
     }
 
     void enforceSessionRoute();
@@ -48,7 +56,7 @@ export function SessionGuard({ children }: SessionGuardProps) {
     return () => {
       cancelled = true;
     };
-  }, [pathname, router, searchParams]);
+  }, [pathname, router, search, isPublic]);
 
   if (!initialCheckDone) {
     return (

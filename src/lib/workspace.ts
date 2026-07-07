@@ -51,6 +51,18 @@ function defaultWorkspaceName(email: string): string {
   return local || "My studio";
 }
 
+function workspaceNameFromUserMetadata(
+  metadata: Record<string, unknown> | undefined,
+  email: string
+): string {
+  const fromMetadata = metadata?.workspace_name;
+  if (typeof fromMetadata === "string" && fromMetadata.trim()) {
+    return fromMetadata.trim();
+  }
+
+  return defaultWorkspaceName(email);
+}
+
 export async function ensureUserWorkspace(
   supabase: SupabaseClient
 ): Promise<{ workspace: Workspace } | { error: string }> {
@@ -73,7 +85,7 @@ export async function ensureUserWorkspace(
     supabase,
     user.id,
     email,
-    defaultWorkspaceName(email)
+    workspaceNameFromUserMetadata(user.user_metadata, email)
   );
 
   if ("error" in result) {
