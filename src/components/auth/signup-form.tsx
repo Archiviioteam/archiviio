@@ -5,8 +5,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { formatAuthError, formatClientError } from "@/lib/supabase/format-error";
-import { getAuthCallbackUrl } from "@/lib/supabase/site-url";
-import { setupWorkspaceForUser } from "@/lib/workspace";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -48,114 +46,36 @@ export function SignupForm() {
         }),
       });
 
-      let useClientSignup = apiResponse.status === 503;
+      let apiPayload: { error?: string } | null = null;
+      try {
+        apiPayload = (await apiResponse.json()) as { error?: string };
+      } catch {
+        apiPayload = null;
+      }
 
-      if (!apiResponse.ok && !useClientSignup) {
-        let apiError = "Sign-up failed. Please try again.";
-        try {
-          const payload = (await apiResponse.json()) as { error?: string };
-          if (payload.error) {
-            apiError = payload.error;
-          }
-        } catch {
-          // ignore JSON parse errors
-        }
-
-        setError(apiError);
+      if (!apiResponse.ok) {
+        setError(
+          apiPayload?.error ||
+            (apiResponse.status === 503
+              ? "Signup is not configured on the server. Add SUPABASE_SERVICE_ROLE_KEY in Vercel."
+              : "Sign-up failed. Please try again.")
+        );
         setLoading(false);
         return;
       }
 
-      if (!useClientSignup) {
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email: normalizedEmail,
-          password,
-        });
-
-        if (signInError) {
-          setError(formatAuthError(signInError, "Account created but sign-in failed. Try logging in."));
-          setLoading(false);
-          return;
-        }
-
-        const {
-          data: { user: signedInUser },
-        } = await supabase.auth.getUser();
-
-        if (!signedInUser) {
-          setError("Account created but sign-in failed. Try logging in.");
-          setLoading(false);
-          return;
-        }
-
-        const result = await setupWorkspaceForUser(
-          supabase,
-          signedInUser.id,
-          normalizedEmail,
-          resolvedWorkspaceName
-        );
-
-        if ("error" in result) {
-          setError(result.error);
-          setLoading(false);
-          return;
-        }
-
-        router.push("/dashboard");
-        router.refresh();
-        return;
-      }
-
-      const { data, error: authError } = await supabase.auth.signUp({
+      const { error: signInError } = await supabase.auth.signInWithPassword({
         email: normalizedEmail,
         password,
-        options: {
-          emailRedirectTo: getAuthCallbackUrl(),
-          data: {
-            workspace_name: resolvedWorkspaceName,
-          },
-        },
       });
 
-      if (authError) {
-        setError(formatAuthError(authError));
-        setLoading(false);
-        return;
-      }
-
-      if (data.user && data.user.identities?.length === 0) {
+      if (signInError) {
         setError(
-          "An account with this email already exists. Try signing in instead."
+          formatAuthError(
+            signInError,
+            "Account created but sign-in failed. Try logging in."
+          )
         );
-        setLoading(false);
-        return;
-      }
-
-      const signedUpUser = data.user;
-
-      if (!data.session) {
-        setInfo(
-          "We sent a confirmation link to your email. Open it to finish creating your workspace."
-        );
-        setLoading(false);
-        return;
-      }
-
-      if (!signedUpUser) {
-        setError("Could not complete sign-up. Please try again.");
-        setLoading(false);
-        return;
-      }
-
-      const result = await setupWorkspaceForUser(
-        supabase,
-        signedUpUser.id,
-        normalizedEmail,
-        resolvedWorkspaceName
-      );
-
-      if ("error" in result) {
-        setError(result.error);
         setLoading(false);
         return;
       }

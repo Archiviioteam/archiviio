@@ -1,4 +1,4 @@
-import { createClient as createAdminClient } from "@supabase/supabase-js";
+import { createClient as createAdminClient, type SupabaseClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { formatAuthError } from "@/lib/supabase/format-error";
 
@@ -21,6 +21,56 @@ function parseSignupBody(body: unknown) {
       : "";
 
   return { email, password, workspaceName };
+}
+
+async function ensureWorkspaceForNewUser(
+  supabaseAdmin: SupabaseClient,
+  userId: string,
+  email: string,
+  workspaceName: string
+): Promise<{ workspaceId: string } | { error: string }> {
+  const { data: existingProfile, error: existingProfileError } = await supabaseAdmin
+    .from("users")
+    .select("workspace_id")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (existingProfileError) {
+    return { error: existingProfileError.message };
+  }
+
+  const profile = existingProfile as { workspace_id: string } | null;
+
+  if (profile?.workspace_id) {
+    return { workspaceId: profile.workspace_id };
+  }
+
+  const { data: workspace, error: workspaceError } = await supabaseAdmin
+    .from("workspaces")
+    .insert({ name: workspaceName } as never)
+    .select("id")
+    .single();
+
+  const createdWorkspace = workspace as { id: string } | null;
+
+  if (workspaceError || !createdWorkspace) {
+    return {
+      error: workspaceError?.message || "Failed to create workspace",
+    };
+  }
+
+  const { error: profileError } = await supabaseAdmin.from("users").insert({
+    id: userId,
+    workspace_id: createdWorkspace.id,
+    email,
+    role: "owner",
+  } as never);
+
+  if (profileError) {
+    return { error: profileError.message };
+  }
+
+  return { workspaceId: createdWorkspace.id };
 }
 
 export async function POST(request: Request) {
@@ -57,7 +107,10 @@ export async function POST(request: Request) {
 
   if (!serviceRoleKey || !supabaseUrl) {
     return NextResponse.json(
-      { error: "Signup service not configured", fallback: true },
+      {
+        error:
+          "Signup is not configured on the server. Add SUPABASE_SERVICE_ROLE_KEY in Vercel environment variables.",
+      },
       { status: 503 }
     );
   }
@@ -67,6 +120,7 @@ export async function POST(request: Request) {
   });
 
   const resolvedWorkspaceName = workspaceName || "My studio";
+
   const { data, error } = await supabaseAdmin.auth.admin.createUser({
     email,
     password,
@@ -87,5 +141,19 @@ export async function POST(request: Request) {
     );
   }
 
-  return NextResponse.json({ userId: data.user.id });
+  const workspaceResult = await ensureWorkspaceForNewUser(
+    supabaseAdmin,
+    data.user.id,
+    email,
+    resolvedWorkspaceName
+  );
+
+  if ("error" in workspaceResult) {
+    return NextResponse.json({ error: workspaceResult.error }, { status: 500 });
+  }
+
+  return NextResponse.json({
+    userId: data.user.id,
+    workspaceId: workspaceResult.workspaceId,
+  });
 }
