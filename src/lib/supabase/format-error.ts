@@ -67,7 +67,7 @@ const AUTH_ERROR_MESSAGES: Record<string, string> = {
   over_request_rate_limit:
     "Too many attempts. Wait a few minutes and try again.",
   unexpected_failure:
-    "Registration could not be completed. Try again in a few minutes.",
+    "Could not send the confirmation email. In Supabase Dashboard go to Authentication → Email: configure SMTP, or turn off “Confirm email”.",
 };
 
 function isEmptyErrorMessage(message: string | undefined): boolean {
@@ -85,6 +85,10 @@ export function formatAuthError(
 
   const message = error.message?.trim();
   if (message && !isEmptyErrorMessage(message)) {
+    if (/confirmation email|sending confirmation/i.test(message)) {
+      return AUTH_ERROR_MESSAGES.unexpected_failure;
+    }
+
     return formatSupabaseError(message);
   }
 
