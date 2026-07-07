@@ -41,7 +41,9 @@ export function formatSupabaseError(message: string): string {
 
 type AuthLikeError = {
   message?: string;
+  msg?: string;
   code?: string;
+  error_code?: string;
   status?: number;
 };
 
@@ -75,6 +77,19 @@ function isEmptyErrorMessage(message: string | undefined): boolean {
   return !trimmed || trimmed === "{}";
 }
 
+function readAuthErrorMessage(error: AuthLikeError): string | undefined {
+  const message = error.message?.trim() || error.msg?.trim();
+  if (!message || isEmptyErrorMessage(message)) {
+    return undefined;
+  }
+
+  return message;
+}
+
+function readAuthErrorCode(error: AuthLikeError): string | undefined {
+  return error.code?.trim() || error.error_code?.trim();
+}
+
 export function formatAuthError(
   error: AuthLikeError | null | undefined,
   fallback = "Sign-up failed. Please try again."
@@ -83,18 +98,18 @@ export function formatAuthError(
     return fallback;
   }
 
-  const message = error.message?.trim();
-  if (message && !isEmptyErrorMessage(message)) {
+  const code = readAuthErrorCode(error);
+  if (code && AUTH_ERROR_MESSAGES[code]) {
+    return AUTH_ERROR_MESSAGES[code];
+  }
+
+  const message = readAuthErrorMessage(error);
+  if (message) {
     if (/confirmation email|sending confirmation/i.test(message)) {
       return AUTH_ERROR_MESSAGES.unexpected_failure;
     }
 
     return formatSupabaseError(message);
-  }
-
-  const code = error.code?.trim();
-  if (code && AUTH_ERROR_MESSAGES[code]) {
-    return AUTH_ERROR_MESSAGES[code];
   }
 
   if (error.status === 422) {
@@ -105,8 +120,8 @@ export function formatAuthError(
     return "Too many attempts. Wait a few minutes and try again.";
   }
 
-  if (isEmptyErrorMessage(message)) {
-    return "Registration could not be completed. Verify Supabase Auth settings (email signups enabled and production callback URL allowed), then try again.";
+  if (error.status === 500) {
+    return AUTH_ERROR_MESSAGES.unexpected_failure;
   }
 
   return fallback;

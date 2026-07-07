@@ -37,6 +37,75 @@ export function SignupForm() {
       const supabase = createClient();
       const normalizedEmail = email.trim().toLowerCase();
       const resolvedWorkspaceName = workspaceName.trim() || "My studio";
+
+      const apiResponse = await fetch("/api/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: normalizedEmail,
+          password,
+          workspaceName: resolvedWorkspaceName,
+        }),
+      });
+
+      let useClientSignup = apiResponse.status === 503;
+
+      if (!apiResponse.ok && !useClientSignup) {
+        let apiError = "Sign-up failed. Please try again.";
+        try {
+          const payload = (await apiResponse.json()) as { error?: string };
+          if (payload.error) {
+            apiError = payload.error;
+          }
+        } catch {
+          // ignore JSON parse errors
+        }
+
+        setError(apiError);
+        setLoading(false);
+        return;
+      }
+
+      if (!useClientSignup) {
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: normalizedEmail,
+          password,
+        });
+
+        if (signInError) {
+          setError(formatAuthError(signInError, "Account created but sign-in failed. Try logging in."));
+          setLoading(false);
+          return;
+        }
+
+        const {
+          data: { user: signedInUser },
+        } = await supabase.auth.getUser();
+
+        if (!signedInUser) {
+          setError("Account created but sign-in failed. Try logging in.");
+          setLoading(false);
+          return;
+        }
+
+        const result = await setupWorkspaceForUser(
+          supabase,
+          signedInUser.id,
+          normalizedEmail,
+          resolvedWorkspaceName
+        );
+
+        if ("error" in result) {
+          setError(result.error);
+          setLoading(false);
+          return;
+        }
+
+        router.push("/dashboard");
+        router.refresh();
+        return;
+      }
+
       const { data, error: authError } = await supabase.auth.signUp({
         email: normalizedEmail,
         password,
