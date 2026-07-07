@@ -1,6 +1,9 @@
 import {
-  dashboardGridClass,
-  dashboardPanelClass,
+  dashboardGridClassDesktop,
+  dashboardGridClassMobile,
+  dashboardGridGapClass,
+  dashboardPanelClassDesktop,
+  dashboardPanelClassMobile,
   dashboardPanelContentClass,
   dashboardPanelHeaderClass,
   dashboardPanelInnerGapClass,
@@ -22,9 +25,11 @@ function DashboardSectionSkeleton({
 }) {
   return (
     <Card
+      data-dashboard-panel
       className={cn(
-        "flex h-full min-h-0 min-w-0 flex-col overflow-hidden",
-        dashboardPanelClass
+        "flex min-h-0 min-w-0 flex-col overflow-hidden",
+        dashboardPanelClassMobile,
+        dashboardPanelClassDesktop
       )}
     >
       <CardHeader className={dashboardPanelHeaderClass}>
@@ -72,7 +77,14 @@ function DashboardSectionSkeleton({
 
 export function DashboardSkeleton() {
   return (
-    <div className={dashboardGridClass}>
+    <div
+      data-dashboard-grid
+      className={cn(
+        dashboardGridClassMobile,
+        dashboardGridClassDesktop,
+        dashboardGridGapClass
+      )}
+    >
       <DashboardSectionSkeleton listItems={3} />
       <DashboardSectionSkeleton listItems={3} />
       <DashboardSectionSkeleton notesComposer />

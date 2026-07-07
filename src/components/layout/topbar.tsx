@@ -1,37 +1,52 @@
 "use client";
 
+import { Menu } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { SearchTrigger } from "@/components/search/search-trigger";
+import { Button } from "@/components/ui/button";
 import { useLayout } from "@/components/layout/layout-provider";
 import { getPageTitle } from "@/lib/layout/navigation";
 import { responsive } from "@/lib/layout/responsive";
+import { t } from "@/lib/i18n/translations";
+import { useAppLanguage } from "@/lib/settings/language";
+import { radius } from "@/lib/radius";
 import { textStyle } from "@/lib/typography";
 import { cn } from "@/lib/utils";
 
 export function Topbar() {
+  const language = useAppLanguage();
   const pathname = usePathname();
-  const { pageTitleOverride } = useLayout();
+  const { pageTitleOverride, setSidebarOpen } = useLayout();
   const pageTitle = pageTitleOverride ?? getPageTitle(pathname);
 
   return (
     <header
       className={cn(
-        "relative flex h-16 shrink-0 items-center gap-3 bg-background pt-[env(safe-area-inset-top)]",
+        "relative flex h-14 shrink-0 items-center gap-2 bg-background pt-[env(safe-area-inset-top)] sm:h-16 sm:gap-3",
         responsive.contentShell,
         responsive.contentPaddingX
       )}
     >
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className={cn(radius.control, responsive.tabletDrawerOnly, "size-9 shrink-0")}
+        onClick={() => setSidebarOpen(true)}
+        aria-label={t(language, "navigation.menu")}
+      >
+        <Menu className="size-5" />
+      </Button>
+
       <h1
         className={cn(
-          "min-w-0 text-foreground",
+          "min-w-0 flex-1 text-foreground",
           textStyle.bodyMedium,
           textStyle.truncate
         )}
       >
         {pageTitle}
       </h1>
-
-      <div className="flex-1" />
 
       <SearchTrigger />
     </header>

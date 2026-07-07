@@ -50,6 +50,7 @@ export function WorkspaceHubTile() {
 
   return (
     <Card
+      data-dashboard-panel
       variant="nested"
       className={cn(settingsHubTileClass, "justify-between gap-5")}
     >

@@ -3,11 +3,16 @@ import { cn } from "@/lib/utils";
 /** Gap between dashboard panels — single spacing source. */
 export const dashboardGridGapClass = "gap-3";
 
-/**
- * Fixed 2×2 dashboard grid.
- * Explicit 1fr tracks keep all four cells equal size; minmax(0, …) prevents overflow blowout.
- */
-export const dashboardGridClass = cn(
+/** Mobile / tablet: vertical stack. CSS in globals.css enforces this below lg. */
+export const dashboardGridClassMobile = cn(
+  "dashboard-grid-mobile",
+  "flex w-full flex-col",
+  dashboardGridGapClass
+);
+
+/** Desktop only: fixed 2×2 grid (unchanged from original). */
+export const dashboardGridClassDesktop = cn(
+  "dashboard-grid-desktop",
   "grid h-full min-h-0 w-full",
   dashboardGridGapClass,
   "grid-cols-2 grid-rows-2",
@@ -15,16 +20,29 @@ export const dashboardGridClass = cn(
   "[grid-template-rows:minmax(0,1fr)_minmax(0,1fr)]"
 );
 
-/** Every grid cell must fill its track and clip overflow. */
-export const dashboardPanelClass = "h-full min-h-0 min-w-0 overflow-hidden";
+/** @deprecated Use dashboardGridClassMobile / dashboardGridClassDesktop */
+export const dashboardGridClass = dashboardGridClassDesktop;
+
+/** Panel on mobile: natural height, full width. */
+export const dashboardPanelClassMobile = cn(
+  "dashboard-panel-mobile",
+  "min-h-0 min-w-0 w-full shrink-0 overflow-hidden"
+);
+
+/** Panel on desktop: fill grid cell. */
+export const dashboardPanelClassDesktop = "h-full min-h-0 min-w-0 overflow-hidden";
+
+/** @deprecated Use dashboardPanelClassMobile / dashboardPanelClassDesktop */
+export const dashboardPanelClass = dashboardPanelClassDesktop;
 
 /** Shared inset padding for every panel header and body. */
 export const dashboardPanelInsetClass = "p-3 sm:p-4 lg:p-6";
 
 export const dashboardPanelHeaderClass = cn(
-  "flex shrink-0 flex-row items-center justify-between gap-2 sm:gap-3",
+  "flex shrink-0 flex-col items-stretch gap-2",
+  "sm:flex-row sm:items-center sm:justify-between sm:gap-3",
   dashboardPanelInsetClass,
-  "min-h-12 pb-0 sm:min-h-14"
+  "min-h-0 pb-0 sm:min-h-14"
 );
 
 export const dashboardPanelContentClass = cn(

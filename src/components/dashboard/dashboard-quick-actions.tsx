@@ -37,8 +37,9 @@ export function DashboardQuickActions({ onActionClick }: DashboardQuickActionsPr
   return (
     <div
       className={cn(
-        "grid h-full min-h-0 flex-1 grid-cols-2 grid-rows-2",
-        dashboardPanelInnerGapClass
+        "grid min-h-0 flex-1 gap-2",
+        "grid-cols-2 grid-rows-2 max-sm:grid-cols-1 max-sm:grid-rows-none max-sm:auto-rows-fr",
+        "lg:h-full"
       )}
     >
       {quickActions.map((action) => {

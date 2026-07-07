@@ -26,7 +26,13 @@ type LayoutContextValue = {
 const LayoutContext = createContext<LayoutContextValue | null>(null);
 
 export function LayoutProvider({ children }: { children: ReactNode }) {
-  const [sidebarOpen, setSidebarOpenState] = useState(true);
+  const [sidebarOpen, setSidebarOpenState] = useState(() => {
+    if (typeof window === "undefined") {
+      return true;
+    }
+
+    return window.matchMedia(mediaQueries.persistentSidebar).matches;
+  });
   const [pageTitleOverride, setPageTitleOverride] = useState<string | null>(null);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
 
@@ -40,19 +46,28 @@ export function LayoutProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    const mq = window.matchMedia(mediaQueries.persistentSidebar);
+    const persistentMq = window.matchMedia(mediaQueries.persistentSidebar);
+    const overlayMq = window.matchMedia(mediaQueries.overlaySidebar);
 
-    function handleViewportChange(event: MediaQueryListEvent) {
-      if (event.matches) {
+    function handleViewportChange() {
+      if (persistentMq.matches) {
         setSidebarOpenState(true);
         return;
       }
 
-      setSidebarOpenState(false);
+      if (overlayMq.matches) {
+        setSidebarOpenState(false);
+      }
     }
 
-    mq.addEventListener("change", handleViewportChange);
-    return () => mq.removeEventListener("change", handleViewportChange);
+    persistentMq.addEventListener("change", handleViewportChange);
+    overlayMq.addEventListener("change", handleViewportChange);
+    handleViewportChange();
+
+    return () => {
+      persistentMq.removeEventListener("change", handleViewportChange);
+      overlayMq.removeEventListener("change", handleViewportChange);
+    };
   }, []);
 
   useEffect(() => {

@@ -267,6 +267,47 @@
 
 
 
+/* Dashboard: single-column stack on phone/tablet, 2×2 grid only on desktop. */
+@media (max-width: 1023px) {
+  [data-dashboard-grid] {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.75rem;
+    width: 100%;
+    height: auto !important;
+    min-height: 0;
+    overflow: visible !important;
+  }
+
+  [data-dashboard-grid] > [data-dashboard-panel] {
+    width: 100%;
+    height: auto !important;
+    min-height: 0;
+    flex-shrink: 0;
+  }
+
+  [data-dashboard-grid] .dashboard-panel-list {
+    max-height: min(40dvh, 280px);
+    overflow-y: auto;
+  }
+}
+
+@media (min-width: 1024px) {
+  [data-dashboard-grid] {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  [data-dashboard-grid] > [data-dashboard-panel] {
+    height: 100%;
+    min-height: 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

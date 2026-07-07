@@ -1,12 +1,14 @@
 import { radius } from "@/lib/theme";
-import { dashboardPanelClass } from "@/lib/dashboard-layout";
+import { dashboardPanelClassDesktop, dashboardPanelClassMobile } from "@/lib/dashboard-layout";
 import { cn } from "@/lib/utils";
 
 /** Outer settings hub tiles — no border, no hover fill. */
 export const settingsHubTileClass = cn(
-  dashboardPanelClass,
+  dashboardPanelClassMobile,
+  dashboardPanelClassDesktop,
   radius.nested,
-  "flex h-full min-h-0 flex-col border-0 bg-card p-6 shadow-none transition-none hover:bg-card sm:p-8"
+  "flex min-h-0 flex-col border-0 bg-card p-6 shadow-none transition-none hover:bg-card sm:p-8",
+  "max-lg:min-h-0 lg:h-full"
 );
 
 /** Pill controls matching the search bar — perfect semicircle end caps. */

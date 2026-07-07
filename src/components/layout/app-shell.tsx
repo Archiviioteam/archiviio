@@ -6,8 +6,10 @@ import { createClient } from "@/lib/supabase/client";
 import { ensureUserWorkspace } from "@/lib/workspace";
 import { ContentArea } from "@/components/layout/content-area";
 import { LayoutProvider } from "@/components/layout/layout-provider";
+import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Topbar } from "@/components/layout/topbar";
+import { useIsMobile } from "@/lib/layout/use-is-mobile";
 import { textStyle } from "@/lib/typography";
 import { cn } from "@/lib/utils";
 import {
@@ -23,8 +25,10 @@ interface AppShellProps {
 function AppShellFrame({ children }: AppShellProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const isFullHeightGrid =
+  const isMobile = useIsMobile();
+  const isDashboardOrSettings =
     pathname === "/dashboard" || pathname === "/settings";
+  const isFullHeightGrid = !isMobile && isDashboardOrSettings;
   const [workspaceName, setWorkspaceName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -60,6 +64,7 @@ function AppShellFrame({ children }: AppShellProps) {
           )}
         </ContentArea>
       </div>
+      <MobileBottomNav />
     </div>
   );
 }

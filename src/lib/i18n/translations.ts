@@ -259,6 +259,10 @@ export type TranslationKey =
   | "projects.statusArchived"
   | "projects.activityTitle"
   | "navigation.sidebarAria"
+  | "navigation.more"
+  | "navigation.moreDescription"
+  | "navigation.bottomNavAria"
+  | "navigation.menu"
   | "activity.noRecent"
   | "activity.today"
   | "ai.commandOrNavigate"
@@ -579,6 +583,10 @@ const translations: Record<AppLanguage, Record<TranslationKey, string>> = {
     "projects.statusArchived": "Archived",
     "projects.activityTitle": "Project activity",
     "navigation.sidebarAria": "Sidebar navigation",
+    "navigation.more": "More",
+    "navigation.moreDescription": "Additional navigation links",
+    "navigation.bottomNavAria": "Main navigation",
+    "navigation.menu": "Open menu",
     "activity.noRecent": "No recent activity yet",
     "activity.today": "Today",
     "ai.commandOrNavigate": "Command or navigate",
@@ -907,6 +915,10 @@ const translations: Record<AppLanguage, Record<TranslationKey, string>> = {
     "projects.statusArchived": "Archiviato",
     "projects.activityTitle": "Attività progetto",
     "navigation.sidebarAria": "Navigazione barra laterale",
+    "navigation.more": "Altro",
+    "navigation.moreDescription": "Collegamenti di navigazione aggiuntivi",
+    "navigation.bottomNavAria": "Navigazione principale",
+    "navigation.menu": "Apri menu",
     "activity.noRecent": "Nessuna attività recente",
     "activity.today": "Oggi",
     "ai.commandOrNavigate": "Comando o navigazione",

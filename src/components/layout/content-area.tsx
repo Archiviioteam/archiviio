@@ -19,7 +19,9 @@ export function ContentArea({
     <main
       className={cn(
         "flex min-h-0 flex-1 flex-col bg-background",
-        scrollable ? "overflow-y-auto" : "overflow-hidden"
+        scrollable
+          ? "overflow-y-auto"
+          : "overflow-hidden max-lg:overflow-y-auto"
       )}
     >
       <div
@@ -27,8 +29,8 @@ export function ContentArea({
           responsive.contentShell,
           scrollable ? "flex-1" : "flex h-full min-h-0 flex-col overflow-hidden",
           responsive.contentPaddingX,
-          "pt-4 sm:pt-6 lg:pt-8",
-          responsive.contentSafeAreaBottom,
+          "pt-3 sm:pt-6 lg:pt-8",
+          responsive.mobileBottomNavInset,
           className
         )}
       >

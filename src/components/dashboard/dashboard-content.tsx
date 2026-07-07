@@ -17,8 +17,11 @@ import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { readRecentlyOpenedProjects } from "@/lib/ai-command/last-opened-project-storage";
 import {
-  dashboardGridClass,
-  dashboardPanelClass,
+  dashboardGridClassDesktop,
+  dashboardGridClassMobile,
+  dashboardGridGapClass,
+  dashboardPanelClassDesktop,
+  dashboardPanelClassMobile,
 } from "@/lib/dashboard-layout";
 import { deadlineHref, fetchDashboardData } from "@/lib/dashboard";
 import { t } from "@/lib/i18n/translations";
@@ -128,11 +131,23 @@ export function DashboardContent() {
     };
   }, [loadDashboard]);
 
+  const panelClass = cn(
+    dashboardPanelClassMobile,
+    dashboardPanelClassDesktop
+  );
+
   return (
-    <div className={dashboardGridClass}>
+    <div
+      data-dashboard-grid
+      className={cn(
+        dashboardGridClassMobile,
+        dashboardGridClassDesktop,
+        dashboardGridGapClass
+      )}
+    >
       <DashboardSection
         title={t(language, "dashboard.recentProjects")}
-        className={dashboardPanelClass}
+        className={panelClass}
         action={{ label: t(language, "dashboard.viewAll"), href: "/projects" }}
       >
         {loading ? (
@@ -145,19 +160,19 @@ export function DashboardContent() {
             action={{ label: t(language, "quickActions.createProject"), href: "/projects?action=create" }}
           />
         ) : (
-          <div className="flex h-full w-full flex-col gap-2 overflow-y-auto">
+          <div className="dashboard-panel-list flex w-full flex-col gap-2 overflow-y-auto lg:h-full">
             {data.projects.map((project) => (
               <Card key={project.id} variant="nested" asChild>
                 <Link
                   href={`/projects/${project.id}`}
-                  className="flex items-start justify-between gap-3 p-3"
+                  className="flex flex-col gap-2 p-3 sm:flex-row sm:items-start sm:justify-between"
                 >
                   <div className="min-w-0 flex-1">
-                    <span className={cn(textStyle.bodyMedium, "truncate text-foreground")}>
+                    <span className={cn(textStyle.bodyMedium, "text-foreground")}>
                       {formatProjectCodeDisplay(project.code)} - {project.name}
                     </span>
                   </div>
-                  <ProjectStatusBadge status={project.status} />
+                  <ProjectStatusBadge status={project.status} className="self-start shrink-0" />
                 </Link>
               </Card>
             ))}
@@ -167,7 +182,7 @@ export function DashboardContent() {
 
       <DashboardSection
         title={t(language, "dashboard.upcomingTasks")}
-        className={dashboardPanelClass}
+        className={panelClass}
         action={{ label: t(language, "tasks.addTask"), onClick: () => setTaskDialogOpen(true) }}
       >
         {loading ? (
@@ -180,15 +195,15 @@ export function DashboardContent() {
             action={{ label: t(language, "tasks.viewTasks"), href: "/tasks" }}
           />
         ) : (
-          <div className="flex h-full w-full flex-col gap-2 overflow-y-auto">
+          <div className="dashboard-panel-list flex w-full flex-col gap-2 overflow-y-auto lg:h-full">
             {data.deadlines.map((task) => (
               <Card key={task.id} variant="nested" asChild>
                 <Link
                   href={deadlineHref(task)}
-                  className="flex items-start justify-between gap-3 p-3"
+                  className="flex flex-col gap-2 p-3 sm:flex-row sm:items-start sm:justify-between"
                 >
                   <div className="min-w-0 flex-1">
-                    <span className={cn(textStyle.bodyMedium, "truncate text-foreground")}>
+                    <span className={cn(textStyle.bodyMedium, "text-foreground")}>
                       {(task.projectCode
                         ? formatProjectCodeDisplay(task.projectCode)
                         : task.projectName ?? "—") +
@@ -196,7 +211,7 @@ export function DashboardContent() {
                         task.title}
                     </span>
                   </div>
-                  <div className="flex shrink-0 items-center gap-2">
+                  <div className="flex shrink-0 flex-wrap items-center gap-2 self-start">
                     <span className={cn(textStyle.caption, "text-muted-foreground")}>
                       {formatDueDate(task.dueDate) || "—"}
                     </span>
@@ -221,14 +236,14 @@ export function DashboardContent() {
 
       <DashboardSection
         title={t(language, "dashboard.note")}
-        className={dashboardPanelClass}
+        className={panelClass}
         action={{ label: t(language, "dashboard.viewAll"), href: "/notes" }}
         contentClassName="flex min-h-0 flex-1 flex-col items-center justify-start pt-2 sm:pt-3"
       >
         <DashboardNotesComposer />
       </DashboardSection>
 
-      <DashboardSection title={t(language, "dashboard.quickActions")} className={dashboardPanelClass}>
+      <DashboardSection title={t(language, "dashboard.quickActions")} className={panelClass}>
         <DashboardQuickActions onActionClick={handleQuickActionClick} />
       </DashboardSection>
 

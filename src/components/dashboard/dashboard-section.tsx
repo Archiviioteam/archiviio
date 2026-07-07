@@ -30,26 +30,28 @@ export function DashboardSection({
 }: DashboardSectionProps) {
   return (
     <Card
+      data-dashboard-panel
       className={cn(
-        "flex h-full min-h-0 min-w-0 flex-col overflow-hidden",
+        "flex min-h-0 min-w-0 flex-col overflow-hidden",
+        "h-auto max-lg:h-auto lg:h-full",
         className
       )}
     >
       <CardHeader className={dashboardPanelHeaderClass}>
         <div className={cn("flex min-w-0 flex-1 flex-col", stack.compact)}>
-          <CardTitle className={cn("text-body-lg sm:text-heading", textStyle.truncate)}>
+          <CardTitle className={cn("text-body-lg sm:text-heading")}>
             {title}
           </CardTitle>
         </div>
         {action?.href ? (
-          <Button variant="outline" size="sm" className="shrink-0" asChild>
+          <Button variant="outline" size="sm" className="w-full shrink-0 sm:w-auto" asChild>
             <Link href={action.href}>{action.label}</Link>
           </Button>
         ) : action?.onClick ? (
           <Button
             variant="outline"
             size="sm"
-            className="shrink-0"
+            className="w-full shrink-0 sm:w-auto"
             type="button"
             onClick={action.onClick}
           >

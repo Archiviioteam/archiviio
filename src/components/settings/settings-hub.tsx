@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import {
-  dashboardGridClass,
+  dashboardGridClassDesktop,
+  dashboardGridClassMobile,
+  dashboardGridGapClass,
 } from "@/lib/dashboard-layout";
 import {
   SETTINGS_SECTIONS,
@@ -12,6 +14,7 @@ import {
 import { useAppLanguage } from "@/lib/settings/language";
 import { settingsHubTileClass } from "@/lib/settings/hub-control-styles";
 import { textStyle } from "@/lib/typography";
+import { cn } from "@/lib/utils";
 import { PreferencesHubTile } from "@/components/settings/preferences-hub-tile";
 import { ProfileHubTile } from "@/components/settings/profile-hub-tile";
 import { TeamHubTile } from "@/components/settings/team-hub-tile";
@@ -20,7 +23,14 @@ import { WorkspaceHubTile } from "@/components/settings/workspace-hub-tile";
 export function SettingsHub() {
   const language = useAppLanguage();
   return (
-    <div className={dashboardGridClass}>
+    <div
+      data-dashboard-grid
+      className={cn(
+        dashboardGridClassMobile,
+        dashboardGridClassDesktop,
+        dashboardGridGapClass
+      )}
+    >
       {SETTINGS_SECTIONS.map((section) => {
         const sectionContent = getSettingsSection(section.id, language);
         if (section.id === "team") {
@@ -43,6 +53,7 @@ export function SettingsHub() {
           <Link
             key={section.id}
             href={settingsSectionHref(section.id)}
+            data-dashboard-panel
             className={settingsHubTileClass}
           >
             <span className={textStyle.pageTitle}>{sectionContent.label}</span>

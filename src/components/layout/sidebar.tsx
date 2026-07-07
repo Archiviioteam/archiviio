@@ -12,7 +12,7 @@ import {
   getPrimaryNavItems,
   getSettingsNavItem,
 } from "@/lib/layout/navigation";
-import { isOverlaySidebarViewport } from "@/lib/layout/responsive";
+import { isOverlaySidebarViewport, responsive } from "@/lib/layout/responsive";
 import { useAppLanguage } from "@/lib/settings/language";
 import { motion } from "@/lib/animation";
 import {
@@ -81,7 +81,8 @@ export function Sidebar({ workspaceName: _workspaceName }: { workspaceName: stri
         aria-hidden={!sidebarOpen}
         tabIndex={sidebarOpen ? 0 : -1}
         className={cn(
-          "fixed inset-0 z-40 lg:hidden",
+          "fixed inset-0 z-40",
+          responsive.tabletDrawerOnly,
           overlay,
           motion.sidebarOverlay,
           sidebarOpen
@@ -107,7 +108,8 @@ export function Sidebar({ workspaceName: _workspaceName }: { workspaceName: stri
               "flex min-h-0 flex-1 flex-col overflow-hidden bg-sidebar text-sidebar-foreground",
               desktopSidebarPanelClass(false),
               elevation.sm,
-              "max-lg:fixed max-lg:bottom-[max(12px,env(safe-area-inset-bottom))] max-lg:left-3 max-lg:top-[max(12px,env(safe-area-inset-top))] max-lg:z-50 max-lg:w-sidebar",
+              "max-md:hidden",
+              "md:max-lg:fixed md:max-lg:bottom-[max(12px,env(safe-area-inset-bottom))] md:max-lg:left-3 md:max-lg:top-[max(12px,env(safe-area-inset-top))] md:max-lg:z-50 md:max-lg:w-sidebar",
               "lg:static lg:h-full lg:w-full",
               motion.sidebar,
               sidebarOpen
