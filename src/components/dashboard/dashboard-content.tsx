@@ -28,6 +28,7 @@ import { t } from "@/lib/i18n/translations";
 import { formatProjectCodeDisplay } from "@/lib/projects";
 import { useAppLanguage } from "@/lib/settings/language";
 import { createClient } from "@/lib/supabase/client";
+import { useIsMobile } from "@/lib/layout/use-is-mobile";
 import {
   getTaskUrgencyLabel,
   getTaskUrgencyPillClass,
@@ -46,6 +47,7 @@ function formatDueDate(value: string | null): string {
 
 export function DashboardContent() {
   const language = useAppLanguage();
+  const isMobile = useIsMobile();
   const [data, setData] = useState<DashboardData>({
     projects: [],
     deadlines: [],
@@ -135,6 +137,8 @@ export function DashboardContent() {
     dashboardPanelClassMobile,
     dashboardPanelClassDesktop
   );
+  const visibleProjects = isMobile ? data.projects.slice(0, 2) : data.projects;
+  const visibleDeadlines = isMobile ? data.deadlines.slice(0, 2) : data.deadlines;
 
   return (
     <div
@@ -161,7 +165,7 @@ export function DashboardContent() {
           />
         ) : (
           <div className="dashboard-panel-list flex w-full flex-col gap-2 overflow-y-auto lg:h-full">
-            {data.projects.map((project) => (
+            {visibleProjects.map((project) => (
               <Card key={project.id} variant="nested" asChild>
                 <Link
                   href={`/projects/${project.id}`}
@@ -196,7 +200,7 @@ export function DashboardContent() {
           />
         ) : (
           <div className="dashboard-panel-list flex w-full flex-col gap-2 overflow-y-auto lg:h-full">
-            {data.deadlines.map((task) => (
+            {visibleDeadlines.map((task) => (
               <Card key={task.id} variant="nested" asChild>
                 <Link
                   href={deadlineHref(task)}

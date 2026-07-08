@@ -30,8 +30,6 @@ export function InviteTeamMemberForm({
   const language = useAppLanguage();
   const [email, setEmail] = useState("");
   const [sending, setSending] = useState(false);
-  const [lastInviteUrl, setLastInviteUrl] = useState<string | null>(null);
-  const [lastInvitedEmail, setLastInvitedEmail] = useState<string | null>(null);
 
   const handleSubmit = useCallback(
     async (event: React.FormEvent) => {
@@ -39,8 +37,6 @@ export function InviteTeamMemberForm({
       event.stopPropagation();
 
       setSending(true);
-      setLastInviteUrl(null);
-      setLastInvitedEmail(null);
 
       const supabase = createClient();
       const result = await inviteTeamMember(supabase, email);
@@ -54,11 +50,6 @@ export function InviteTeamMemberForm({
 
       const invitedEmail = email.trim().toLowerCase();
       setEmail("");
-      setLastInvitedEmail(invitedEmail);
-
-      if (result.inviteUrl) {
-        setLastInviteUrl(result.inviteUrl);
-      }
 
       if (result.emailed) {
         toast.success(
@@ -96,16 +87,6 @@ export function InviteTeamMemberForm({
     },
     [email, language, onInvited]
   );
-
-  const handleCopyLink = useCallback(async () => {
-    if (!lastInviteUrl) return;
-    try {
-      await navigator.clipboard.writeText(lastInviteUrl);
-      toast.success(t(language, "team.invitationLinkCopied").replace("{email}", ""));
-    } catch {
-      toast.error(t(language, "team.invitationLinkReady").replace("{email}", ""));
-    }
-  }, [language, lastInviteUrl]);
 
   return (
     <form
@@ -145,21 +126,6 @@ export function InviteTeamMemberForm({
           )}
         </Button>
       </div>
-
-      {lastInviteUrl ? (
-        <div className="flex flex-col gap-2 rounded-lg border border-border bg-muted/40 p-3">
-          <p className={cn(textStyle.caption, "text-muted-foreground")}>
-            {t(language, "team.invitationLinkReady").replace(
-              "{email}",
-              lastInvitedEmail ?? ""
-            )}
-          </p>
-          <p className="break-all font-mono text-xs text-foreground">{lastInviteUrl}</p>
-          <Button type="button" variant="outline" size="sm" onClick={() => void handleCopyLink()}>
-            {t(language, "team.copyInviteLink")}
-          </Button>
-        </div>
-      ) : null}
     </form>
   );
 }
