@@ -152,11 +152,16 @@ export type TranslationKey =
   | "documents.uploadTitle"
   | "documents.uploadDescription"
   | "documents.uploadedToast"
+  | "documents.dropzoneHint"
+  | "documents.dropzoneActive"
+  | "documents.dropzoneAllowed"
+  | "documents.uploadFailed"
   | "documents.deleteTitle"
   | "documents.deleteDescription"
   | "documents.deletedToast"
   | "elaborati.uploadTitle"
   | "elaborati.uploadDescription"
+  | "elaborati.dropOnProject"
   | "elaborati.uploadedToast"
   | "elaborati.deleteTitle"
   | "elaborati.deleteDescription"
@@ -466,13 +471,18 @@ const translations: Record<AppLanguage, Record<TranslationKey, string>> = {
     "documents.uploadDescription":
       "Choose a project, then select a file to upload.",
     "documents.uploadedToast": "{name} uploaded",
+    "documents.dropzoneHint": "Drag files here or click to upload",
+    "documents.dropzoneActive": "Drop files to upload",
+    "documents.dropzoneAllowed": "{types} · max {size} per file",
+    "documents.uploadFailed": "Failed",
     "documents.deleteTitle": "Delete document",
     "documents.deleteDescription":
       "Delete {name}? This removes the file and all stored versions. This action cannot be undone.",
     "documents.deletedToast": "{name} deleted",
     "elaborati.uploadTitle": "Upload deliverable",
     "elaborati.uploadDescription":
-      "Choose a project, then select a file to upload.",
+      "Choose a project or drag files onto a project below.",
+    "elaborati.dropOnProject": "Drop to upload here",
     "elaborati.uploadedToast": "{name} uploaded",
     "elaborati.deleteTitle": "Delete deliverable",
     "elaborati.deleteDescription":
@@ -799,13 +809,18 @@ const translations: Record<AppLanguage, Record<TranslationKey, string>> = {
     "documents.uploadDescription":
       "Seleziona un file da caricare nello studio.",
     "documents.uploadedToast": "{name} caricato",
+    "documents.dropzoneHint": "Trascina i file qui o clicca per caricare",
+    "documents.dropzoneActive": "Rilascia i file per caricare",
+    "documents.dropzoneAllowed": "{types} · max {size} per file",
+    "documents.uploadFailed": "Errore",
     "documents.deleteTitle": "Elimina elaborato",
     "documents.deleteDescription":
       "Eliminare {name}? Verranno rimossi il file e tutte le versioni salvate. Questa azione non può essere annullata.",
     "documents.deletedToast": "{name} eliminato",
     "elaborati.uploadTitle": "Carica elaborato",
     "elaborati.uploadDescription":
-      "Scegli un progetto, poi seleziona un file da caricare.",
+      "Scegli un progetto o trascina i file su un progetto qui sotto.",
+    "elaborati.dropOnProject": "Rilascia per caricare qui",
     "elaborati.uploadedToast": "{name} caricato",
     "elaborati.deleteTitle": "Elimina elaborato",
     "elaborati.deleteDescription":

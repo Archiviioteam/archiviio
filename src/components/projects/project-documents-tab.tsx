@@ -123,19 +123,11 @@ export function ProjectDocumentsTab({ projectId }: ProjectDocumentsTabProps) {
       <DocumentUploader
         projectId={projectId}
         inputId={UPLOADER_INPUT_ID}
-        showDropzone={false}
+        showDropzone={documents.length === 0}
         onUploadComplete={handleUploadComplete}
       />
 
-      {documents.length === 0 ? (
-        <EmptyState
-          title={emptyStatePresets.elaborati.title}
-          action={{
-            label: language === "it" ? "Aggiungi file" : "Add file",
-            onClick: handleAddClick,
-          }}
-        />
-      ) : filteredDocuments.length === 0 ? (
+      {documents.length === 0 ? null : filteredDocuments.length === 0 ? (
         <Card>
           <CardContent className="p-6">
             <EmptyState

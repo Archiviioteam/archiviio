@@ -38,13 +38,13 @@ function encodeStoragePath(path: string): string {
 }
 
 function getDocumentContentType(file: File): string {
-  if (file.type) {
-    return file.type;
-  }
-
   const extension = getDocumentFileExtension(file.name);
   if (extension && CONTENT_TYPE_BY_EXTENSION[extension]) {
     return CONTENT_TYPE_BY_EXTENSION[extension];
+  }
+
+  if (file.type) {
+    return file.type;
   }
 
   return "application/octet-stream";

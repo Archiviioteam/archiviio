@@ -17,11 +17,21 @@ export const DOCUMENT_ALLOWED_EXTENSIONS = [
 
 export type DocumentAllowedExtension = (typeof DOCUMENT_ALLOWED_EXTENSIONS)[number];
 
-export const DOCUMENT_ALLOWED_MIME_TYPES = [
-  "application/pdf",
+export const DWG_MIME_TYPES = [
   "image/vnd.dwg",
+  "image/x-dwg",
   "application/acad",
   "application/x-dwg",
+  "application/dwg",
+  "application/x-autocad",
+  "application/autocad_dwg",
+  "application/vnd.autodesk.autocad.dwg",
+  "application/octet-stream",
+] as const;
+
+export const DOCUMENT_ALLOWED_MIME_TYPES = [
+  "application/pdf",
+  ...DWG_MIME_TYPES,
   "image/jpeg",
   "image/png",
   "image/webp",
@@ -33,7 +43,7 @@ export const DOCUMENT_ALLOWED_MIME_TYPES = [
 
 const EXTENSION_MIME_TYPES: Record<DocumentAllowedExtension, readonly string[]> = {
   pdf: ["application/pdf"],
-  dwg: ["image/vnd.dwg", "application/acad", "application/x-dwg", "application/octet-stream"],
+  dwg: DWG_MIME_TYPES,
   jpg: ["image/jpeg"],
   jpeg: ["image/jpeg"],
   png: ["image/png"],

@@ -1,11 +1,13 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Upload } from "lucide-react";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { uploadDocument } from "@/lib/documents/upload-document";
+import { t } from "@/lib/i18n/translations";
+import { useAppLanguage } from "@/lib/settings/language";
 import { createClient } from "@/lib/supabase/client";
 import {
   DOCUMENT_ALLOWED_EXTENSIONS,
@@ -34,11 +36,16 @@ interface DocumentUploaderProps {
   triggerId?: string;
   inputId?: string;
   showDropzone?: boolean;
+  enableDragDrop?: boolean;
 }
 
 function formatMaxFileSize(): string {
   const maxMb = Math.round(getDocumentMaxFileSizeBytes() / (1024 * 1024));
   return `${maxMb} MB`;
+}
+
+function hasDraggedFiles(dataTransfer: DataTransfer | null): boolean {
+  return dataTransfer?.types.includes("Files") ?? false;
 }
 
 export function DocumentUploader({
@@ -48,15 +55,22 @@ export function DocumentUploader({
   triggerId,
   inputId,
   showDropzone = true,
+  enableDragDrop = true,
 }: DocumentUploaderProps) {
+  const language = useAppLanguage();
   const resolvedInputId = inputId ?? triggerId;
   const inputRef = useRef<HTMLInputElement>(null);
   const processingRef = useRef(false);
+  const dragDepthRef = useRef(0);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [uploads, setUploads] = useState<UploadItem[]>([]);
   const isUploading =
     isProcessing || uploads.some((item) => item.status === "uploading");
+
+  const allowedTypes = DOCUMENT_ALLOWED_EXTENSIONS.filter(
+    (ext) => ext !== "jpeg"
+  ).join(", ");
 
   const updateUpload = useCallback(
     (id: string, patch: Partial<UploadItem>) => {
@@ -106,10 +120,10 @@ export function DocumentUploader({
       }
 
       setUploads((current) => current.filter((item) => item.id !== uploadId));
-      toast.success(`${file.name} uploaded`);
+      toast.success(t(language, "documents.uploadedToast").replace("{name}", file.name));
       onUploadComplete?.(result.document);
     },
-    [onUploadComplete, projectId, updateUpload]
+    [language, onUploadComplete, projectId, updateUpload]
   );
 
   const handleFiles = useCallback(
@@ -133,10 +147,64 @@ export function DocumentUploader({
     [disabled, processFile]
   );
 
+  useEffect(() => {
+    if (!enableDragDrop || showDropzone || disabled) return;
+
+    const resetDragState = () => {
+      dragDepthRef.current = 0;
+      setIsDragging(false);
+    };
+
+    const onDragEnter = (event: DragEvent) => {
+      if (!hasDraggedFiles(event.dataTransfer)) return;
+      event.preventDefault();
+      dragDepthRef.current += 1;
+      setIsDragging(true);
+    };
+
+    const onDragOver = (event: DragEvent) => {
+      if (!hasDraggedFiles(event.dataTransfer)) return;
+      event.preventDefault();
+    };
+
+    const onDragLeave = (event: DragEvent) => {
+      if (!hasDraggedFiles(event.dataTransfer)) return;
+      event.preventDefault();
+      dragDepthRef.current = Math.max(0, dragDepthRef.current - 1);
+      if (dragDepthRef.current === 0) {
+        setIsDragging(false);
+      }
+    };
+
+    const onDrop = (event: DragEvent) => {
+      if (!hasDraggedFiles(event.dataTransfer)) return;
+      event.preventDefault();
+      resetDragState();
+
+      if (disabled || processingRef.current) return;
+      if (event.dataTransfer?.files) {
+        void handleFiles(event.dataTransfer.files);
+      }
+    };
+
+    window.addEventListener("dragenter", onDragEnter);
+    window.addEventListener("dragover", onDragOver);
+    window.addEventListener("dragleave", onDragLeave);
+    window.addEventListener("drop", onDrop);
+
+    return () => {
+      window.removeEventListener("dragenter", onDragEnter);
+      window.removeEventListener("dragover", onDragOver);
+      window.removeEventListener("dragleave", onDragLeave);
+      window.removeEventListener("drop", onDrop);
+      resetDragState();
+    };
+  }, [disabled, enableDragDrop, handleFiles, showDropzone]);
+
   const onDragEnter = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     event.stopPropagation();
-    if (!disabled && !isUploading) {
+    if (!disabled && !isUploading && hasDraggedFiles(event.dataTransfer)) {
       setIsDragging(true);
     }
   };
@@ -174,9 +242,13 @@ export function DocumentUploader({
     inputRef.current?.click();
   };
 
-  const allowedTypes = DOCUMENT_ALLOWED_EXTENSIONS.filter(
-    (ext) => ext !== "jpeg"
-  ).join(", ");
+  const dropzoneHint = isDragging
+    ? t(language, "documents.dropzoneActive")
+    : t(language, "documents.dropzoneHint");
+
+  const dropzoneAllowed = t(language, "documents.dropzoneAllowed")
+    .replace("{types}", allowedTypes)
+    .replace("{size}", formatMaxFileSize());
 
   return (
     <div className="flex flex-col gap-4">
@@ -186,7 +258,7 @@ export function DocumentUploader({
           variant="dashed"
           role="button"
           tabIndex={disabled || isUploading ? -1 : 0}
-          aria-label="Upload documents"
+          aria-label={t(language, "documents.uploadTitle")}
           aria-disabled={disabled || isUploading}
           onKeyDown={(event) => {
             if (event.key === "Enter" || event.key === " ") {
@@ -201,7 +273,7 @@ export function DocumentUploader({
           onDrop={onDrop}
           className={cn(
             "flex cursor-pointer flex-col items-center justify-center gap-3 p-8 text-center",
-            isDragging && "bg-primary/10",
+            isDragging && "border-primary bg-primary/10",
             (disabled || isUploading) && "cursor-not-allowed opacity-60"
           )}
         >
@@ -209,14 +281,8 @@ export function DocumentUploader({
             <Upload className="size-4 text-muted-foreground" />
           </div>
           <div className="flex flex-col gap-1">
-            <p className="text-sm font-medium text-foreground">
-              {isDragging
-                ? "Drop files to upload"
-                : "Drag files here or click to upload"}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {allowedTypes} · max {formatMaxFileSize()} per file
-            </p>
+            <p className="text-sm font-medium text-foreground">{dropzoneHint}</p>
+            <p className="text-xs text-muted-foreground">{dropzoneAllowed}</p>
           </div>
           <input
             ref={inputRef}
@@ -242,7 +308,26 @@ export function DocumentUploader({
         />
       )}
 
-      {showDropzone &&
+      {enableDragDrop && !showDropzone && isDragging && (
+        <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-6 backdrop-blur-sm">
+          <Card
+            variant="dashed"
+            className="flex max-w-lg flex-col items-center justify-center gap-3 border-primary bg-primary/10 p-10 text-center"
+          >
+            <div className={cn("flex size-12 items-center justify-center bg-muted", radius.pill)}>
+              <Upload className="size-4 text-muted-foreground" />
+            </div>
+            <div className="flex flex-col gap-1">
+              <p className="text-sm font-medium text-foreground">
+                {t(language, "documents.dropzoneActive")}
+              </p>
+              <p className="text-xs text-muted-foreground">{dropzoneAllowed}</p>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {(showDropzone || enableDragDrop) &&
         uploads.some(
           (item) => item.status === "uploading" || item.status === "error"
         ) && (
@@ -259,7 +344,7 @@ export function DocumentUploader({
                 </span>
                 <span className="shrink-0 text-xs text-muted-foreground">
                   {item.status === "uploading" && `${item.progress}%`}
-                  {item.status === "error" && "Failed"}
+                  {item.status === "error" && t(language, "documents.uploadFailed")}
                 </span>
               </div>
 
