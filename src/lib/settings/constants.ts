@@ -1,8 +1,8 @@
 import type { AppLanguage } from "@/lib/settings/preferences-storage";
 import { t } from "@/lib/i18n/translations";
 
-/** Multi-user team features are prepared but not yet active. */
-export const TEAM_FEATURES_ENABLED = false;
+/** Multi-user team collaboration is active. */
+export const TEAM_FEATURES_ENABLED = true;
 
 export type SettingsSectionId =
   | "profile"

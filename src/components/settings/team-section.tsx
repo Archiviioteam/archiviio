@@ -159,7 +159,7 @@ export function TeamSection() {
     setRemoveTarget(null);
   }
 
-  const showEmptyState = !TEAM_FEATURES_ENABLED || members.length <= 1;
+  const showEmptyState = !TEAM_FEATURES_ENABLED;
 
   return (
     <SettingsSectionCard
