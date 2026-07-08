@@ -38,7 +38,7 @@ export function DashboardQuickActions({ onActionClick }: DashboardQuickActionsPr
     <div
       className={cn(
         "grid min-h-0 flex-1 gap-2",
-        "grid-cols-2 grid-rows-2 max-sm:grid-cols-1 max-sm:grid-rows-none max-sm:auto-rows-fr",
+        "grid-cols-2 grid-rows-2",
         "lg:h-full"
       )}
     >
@@ -49,7 +49,7 @@ export function DashboardQuickActions({ onActionClick }: DashboardQuickActionsPr
           <Card key={action.id} variant="nested" className="h-full min-h-0" asChild>
             <button
               type="button"
-              className="flex h-full min-h-0 flex-col items-center justify-center gap-2 p-3"
+              className="flex h-full min-h-0 flex-col items-center justify-center gap-2 p-3 transition-all duration-200 active:scale-[0.98]"
               onClick={() => onActionClick(action.id)}
             >
               <Icon className="size-5 text-muted-foreground" />

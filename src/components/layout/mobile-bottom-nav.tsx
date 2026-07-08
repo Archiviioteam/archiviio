@@ -53,9 +53,9 @@ export function MobileBottomNav() {
                   className={cn(
                     "flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 px-1",
                     radius.control,
-                    "transition-colors",
+                    "transition-all duration-200 active:scale-95",
                     isActive
-                      ? "text-foreground"
+                      ? "bg-foreground/10 text-foreground"
                       : "text-muted-foreground active:text-foreground"
                   )}
                 >
@@ -73,9 +73,9 @@ export function MobileBottomNav() {
                 className={cn(
                   "flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 px-1",
                   radius.control,
-                  "transition-colors",
+                  "transition-all duration-200 active:scale-95",
                   isActive
-                    ? "text-foreground"
+                    ? "bg-foreground/10 text-foreground"
                     : "text-muted-foreground active:text-foreground"
                 )}
               >
