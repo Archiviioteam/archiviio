@@ -290,6 +290,15 @@
     font-size: 16px;
   }
 
+  /* Keep iOS date/time controls aligned with other fields in dialogs. */
+  [data-slot="dialog-content"] input[type="date"],
+  [data-slot="dialog-content"] input[type="time"] {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
   /*
    * Prevent iOS Safari from leaving the page shifted after keyboard close.
    * Scrolling is handled by internal app containers, not by body.
