@@ -45,9 +45,11 @@ function DialogContent({
   className,
   children,
   showCloseButton = true,
+  showMobileHandle = true,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean;
+  showMobileHandle?: boolean;
 }) {
   return (
     <DialogPortal>
@@ -57,13 +59,20 @@ function DialogContent({
         {...radiusTierProps("surface")}
         className={cn(
           radius.surface,
-          "fixed inset-0 z-[100] m-auto flex h-fit max-h-[calc(100dvh-var(--spacing-8))] w-[calc(100%-var(--spacing-8))] max-w-4xl flex-col gap-4 overflow-y-auto overflow-x-hidden bg-card p-6 outline-none max-md:touch-pan-y max-md:[&_input]:text-base max-md:[&_textarea]:text-base max-md:[&_select]:text-base",
+          "fixed inset-0 z-[100] m-auto flex h-fit max-h-[calc(100dvh-var(--spacing-8))] w-[calc(100%-var(--spacing-8))] max-w-4xl flex-col gap-4 overflow-y-auto overflow-x-hidden bg-card p-6 outline-none max-md:inset-x-0 max-md:top-auto max-md:bottom-0 max-md:m-0 max-md:h-[92dvh] max-md:max-h-[92dvh] max-md:w-full max-md:max-w-none max-md:rounded-t-3xl max-md:rounded-b-none max-md:px-5 max-md:pt-5 max-md:pb-0 max-md:touch-pan-y max-md:[&_input]:text-base max-md:[&_textarea]:text-base max-md:[&_select]:text-base",
           elevation.lg,
           motion.modalContent,
           className
         )}
         {...props}
       >
+        {showMobileHandle ? (
+          <div
+            aria-hidden
+            className="mx-auto -mt-1 mb-1 h-1.5 w-10 rounded-full bg-muted-foreground/30 md:hidden"
+          />
+        ) : null}
+
         {children}
         {showCloseButton && (
           <DialogPrimitive.Close
@@ -125,7 +134,8 @@ function DialogFooter({ className, ...props }: React.ComponentProps<"div">) {
       data-slot="dialog-footer"
       className={cn(
         "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end",
-        "max-md:sticky max-md:bottom-0 max-md:mt-2 max-md:border-t max-md:border-border/70 max-md:bg-card/95 max-md:pb-[max(1rem,env(safe-area-inset-bottom))] max-md:pt-3 max-md:backdrop-blur-xl",
+        "max-md:sticky max-md:bottom-0 max-md:z-10 max-md:mt-auto max-md:pb-[max(1rem,env(safe-area-inset-bottom))] max-md:pt-3 max-md:backdrop-blur-xl",
+        "max-md:-mx-5 max-md:border-t max-md:border-border/70 max-md:bg-card/95 max-md:px-5",
         className
       )}
       {...props}
