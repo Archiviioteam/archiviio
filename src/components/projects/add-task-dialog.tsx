@@ -58,12 +58,60 @@ function buildReminderAt(date: string, time: string): string | null {
     return null;
   }
 
-  const reminder = new Date(`${date}T${time}`);
+  const parsedDate = parseDateFromInput(date);
+  if (!parsedDate) {
+    return null;
+  }
+
+  const reminder = new Date(`${parsedDate}T${time}`);
   if (Number.isNaN(reminder.getTime())) {
     return null;
   }
 
   return reminder.toISOString();
+}
+
+function formatDateForInput(value: string | null): string {
+  if (!value) {
+    return "";
+  }
+
+  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) {
+    return "";
+  }
+
+  const [, year, month, day] = match;
+  return `${day}/${month}/${year}`;
+}
+
+function parseDateFromInput(value: string): string | null {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  const match = trimmed.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (!match) {
+    return null;
+  }
+
+  const [, dayText, monthText, yearText] = match;
+  const day = Number(dayText);
+  const month = Number(monthText);
+  const year = Number(yearText);
+  const candidate = new Date(year, month - 1, day);
+
+  if (
+    Number.isNaN(candidate.getTime()) ||
+    candidate.getFullYear() !== year ||
+    candidate.getMonth() !== month - 1 ||
+    candidate.getDate() !== day
+  ) {
+    return null;
+  }
+
+  return `${yearText}-${monthText}-${dayText}`;
 }
 
 function parseReminderAt(value: string | null): {
@@ -80,9 +128,10 @@ function parseReminderAt(value: string | null): {
   }
 
   const pad = (part: number) => String(part).padStart(2, "0");
+  const isoDate = `${reminder.getFullYear()}-${pad(reminder.getMonth() + 1)}-${pad(reminder.getDate())}`;
 
   return {
-    date: `${reminder.getFullYear()}-${pad(reminder.getMonth() + 1)}-${pad(reminder.getDate())}`,
+    date: formatDateForInput(isoDate),
     time: `${pad(reminder.getHours())}:${pad(reminder.getMinutes())}`,
   };
 }
@@ -118,7 +167,7 @@ export function AddTaskDialog({
   const [loadingProjects, setLoadingProjects] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState("");
   const [title, setTitle] = useState("");
-  const [dueDate, setDueDate] = useState("");
+  const [dueDateInput, setDueDateInput] = useState("");
   const [urgency, setUrgency] = useState<TaskUrgencyLevel>("medium");
   const [notes, setNotes] = useState("");
   const [reminderDate, setReminderDate] = useState("");
@@ -170,7 +219,7 @@ export function AddTaskDialog({
 
     if (task) {
       setTitle(task.title);
-      setDueDate(task.due_date ?? "");
+      setDueDateInput(formatDateForInput(task.due_date));
       setUrgency(normalizeTaskUrgency(task.urgency));
       setNotes(task.notes ?? "");
       const reminder = parseReminderAt(task.reminder_at);
@@ -181,7 +230,7 @@ export function AddTaskDialog({
 
     setSelectedProjectId("");
     setTitle("");
-    setDueDate("");
+    setDueDateInput("");
     setUrgency("medium");
     setNotes("");
     setReminderDate("");
@@ -205,6 +254,16 @@ export function AddTaskDialog({
         return;
       }
 
+      const parsedDueDate = parseDateFromInput(dueDateInput);
+      if (dueDateInput.trim() && !parsedDueDate) {
+        toast.error(
+          language === "it"
+            ? "Formato data non valido. Usa gg/mm/aaaa."
+            : "Invalid date format. Use dd/mm/yyyy."
+        );
+        return;
+      }
+
       setSaving(true);
 
       const supabase = createClient();
@@ -221,7 +280,7 @@ export function AddTaskDialog({
         workspaceId,
         projectId: resolvedProjectId,
         title: trimmedTitle,
-        dueDate: dueDate || null,
+        dueDate: parsedDueDate,
         urgency,
         notes: notes.trim() || null,
         reminderAt: buildReminderAt(reminderDate, reminderTime),
@@ -261,7 +320,7 @@ export function AddTaskDialog({
       );
     },
     [
-      dueDate,
+      dueDateInput,
       isEditing,
       notes,
       onOpenChange,
@@ -398,9 +457,11 @@ export function AddTaskDialog({
             </Label>
             <Input
               id="task-deadline"
-              type="date"
-              value={dueDate}
-              onChange={(event) => setDueDate(event.target.value)}
+              type="text"
+              inputMode="numeric"
+              placeholder={language === "it" ? "gg/mm/aaaa" : "dd/mm/yyyy"}
+              value={dueDateInput}
+              onChange={(event) => setDueDateInput(event.target.value)}
               disabled={saving}
             />
           </div>
@@ -469,7 +530,9 @@ export function AddTaskDialog({
                 </Label>
                 <Input
                   id="task-reminder-date"
-                  type="date"
+                  type="text"
+                  inputMode="numeric"
+                  placeholder={language === "it" ? "gg/mm/aaaa" : "dd/mm/yyyy"}
                   value={reminderDate}
                   onChange={(event) => setReminderDate(event.target.value)}
                   disabled={saving}
