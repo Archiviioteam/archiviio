@@ -165,6 +165,7 @@ export function AddContactDialog({
             </Label>
             <Input
               id="contact-name"
+              autoComplete="name"
               placeholder={language === "it" ? "Inserisci nome" : "Enter name"}
               value={name}
               onChange={(event) => setName(event.target.value)}
@@ -205,6 +206,7 @@ export function AddContactDialog({
             </Label>
             <Input
               id="contact-company"
+              autoComplete="organization"
               placeholder={
                 language === "it" ? "Inserisci azienda" : "Enter company"
               }
@@ -219,6 +221,8 @@ export function AddContactDialog({
             <Input
               id="contact-email"
               type="email"
+              inputMode="email"
+              autoComplete="email"
               placeholder={language === "it" ? "Inserisci email" : "Enter email"}
               value={email}
               onChange={(event) => setEmail(event.target.value)}
@@ -233,6 +237,8 @@ export function AddContactDialog({
             <Input
               id="contact-phone"
               type="tel"
+              inputMode="tel"
+              autoComplete="tel"
               placeholder={
                 language === "it" ? "Inserisci telefono" : "Enter phone number"
               }

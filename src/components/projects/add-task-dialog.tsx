@@ -382,6 +382,7 @@ export function AddTaskDialog({
             </Label>
             <Input
               id="task-name"
+              autoComplete="off"
               placeholder={
                 language === "it" ? "Inserisci nome attività" : "Enter task name"
               }

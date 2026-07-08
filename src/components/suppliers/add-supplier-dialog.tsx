@@ -168,6 +168,7 @@ export function AddSupplierDialog({
             </Label>
             <Input
               id="supplier-company"
+              autoComplete="organization"
               placeholder={
                 language === "it" ? "Inserisci nome azienda" : "Enter company name"
               }
@@ -215,6 +216,7 @@ export function AddSupplierDialog({
             </Label>
             <Input
               id="supplier-contact-name"
+              autoComplete="name"
               placeholder={
                 language === "it" ? "Inserisci nome contatto" : "Enter contact name"
               }
@@ -229,6 +231,8 @@ export function AddSupplierDialog({
             <Input
               id="supplier-email"
               type="email"
+              inputMode="email"
+              autoComplete="email"
               placeholder={language === "it" ? "Inserisci email" : "Enter email"}
               value={email}
               onChange={(event) => setEmail(event.target.value)}
@@ -243,6 +247,8 @@ export function AddSupplierDialog({
             <Input
               id="supplier-phone"
               type="tel"
+              inputMode="tel"
+              autoComplete="tel"
               placeholder={
                 language === "it" ? "Inserisci telefono" : "Enter phone number"
               }
@@ -260,6 +266,7 @@ export function AddSupplierDialog({
               id="supplier-website"
               type="text"
               inputMode="url"
+              autoComplete="url"
               value={website}
               onChange={(event) => setWebsite(event.target.value)}
               disabled={saving}
