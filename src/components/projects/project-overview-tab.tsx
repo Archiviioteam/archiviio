@@ -160,7 +160,7 @@ export function ProjectOverviewTab({
   return (
     <>
       <div className={cn("flex flex-col", stack.default)}>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Card className="min-h-48">
             <CardHeader>
               <CardTitle>
@@ -172,11 +172,18 @@ export function ProjectOverviewTab({
                 className={cn(
                   "w-full text-foreground",
                   textStyle.bodyLarge,
-                  "font-medium"
+                  "font-medium leading-relaxed"
                 )}
               >
-                {[formatProjectCodeDisplay(project.code), project.name, project.location ?? "—"]
-                  .join(" · ")}
+                {formatProjectCodeDisplay(project.code)}
+                <br />
+                {project.name}
+                {project.location ? (
+                  <>
+                    <br />
+                    {project.location}
+                  </>
+                ) : null}
               </p>
 
               <div className="flex items-center gap-2">

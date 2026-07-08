@@ -79,12 +79,16 @@ export function ContactCard({
     removeMode === "unlink"
       ? `Remove ${contact.name} from project`
       : `Delete contact ${contact.name}`;
+  const company = contactField(contact.company);
+  const email = contactField(contact.email);
+  const phone = contactField(contact.phone);
 
   return (
     <Card variant={onClick ? "interactive" : "default"}>
-      <CardContent className="flex items-center gap-2 px-4 py-2.5">
+      <CardContent className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:gap-2 sm:py-2.5">
         <div
           className={cn(
+            "hidden sm:grid",
             contactRowGridClassName,
             onClick && "cursor-pointer",
             onClick && transition.hover
@@ -125,37 +129,53 @@ export function ContactCard({
             {contactField(typeLabel)}
           </span>
 
-          <span
-            className={cn(
-              textStyle.caption,
-              contactCellClassName,
-              "text-muted-foreground"
-            )}
-            title={contact.company ?? undefined}
-          >
-            {contactField(contact.company)}
+          <span className={cn(textStyle.caption, contactCellClassName, "text-muted-foreground")} title={contact.company ?? undefined}>
+            {company}
           </span>
 
-          <span
-            className={cn(
-              textStyle.caption,
-              contactCellClassName,
-              "text-muted-foreground"
-            )}
-            title={contact.email ?? undefined}
-          >
-            {contactField(contact.email)}
+          <span className={cn(textStyle.caption, contactCellClassName, "text-muted-foreground")} title={contact.email ?? undefined}>
+            {email}
           </span>
 
-          <span
-            className={cn(
-              textStyle.caption,
-              contactCellClassName,
-              "text-muted-foreground"
-            )}
-            title={contact.phone ?? undefined}
-          >
-            {contactField(contact.phone)}
+          <span className={cn(textStyle.caption, contactCellClassName, "text-muted-foreground")} title={contact.phone ?? undefined}>
+            {phone}
+          </span>
+        </div>
+
+        <div
+          className={cn(
+            "flex min-w-0 flex-1 flex-col gap-1.5 sm:hidden",
+            onClick && "cursor-pointer",
+            onClick && transition.hover
+          )}
+          onClick={onClick ? () => onClick(contact) : undefined}
+          onKeyDown={
+            onClick
+              ? (event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    onClick(contact);
+                  }
+                }
+              : undefined
+          }
+          role={onClick ? "button" : undefined}
+          tabIndex={onClick ? 0 : undefined}
+        >
+          <span className={cn(textStyle.bodyMedium, "truncate text-foreground")} title={contact.name}>
+            {contact.name}
+          </span>
+          <span className={cn(textStyle.caption, "truncate text-muted-foreground")} title={typeLabel ?? undefined}>
+            {contactField(typeLabel)}
+          </span>
+          <span className={cn(textStyle.caption, "truncate text-muted-foreground")} title={contact.company ?? undefined}>
+            {company}
+          </span>
+          <span className={cn(textStyle.caption, "truncate text-muted-foreground")} title={contact.email ?? undefined}>
+            {email}
+          </span>
+          <span className={cn(textStyle.caption, "truncate text-muted-foreground")} title={contact.phone ?? undefined}>
+            {phone}
           </span>
         </div>
 
@@ -166,6 +186,7 @@ export function ContactCard({
             size="icon"
             className={cn(
               deleteButtonClassName,
+              "self-end sm:self-auto",
               "text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
             )}
             aria-label={removeAriaLabel}

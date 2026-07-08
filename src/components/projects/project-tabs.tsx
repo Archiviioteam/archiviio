@@ -23,19 +23,19 @@ interface ProjectTabsProps {
 export function ProjectTabs({ activeTab, onTabChange }: ProjectTabsProps) {
   const language = useAppLanguage();
   return (
-    <div className="flex gap-1 overflow-x-auto">
+    <div className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1">
       {PROJECT_TABS.map((tab) => (
         <button
           key={tab.id}
           type="button"
           onClick={() => onTabChange(tab.id)}
           className={cn(
-            "shrink-0 px-4 py-2",
+            "shrink-0 whitespace-nowrap rounded-md px-3 py-2 sm:px-4",
             textStyle.body,
             transition.hover,
             activeTab === tab.id
-              ? "font-bold text-foreground"
-              : "text-muted-foreground"
+              ? "bg-muted font-semibold text-foreground"
+              : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
           )}
         >
           {language === "it"

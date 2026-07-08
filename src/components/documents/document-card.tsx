@@ -63,7 +63,7 @@ export function DocumentCard({
 
         <div
           className={cn(
-            "absolute top-2 right-2 z-10 opacity-0 transition-opacity duration-200 group-hover:opacity-100",
+            "absolute top-2 right-2 z-10 opacity-100 transition-opacity duration-200 sm:opacity-0 sm:group-hover:opacity-100",
             menuOpen && "opacity-100"
           )}
         >
@@ -114,10 +114,16 @@ export function DocumentCard({
       </div>
 
       <div className="min-w-0 px-0.5">
-        <p className={cn(textStyle.bodyMedium, "truncate text-foreground")}>
+        <p
+          className={cn(
+            textStyle.bodyMedium,
+            "line-clamp-2 break-words text-foreground sm:truncate"
+          )}
+          title={document.name}
+        >
           {document.name}
         </p>
-        <p className={cn(textStyle.caption, "text-muted-foreground")}>
+        <p className={cn(textStyle.caption, "mt-0.5 text-muted-foreground")}>
           {formatUploadDate(document.created_at)}
         </p>
       </div>

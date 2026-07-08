@@ -38,7 +38,7 @@ export function SupplierFilters({
   const companyTypeOptions = getSupplierCompanyTypeOptions(language);
 
   return (
-    <div className="flex flex-row flex-wrap items-center gap-3">
+    <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
       <SearchInput
         placeholder={
           language === "it"
@@ -47,10 +47,10 @@ export function SupplierFilters({
         }
         value={query}
         onChange={(event) => onQueryChange(event.target.value)}
-        className="min-w-0 flex-1"
+        className="min-w-0 w-full flex-1"
       />
 
-      <div className="relative shrink-0">
+      <div className="relative w-full shrink-0 sm:w-auto">
         <select
           value={companyType ?? ""}
           onChange={(event) =>
@@ -58,7 +58,7 @@ export function SupplierFilters({
               (event.target.value as SupplierCompanyType) || null
             )
           }
-          className={selectClassName}
+          className={cn(selectClassName, "w-full sm:w-auto")}
           aria-label={language === "it" ? "Filtra per categoria" : "Filter by category"}
         >
           <option value="">{language === "it" ? "Tutte le categorie" : "All categories"}</option>
@@ -74,7 +74,7 @@ export function SupplierFilters({
         />
       </div>
 
-      <Button type="button" onClick={onAddClick} className="shrink-0">
+      <Button type="button" onClick={onAddClick} className="w-full shrink-0 sm:w-auto">
         {t(language, "suppliers.addTitle")}
       </Button>
     </div>

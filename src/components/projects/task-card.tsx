@@ -106,7 +106,7 @@ export function TaskCard({
             </span>
           ) : null}
 
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
             <span
               className={cn(
                 textStyle.pageTitle,
@@ -120,7 +120,7 @@ export function TaskCard({
             <span
               className={cn(
                 textStyle.caption,
-                "shrink-0 text-muted-foreground",
+                "shrink-0 text-muted-foreground sm:text-right",
                 !task.due_date && "italic"
               )}
             >
@@ -147,7 +147,7 @@ export function TaskCard({
             )}
           </div>
 
-          <div className="flex items-start justify-between gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
             {task.notes ? (
               <p
                 className={cn(
@@ -167,7 +167,7 @@ export function TaskCard({
             <p
               className={cn(
                 textStyle.caption,
-                "shrink-0 text-right text-muted-foreground"
+                "shrink-0 text-left text-muted-foreground sm:text-right"
               )}
             >
               {task.reminder_at
