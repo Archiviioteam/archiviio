@@ -135,6 +135,7 @@ export function desktopColumnWrapperClass(
 export function appShellRootClass(isDesktop: boolean): string {
   return cn(
     "flex h-[100dvh] min-h-screen bg-background",
+    "max-md:h-[100svh] max-md:min-h-[100svh]",
     isDesktop ? radiusClipShellClass : "overflow-hidden"
   );
 }

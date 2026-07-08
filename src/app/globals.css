@@ -279,6 +279,16 @@
     font-size: 16px;
   }
 
+  /*
+   * Prevent iOS Safari from leaving the page shifted after keyboard close.
+   * Scrolling is handled by internal app containers, not by body.
+   */
+  html,
+  body {
+    height: 100%;
+    overflow: hidden;
+  }
+
   [data-dashboard-grid] {
     display: flex !important;
     flex-direction: column !important;
