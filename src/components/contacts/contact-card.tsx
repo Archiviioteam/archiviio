@@ -65,6 +65,33 @@ function contactField(value: string | null | undefined, fallback = "—") {
   return trimmed ? trimmed : fallback;
 }
 
+function normalizePhoneHref(phone: string) {
+  return phone.replace(/\s+/g, "");
+}
+
+interface ContactValueProps {
+  value: string | null | undefined;
+  href: string;
+  className: string;
+}
+
+function ContactValue({ value, href, className }: ContactValueProps) {
+  const trimmed = value?.trim();
+  if (!trimmed) {
+    return <span className={className}>—</span>;
+  }
+
+  return (
+    <a
+      href={href}
+      className={cn(className, "hover:text-foreground hover:underline")}
+      onClick={(event) => event.stopPropagation()}
+    >
+      {trimmed}
+    </a>
+  );
+}
+
 export function ContactCard({
   contact,
   onClick,
@@ -133,13 +160,25 @@ export function ContactCard({
             {company}
           </span>
 
-          <span className={cn(textStyle.caption, contactCellClassName, "text-muted-foreground")} title={contact.email ?? undefined}>
-            {email}
-          </span>
+          <ContactValue
+            value={contact.email}
+            href={`mailto:${contact.email?.trim() ?? ""}`}
+            className={cn(
+              textStyle.caption,
+              contactCellClassName,
+              "truncate text-muted-foreground"
+            )}
+          />
 
-          <span className={cn(textStyle.caption, contactCellClassName, "text-muted-foreground")} title={contact.phone ?? undefined}>
-            {phone}
-          </span>
+          <ContactValue
+            value={contact.phone}
+            href={`tel:${normalizePhoneHref(contact.phone?.trim() ?? "")}`}
+            className={cn(
+              textStyle.caption,
+              contactCellClassName,
+              "truncate text-muted-foreground"
+            )}
+          />
         </div>
 
         <div
@@ -171,12 +210,16 @@ export function ContactCard({
           <span className={cn(textStyle.caption, "truncate text-muted-foreground")} title={contact.company ?? undefined}>
             {company}
           </span>
-          <span className={cn(textStyle.caption, "truncate text-muted-foreground")} title={contact.email ?? undefined}>
-            {email}
-          </span>
-          <span className={cn(textStyle.caption, "truncate text-muted-foreground")} title={contact.phone ?? undefined}>
-            {phone}
-          </span>
+          <ContactValue
+            value={contact.email}
+            href={`mailto:${contact.email?.trim() ?? ""}`}
+            className={cn(textStyle.caption, "truncate text-muted-foreground")}
+          />
+          <ContactValue
+            value={contact.phone}
+            href={`tel:${normalizePhoneHref(contact.phone?.trim() ?? "")}`}
+            className={cn(textStyle.caption, "truncate text-muted-foreground")}
+          />
         </div>
 
         {onDelete ? (

@@ -22,35 +22,38 @@ export function Topbar() {
   return (
     <header
       className={cn(
-        "relative flex h-14 shrink-0 items-center gap-2 pt-[env(safe-area-inset-top)] sm:h-16 sm:gap-3",
+        "relative flex h-14 w-full shrink-0 items-center justify-between pt-[env(safe-area-inset-top)] sm:h-16",
         "max-md:bg-background/90 max-md:backdrop-blur-xl",
-        responsive.contentShell,
         responsive.contentPaddingX
       )}
     >
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        className={cn(radius.control, responsive.tabletDrawerOnly, "size-9 shrink-0")}
-        onClick={() => setSidebarOpen(true)}
-        aria-label={t(language, "navigation.menu")}
-      >
-        <Menu className="size-5" />
-      </Button>
+      <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className={cn(radius.control, responsive.tabletDrawerOnly, "size-9 shrink-0")}
+          onClick={() => setSidebarOpen(true)}
+          aria-label={t(language, "navigation.menu")}
+        >
+          <Menu className="size-5" />
+        </Button>
 
-      <h1
-        className={cn(
-          "min-w-0 flex-1 text-foreground",
-          "max-md:text-[17px] max-md:font-semibold",
-          textStyle.bodyMedium,
-          textStyle.truncate
-        )}
-      >
-        {pageTitle}
-      </h1>
+        <h1
+          className={cn(
+            "min-w-0 flex-1 text-foreground",
+            "max-md:text-[17px] max-md:font-semibold",
+            textStyle.bodyMedium,
+            textStyle.truncate
+          )}
+        >
+          {pageTitle}
+        </h1>
+      </div>
 
-      <SearchTrigger />
+      <div className="shrink-0">
+        <SearchTrigger />
+      </div>
     </header>
   );
 }

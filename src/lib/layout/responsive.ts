@@ -37,7 +37,7 @@ export function isPersistentSidebarViewport(): boolean {
 
 /** Reusable layout class groups (Tailwind md = 768px, lg = 1024px) */
 export const responsive = {
-  contentShell: "mx-auto w-full max-w-6xl",
+  contentShell: "w-full max-w-none",
   contentPaddingX: "px-4 sm:px-6 lg:px-8",
   contentPaddingY: "py-4 sm:py-6 lg:py-8",
   contentPadding: "p-4 sm:p-6 lg:p-8",

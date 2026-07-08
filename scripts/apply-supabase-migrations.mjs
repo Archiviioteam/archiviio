@@ -106,6 +106,11 @@ async function checkSchemaViaPg(client) {
     supplier_details:
       (await pgColumnExists(client, "suppliers", "company")) &&
       (await pgColumnExists(client, "suppliers", "company_types")),
+    supplier_material_library: await pgColumnExists(
+      client,
+      "suppliers",
+      "in_material_library"
+    ),
     project_suppliers: await pgTableExists(client, "project_suppliers"),
     workspace_notes: await pgTableExists(client, "workspace_notes"),
     workspace_settings:
@@ -190,6 +195,13 @@ async function checkSchemaViaApi(supabase) {
         .limit(0);
       return !error;
     },
+    supplier_material_library: async () => {
+      const { error } = await supabase
+        .from("suppliers")
+        .select("in_material_library")
+        .limit(0);
+      return !error;
+    },
     project_suppliers: async () => {
       const { error } = await supabase
         .from("project_suppliers")
@@ -262,6 +274,9 @@ function migrationsForStatus(status) {
     needed.add("018_workspace_nomenclature_rules.sql");
   }
   if (!status.supplier_details) needed.add("019_supplier_details.sql");
+  if (!status.supplier_material_library) {
+    needed.add("028_supplier_material_library.sql");
+  }
   if (!status.project_suppliers) needed.add("020_project_suppliers.sql");
   if (!status.workspace_notes) needed.add("021_workspace_notes.sql");
   if (!status.workspace_settings || !status.user_profile_settings) {

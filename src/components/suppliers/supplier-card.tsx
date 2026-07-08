@@ -31,13 +31,23 @@ function normalizeWebsiteHref(website: string): string {
   return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
 }
 
+function normalizePhoneHref(phone: string): string {
+  return phone.replace(/\s+/g, "");
+}
+
 interface ContactRowProps {
   icon: typeof Mail;
   value: string;
   href?: string;
+  openInNewTab?: boolean;
 }
 
-function ContactRow({ icon: Icon, value, href }: ContactRowProps) {
+function ContactRow({
+  icon: Icon,
+  value,
+  href,
+  openInNewTab = false,
+}: ContactRowProps) {
   const content = (
     <>
       <Icon className="size-4 shrink-0 text-muted-foreground" strokeWidth={1.5} />
@@ -51,8 +61,8 @@ function ContactRow({ icon: Icon, value, href }: ContactRowProps) {
     return (
       <a
         href={href}
-        target="_blank"
-        rel="noreferrer"
+        target={openInNewTab ? "_blank" : undefined}
+        rel={openInNewTab ? "noreferrer" : undefined}
         className="flex min-w-0 items-center gap-2 hover:text-foreground"
         onClick={(event) => event.stopPropagation()}
       >
@@ -162,13 +172,16 @@ export function SupplierCard({
 
       {(email || phone || website) && (
         <div className="flex flex-col gap-2.5">
-          {email ? <ContactRow icon={Mail} value={email} /> : null}
-          {phone ? <ContactRow icon={Phone} value={phone} /> : null}
+          {email ? <ContactRow icon={Mail} value={email} href={`mailto:${email}`} /> : null}
+          {phone ? (
+            <ContactRow icon={Phone} value={phone} href={`tel:${normalizePhoneHref(phone)}`} />
+          ) : null}
           {website ? (
             <ContactRow
               icon={Globe}
               value={formatWebsiteDisplay(website)}
               href={normalizeWebsiteHref(website)}
+              openInNewTab
             />
           ) : null}
         </div>

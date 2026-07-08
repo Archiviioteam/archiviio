@@ -77,7 +77,7 @@ export function DashboardNotesComposer() {
 
   return (
     <form
-      className="flex min-h-0 w-full max-w-md flex-1 flex-col gap-3"
+      className="flex min-h-0 w-full flex-1 flex-col gap-3"
       onSubmit={(event) => void handleSubmit(event)}
     >
       <Input

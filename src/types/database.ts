@@ -91,6 +91,13 @@ export type SupplierCompanyType =
   | "trimmings"
   | "metals"
   | "wallpaper"
+  | "laminates"
+  | "finishes"
+  | "leather_eco"
+  | "supplies"
+  | "marble"
+  | "carpets"
+  | "handles"
   | "other";
 
 export interface Supplier {

@@ -1,23 +1,6 @@
 import type { AppLanguage } from "@/lib/settings/preferences-storage";
 import type { SupplierCompanyType } from "@/types/database";
 
-const SUPPLIER_COMPANY_TYPE_ORDER: SupplierCompanyType[] = [
-  "lighting",
-  "gres",
-  "wood",
-  "bathroom",
-  "flooring",
-  "furniture",
-  "kitchens",
-  "outdoor",
-  "curtains",
-  "upholstery",
-  "trimmings",
-  "metals",
-  "wallpaper",
-  "other",
-];
-
 const SUPPLIER_COMPANY_TYPE_LABELS: Record<
   AppLanguage,
   Record<SupplierCompanyType, string>
@@ -36,6 +19,13 @@ const SUPPLIER_COMPANY_TYPE_LABELS: Record<
     trimmings: "Trimmings",
     metals: "Metals",
     wallpaper: "Wallpaper",
+    laminates: "Laminates",
+    finishes: "Finishes",
+    leather_eco: "Leather & eco",
+    supplies: "Supplies",
+    marble: "Marble",
+    carpets: "Carpets",
+    handles: "Handles",
     other: "Other",
   },
   it: {
@@ -52,15 +42,30 @@ const SUPPLIER_COMPANY_TYPE_LABELS: Record<
     trimmings: "Passamanerie",
     metals: "Metalli",
     wallpaper: "Carte da parati",
+    laminates: "Laminati",
+    finishes: "Finiture",
+    leather_eco: "Pelle e eco",
+    supplies: "Forniture",
+    marble: "Marmi",
+    carpets: "Tappeti",
+    handles: "Maniglie",
     other: "Altro",
   },
 };
 
+const ALL_SUPPLIER_COMPANY_TYPES = Object.keys(
+  SUPPLIER_COMPANY_TYPE_LABELS.en
+) as SupplierCompanyType[];
+
 export function getSupplierCompanyTypeOptions(language: AppLanguage = "en") {
-  return SUPPLIER_COMPANY_TYPE_ORDER.map((value) => ({
+  return ALL_SUPPLIER_COMPANY_TYPES.map((value) => ({
     value,
     label: SUPPLIER_COMPANY_TYPE_LABELS[language][value],
-  }));
+  })).sort((a, b) =>
+    a.label.localeCompare(b.label, language === "it" ? "it" : "en", {
+      sensitivity: "base",
+    })
+  );
 }
 
 /** @deprecated Use `getSupplierCompanyTypeOptions(language)` instead. */
