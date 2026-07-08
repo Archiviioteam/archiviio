@@ -15,10 +15,6 @@ function normalizeUpdateRoleError(message: string): string {
     return "Ruolo non supportato";
   }
 
-  if (lower.includes("only workspace owners")) {
-    return "Solo il proprietario dello spazio può cambiare i ruoli";
-  }
-
   if (lower.includes("cannot change your own role")) {
     return "Non puoi cambiare il tuo ruolo";
   }

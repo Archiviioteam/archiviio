@@ -58,13 +58,6 @@ export async function PATCH(
     return NextResponse.json({ error: "Current member not found" }, { status: 403 });
   }
 
-  if (currentMember.role !== "owner") {
-    return NextResponse.json(
-      { error: "Only workspace owners can change roles" },
-      { status: 403 }
-    );
-  }
-
   const { data: targetMember, error: targetMemberError } = await supabase
     .from("users")
     .select("id,workspace_id,role")
