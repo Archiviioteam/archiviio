@@ -74,22 +74,17 @@ export function MobileMoreSheet({ open, onOpenChange }: MobileMoreSheetProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        showCloseButton={false}
-        className={cn(
-          "inset-x-0 top-auto bottom-0 m-0 w-full max-w-none rounded-b-none rounded-t-[24px] border-0 p-0",
-          "max-h-[min(72dvh,560px)] bg-background/94 backdrop-blur-2xl"
-        )}
+        className="max-h-[min(72dvh,560px)] max-w-md bg-card/95 backdrop-blur-xl"
       >
-        <div className="px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3">
-          <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-muted-foreground/30" />
-          <DialogHeader className="px-1 pb-2">
-            <DialogTitle>{t(language, "navigation.more")}</DialogTitle>
-            <DialogDescription className="sr-only">
-              {t(language, "navigation.moreDescription")}
-            </DialogDescription>
-          </DialogHeader>
+        <DialogHeader className="pb-1">
+          <DialogTitle>{t(language, "navigation.more")}</DialogTitle>
+          <DialogDescription className="sr-only">
+            {t(language, "navigation.moreDescription")}
+          </DialogDescription>
+        </DialogHeader>
 
-          <nav className="flex flex-col gap-1 pb-1">
+        <nav className="rounded-xl border border-border/70 bg-white p-2 shadow-sm">
+          <div className="flex flex-col gap-1">
             {items.map((item) => (
               <MoreNavLink
                 key={item.href}
@@ -108,8 +103,8 @@ export function MobileMoreSheet({ open, onOpenChange }: MobileMoreSheetProps) {
               <LogOut className="h-5 w-5 shrink-0" />
               <span className="truncate">{t(language, "common.signOut")}</span>
             </button>
-          </nav>
-        </div>
+          </div>
+        </nav>
       </DialogContent>
     </Dialog>
   );
