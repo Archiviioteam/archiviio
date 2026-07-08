@@ -195,7 +195,7 @@ export function AddTaskDialog({
       const trimmedTitle = title.trim();
       if (!trimmedTitle) {
         toast.error(
-          language === "it" ? "Il nome attività e obbligatorio." : "Task name is required."
+          language === "it" ? "Il nome attività è obbligatorio." : "Task name is required."
         );
         return;
       }

@@ -24,7 +24,7 @@ export function ProjectTabs({ activeTab, onTabChange }: ProjectTabsProps) {
   const language = useAppLanguage();
   const tabLabelById: Record<ProjectTabId, string> = {
     overview: language === "it" ? "Panoramica" : "Overview",
-    tasks: language === "it" ? "Attivita" : "Tasks",
+    tasks: language === "it" ? "Attività" : "Tasks",
     documents: language === "it" ? "Elaborati" : "Deliverables",
     contacts: language === "it" ? "Contatti" : "Contacts",
     suppliers: language === "it" ? "Fornitori" : "Suppliers",

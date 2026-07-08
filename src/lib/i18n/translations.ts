@@ -701,7 +701,7 @@ const translations: Record<AppLanguage, Record<TranslationKey, string>> = {
     "notes.emptyTitle": "Nessuna nota",
     "notes.deleteTitle": "Elimina nota",
     "notes.deleteDescription":
-      "Eliminare \"{title}\"? Questa azione non puo essere annullata.",
+      "Eliminare \"{title}\"? Questa azione non può essere annullata.",
     "notes.cancel": "Annulla",
     "notes.deleting": "Eliminazione...",
     "notes.delete": "Elimina",
@@ -746,18 +746,18 @@ const translations: Record<AppLanguage, Record<TranslationKey, string>> = {
     "contacts.editTitle": "Modifica contatto",
     "contacts.deleteTitle": "Elimina contatto",
     "contacts.deleteDescription":
-      "Eliminare {name}? Questa azione non puo essere annullata.",
+      "Eliminare {name}? Questa azione non può essere annullata.",
     "contacts.deletedToast": "{name} eliminato",
-    "contacts.nameRequired": "Il nome e obbligatorio.",
+    "contacts.nameRequired": "Il nome è obbligatorio.",
     "contacts.createdToast": "Contatto creato",
     "contacts.updatedToast": "Contatto aggiornato",
     "suppliers.addTitle": "Aggiungi fornitore",
     "suppliers.editTitle": "Modifica fornitore",
     "suppliers.deleteTitle": "Elimina fornitore",
     "suppliers.deleteDescription":
-      "Eliminare {name}? Questa azione non puo essere annullata.",
+      "Eliminare {name}? Questa azione non può essere annullata.",
     "suppliers.deletedToast": "{name} eliminato",
-    "suppliers.companyRequired": "L'azienda e obbligatoria.",
+    "suppliers.companyRequired": "L'azienda è obbligatoria.",
     "suppliers.createdToast": "Fornitore creato",
     "suppliers.updatedToast": "Fornitore aggiornato",
     "nomenclature.addTitle": "Aggiungi regola",
@@ -768,9 +768,9 @@ const translations: Record<AppLanguage, Record<TranslationKey, string>> = {
       "Aggiorna titolo e note per questa regola di nomenclatura.",
     "nomenclature.deleteTitle": "Elimina regola",
     "nomenclature.deleteDescription":
-      "Eliminare \"{name}\"? Questa azione non puo essere annullata.",
+      "Eliminare \"{name}\"? Questa azione non può essere annullata.",
     "nomenclature.deletedToast": "\"{name}\" eliminata",
-    "nomenclature.titleRequired": "Il titolo e obbligatorio.",
+    "nomenclature.titleRequired": "Il titolo è obbligatorio.",
     "nomenclature.createdToast": "Regola creata",
     "nomenclature.updatedToast": "Regola aggiornata",
     "nomenclature.saveError": "Salvataggio regola non riuscito",
@@ -790,7 +790,7 @@ const translations: Record<AppLanguage, Record<TranslationKey, string>> = {
     "documents.uploadedToast": "{name} caricato",
     "documents.deleteTitle": "Elimina elaborato",
     "documents.deleteDescription":
-      "Eliminare {name}? Verranno rimossi il file e tutte le versioni salvate. Questa azione non puo essere annullata.",
+      "Eliminare {name}? Verranno rimossi il file e tutte le versioni salvate. Questa azione non può essere annullata.",
     "documents.deletedToast": "{name} eliminato",
     "elaborati.uploadTitle": "Carica elaborato",
     "elaborati.uploadDescription":
@@ -798,7 +798,7 @@ const translations: Record<AppLanguage, Record<TranslationKey, string>> = {
     "elaborati.uploadedToast": "{name} caricato",
     "elaborati.deleteTitle": "Elimina elaborato",
     "elaborati.deleteDescription":
-      "Eliminare {name}? Verranno rimossi il file e tutte le versioni salvate. Questa azione non puo essere annullata.",
+      "Eliminare {name}? Verranno rimossi il file e tutte le versioni salvate. Questa azione non può essere annullata.",
     "elaborati.deletedToast": "{name} eliminato",
     "contacts.loading": "Caricamento contatti...",
     "contacts.emptyTitle": "Nessun contatto",
@@ -838,7 +838,7 @@ const translations: Record<AppLanguage, Record<TranslationKey, string>> = {
     "settings.profile.sectionTitle": "Informazioni personali",
     "settings.profile.photoLabel": "Foto profilo",
     "settings.profile.photoHint": "JPG, PNG, WebP o GIF. Max 5 MB.",
-    "settings.profile.firstNameRequired": "Il nome e obbligatorio",
+    "settings.profile.firstNameRequired": "Il nome è obbligatorio",
     "settings.profile.emailInvalid": "Inserisci un indirizzo email valido",
     "settings.profile.phoneInvalid": "Inserisci un numero di telefono valido",
     "settings.profile.emailConfirm":
@@ -856,7 +856,7 @@ const translations: Record<AppLanguage, Record<TranslationKey, string>> = {
     "settings.workspace.logoLabel": "Logo studio",
     "settings.workspace.logoHint":
       "Le immagini quadrate funzionano meglio. Max 5 MB.",
-    "settings.workspace.nameRequired": "Il nome workspace e obbligatorio",
+    "settings.workspace.nameRequired": "Il nome workspace è obbligatorio",
     "settings.workspace.emailInvalid": "Inserisci un indirizzo email valido",
     "settings.workspace.phoneInvalid": "Inserisci un numero di telefono valido",
     "settings.workspace.websiteInvalid": "Inserisci un URL valido",
@@ -867,7 +867,7 @@ const translations: Record<AppLanguage, Record<TranslationKey, string>> = {
     "settings.workspace.code": "Codice workspace",
     "settings.workspace.codeHint": "Riferimento interno per il tuo studio.",
     "settings.workspace.address": "Indirizzo",
-    "settings.workspace.city": "Citta",
+    "settings.workspace.city": "Città",
     "settings.workspace.country": "Paese",
     "settings.workspace.website": "Sito web",
     "settings.workspace.websitePlaceholder": "www.studio.com",
@@ -937,7 +937,7 @@ const translations: Record<AppLanguage, Record<TranslationKey, string>> = {
     "auth.authCallbackFailed":
       "Link di accesso scaduto o non valido. Riprova ad accedere.",
     "auth.emailLinkExpired":
-      "Il link di conferma e scaduto. Accedi con email e password, oppure crea un nuovo account.",
+      "Il link di conferma è scaduto. Accedi con email e password, oppure crea un nuovo account.",
     "auth.workspaceSetupFailed":
       "Impossibile configurare il workspace. Riprova ad accedere.",
     "auth.emailNotFound":
@@ -954,7 +954,7 @@ const translations: Record<AppLanguage, Record<TranslationKey, string>> = {
     "auth.confirmPassword": "Conferma password",
     "auth.passwordMismatch": "Le password non coincidono",
     "auth.passwordMinLength": "La password deve avere almeno 8 caratteri",
-    "auth.alreadyHaveAccount": "Hai gia un account?",
+    "auth.alreadyHaveAccount": "Hai già un account?",
     "auth.signInLink": "Accedi",
     "auth.accountCreated": "Account creato",
     "auth.checkEmail": "Controlla la posta per confermare il tuo account.",

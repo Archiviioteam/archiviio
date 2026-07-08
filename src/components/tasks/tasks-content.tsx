@@ -73,7 +73,7 @@ export function TasksContent() {
     if (!task.project_id) {
       toast.error(
         language === "it"
-          ? "Questa attività non e collegata a un progetto."
+          ? "Questa attività non è collegata a un progetto."
           : "This task is not linked to a project."
       );
       return;
@@ -111,7 +111,7 @@ export function TasksContent() {
     if (!task.project_id) {
       toast.error(
         language === "it"
-          ? "Questa attività non e collegata a un progetto."
+          ? "Questa attività non è collegata a un progetto."
           : "This task is not linked to a project."
       );
       return;

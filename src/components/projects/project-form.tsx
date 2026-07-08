@@ -86,7 +86,7 @@ export function ProjectForm({ project, onSaved, onCancel }: ProjectFormProps) {
     const trimmedCode = code.trim();
     if (!trimmedCode) {
       setError(
-        language === "it" ? "Il codice progetto e obbligatorio." : "Project code is required."
+        language === "it" ? "Il codice progetto è obbligatorio." : "Project code is required."
       );
       return;
     }
@@ -202,7 +202,7 @@ export function ProjectForm({ project, onSaved, onCancel }: ProjectFormProps) {
 
       {locationSupported ? (
         <div className="flex flex-col gap-2">
-          <Label htmlFor="location">{language === "it" ? "Localita" : "Location"}</Label>
+          <Label htmlFor="location">{language === "it" ? "Località" : "Location"}</Label>
           <Input
             id="location"
             value={location}
@@ -213,7 +213,7 @@ export function ProjectForm({ project, onSaved, onCancel }: ProjectFormProps) {
       ) : locationSupported === false ? (
         <p className={cn(textStyle.caption, "text-muted-foreground")}>
           {language === "it"
-            ? "La localita sara disponibile dopo la migration 013 su Supabase."
+            ? "La località sarà disponibile dopo la migration 013 su Supabase."
             : "Location is unavailable until database migration 013 is applied in Supabase."}
         </p>
       ) : null}
