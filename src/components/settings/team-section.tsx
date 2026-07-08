@@ -5,6 +5,7 @@ import { Users } from "lucide-react";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { removeWorkspaceMember } from "@/lib/settings/remove-workspace-member";
+import { updateWorkspaceMemberRole } from "@/lib/settings/update-workspace-member-role";
 import { TEAM_FEATURES_ENABLED } from "@/lib/settings/constants";
 import { t } from "@/lib/i18n/translations";
 import { useAppLanguage } from "@/lib/settings/language";
@@ -68,6 +69,9 @@ export function TeamSection() {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [removeTarget, setRemoveTarget] = useState<User | null>(null);
   const [removing, setRemoving] = useState(false);
+  const [roleTarget, setRoleTarget] = useState<User | null>(null);
+  const [roleChoice, setRoleChoice] = useState<MemberRole | "other">("member");
+  const [updatingRole, setUpdatingRole] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -92,7 +96,7 @@ export function TeamSection() {
             .from("workspace_invitations")
             .select("id,email,status")
             .eq("workspace_id", workspaceId)
-            .in("status", ["pending", "accepted"])
+            .eq("status", "pending")
             .order("created_at", { ascending: false });
 
           if (!cancelled) {
@@ -157,6 +161,45 @@ export function TeamSection() {
         : "Member removed from workspace"
     );
     setRemoveTarget(null);
+  }
+
+  async function handleUpdateRole() {
+    if (!roleTarget) {
+      return;
+    }
+
+    if (roleChoice === "other") {
+      toast.error(
+        language === "it"
+          ? "Il ruolo Altro non è ancora disponibile"
+          : "The Other role is not available yet"
+      );
+      return;
+    }
+
+    if (roleChoice === roleTarget.role) {
+      setRoleTarget(null);
+      return;
+    }
+
+    setUpdatingRole(true);
+    const result = await updateWorkspaceMemberRole(roleTarget.id, roleChoice);
+    setUpdatingRole(false);
+
+    if (!result.ok) {
+      toast.error(result.error);
+      return;
+    }
+
+    setMembers((current) =>
+      current.map((member) =>
+        member.id === roleTarget.id ? { ...member, role: roleChoice } : member
+      )
+    );
+    toast.success(
+      language === "it" ? "Ruolo aggiornato" : "Role updated"
+    );
+    setRoleTarget(null);
   }
 
   const showEmptyState = !TEAM_FEATURES_ENABLED;
@@ -228,6 +271,7 @@ export function TeamSection() {
               last_name: member.last_name ?? names.lastName,
             });
             const canRemove = member.id !== currentUserId && member.role !== "owner";
+            const canEditRole = member.id !== currentUserId;
 
             return (
               <li
@@ -248,7 +292,19 @@ export function TeamSection() {
                     {member.email}
                   </p>
                 </div>
-                <Badge variant="secondary">{roleLabel(member.role, language)}</Badge>
+                <button
+                  type="button"
+                  className="rounded-sm"
+                  onClick={() => {
+                    if (!canEditRole) {
+                      return;
+                    }
+                    setRoleChoice(member.role);
+                    setRoleTarget(member);
+                  }}
+                >
+                  <Badge variant="secondary">{roleLabel(member.role, language)}</Badge>
+                </button>
                 {canRemove ? (
                   <Button
                     type="button"
@@ -302,6 +358,63 @@ export function TeamSection() {
                 : language === "it"
                   ? "Elimina"
                   : "Remove"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={roleTarget !== null}
+        onOpenChange={(open) => {
+          if (!open && !updatingRole) {
+            setRoleTarget(null);
+          }
+        }}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {language === "it" ? "Ruolo membro" : "Member role"}
+            </DialogTitle>
+            <DialogDescription>
+              {language === "it"
+                ? `Seleziona il ruolo per ${roleTarget?.email ?? "questo utente"}.`
+                : `Select the role for ${roleTarget?.email ?? "this member"}.`}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <label className={cn(textStyle.caption, "text-muted-foreground")}>
+              {language === "it" ? "Ruolo" : "Role"}
+            </label>
+            <select
+              value={roleChoice}
+              onChange={(event) =>
+                setRoleChoice(event.target.value as MemberRole | "other")
+              }
+              disabled={updatingRole}
+              className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <option value="owner">{language === "it" ? "Proprietario" : "Owner"}</option>
+              <option value="member">{language === "it" ? "Membro" : "Member"}</option>
+              <option value="other">{language === "it" ? "Altro" : "Other"}</option>
+            </select>
+          </div>
+          <DialogFooter className="flex flex-row justify-end gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setRoleTarget(null)}
+              disabled={updatingRole}
+            >
+              {t(language, "common.cancel")}
+            </Button>
+            <Button onClick={() => void handleUpdateRole()} disabled={updatingRole}>
+              {updatingRole
+                ? language === "it"
+                  ? "Salvataggio..."
+                  : "Saving..."
+                : language === "it"
+                  ? "Salva"
+                  : "Save"}
             </Button>
           </DialogFooter>
         </DialogContent>
