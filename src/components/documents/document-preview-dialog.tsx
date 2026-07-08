@@ -9,6 +9,7 @@ import {
   isImageDocument,
   isPdfDocument,
 } from "@/lib/documents/document-utils";
+import { useIsMobile } from "@/lib/layout/use-is-mobile";
 import type { Document } from "@/types/database";
 
 interface DocumentPreviewDialogProps {
@@ -24,6 +25,7 @@ export function DocumentPreviewDialog({
   open,
   onOpenChange,
 }: DocumentPreviewDialogProps) {
+  const isMobile = useIsMobile();
   const name = document?.name ?? "";
   const fileType = document?.file_type ?? null;
   const isImage = isImageDocument(fileType);
@@ -33,11 +35,11 @@ export function DocumentPreviewDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         showCloseButton
-        className="flex h-[95vh] max-h-[95vh] w-[95vw] max-w-[95vw] flex-col gap-0 overflow-hidden bg-background p-0"
+        className="flex h-[100dvh] max-h-[100dvh] w-[100vw] max-w-[100vw] flex-col gap-0 overflow-hidden bg-background p-0 sm:h-[95vh] sm:max-h-[95vh] sm:w-[95vw] sm:max-w-[95vw]"
       >
         <DialogTitle className="sr-only">{name}</DialogTitle>
 
-        <div className="px-4 py-3">
+        <div className="px-4 py-3 pr-12">
           <p className="truncate text-sm font-medium text-foreground">{name}</p>
         </div>
 
@@ -56,11 +58,27 @@ export function DocumentPreviewDialog({
               />
             </div>
           ) : isPdf ? (
-            <iframe
-              src={url}
-              title={name}
-              className="size-full border-0"
-            />
+            isMobile ? (
+              <div className="m-auto flex max-w-sm flex-col items-center gap-3 px-5 text-center">
+                <p className="text-sm text-muted-foreground">
+                  Anteprima PDF non ottimale su mobile.
+                </p>
+                <a
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground"
+                >
+                  Apri PDF
+                </a>
+              </div>
+            ) : (
+              <iframe
+                src={url}
+                title={name}
+                className="size-full border-0"
+              />
+            )
           ) : null}
         </div>
       </DialogContent>
