@@ -45,7 +45,7 @@ export const responsive = {
     "pb-[max(var(--spacing-6),env(safe-area-inset-bottom))]",
   /** Extra bottom inset for the fixed mobile tab bar (phones only). */
   mobileBottomNavInset:
-    "max-md:pb-[calc(5.4rem+env(safe-area-inset-bottom))] md:pb-[max(var(--spacing-6),env(safe-area-inset-bottom))]",
+    "max-md:pb-[calc(7.4rem+env(safe-area-inset-bottom))] md:pb-[max(var(--spacing-6),env(safe-area-inset-bottom))]",
   pageHeader:
     "flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between lg:items-center",
   overlayOnly: "lg:hidden",

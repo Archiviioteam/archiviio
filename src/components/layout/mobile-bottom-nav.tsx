@@ -34,8 +34,8 @@ export function MobileBottomNav() {
       >
         <div
           className={cn(
-            "pointer-events-auto mx-auto flex h-14 max-w-md items-stretch justify-around px-2",
-            "rounded-[20px] border border-white/60 bg-background/85 shadow-[0_8px_28px_rgba(15,23,42,0.14)] backdrop-blur-2xl"
+            "pointer-events-auto mx-auto flex h-14 w-full max-w-md items-stretch justify-around p-1",
+            "rounded-full border border-white/60 bg-background/88 shadow-[0_8px_28px_rgba(15,23,42,0.14)] backdrop-blur-2xl"
           )}
         >
           {tabs.map((tab) => {
@@ -52,7 +52,7 @@ export function MobileBottomNav() {
                   aria-current={isActive ? "page" : undefined}
                   className={cn(
                     "flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 px-1",
-                    radius.control,
+                    "rounded-full",
                     "transition-all duration-200 active:scale-95",
                     isActive
                       ? "bg-foreground/10 text-foreground"
@@ -72,7 +72,7 @@ export function MobileBottomNav() {
                 aria-current={isActive ? "page" : undefined}
                 className={cn(
                   "flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 px-1",
-                  radius.control,
+                  "rounded-full",
                   "transition-all duration-200 active:scale-95",
                   isActive
                     ? "bg-foreground/10 text-foreground"
