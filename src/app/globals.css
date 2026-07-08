@@ -267,12 +267,12 @@
 
 
 
-/* Dashboard: single-column stack on phone/tablet, 2×2 grid only on desktop. */
-@media (max-width: 1023px) {
+/* Dashboard iPhone layout and visual polish (mobile only). */
+@media (max-width: 767px) {
   [data-dashboard-grid] {
     display: flex !important;
     flex-direction: column !important;
-    gap: 0.75rem;
+    gap: 0.8rem;
     width: 100%;
     height: auto !important;
     min-height: 0;
@@ -289,6 +289,12 @@
   [data-dashboard-grid] .dashboard-panel-list {
     max-height: min(40dvh, 280px);
     overflow-y: auto;
+  }
+
+  [data-dashboard-grid] > [data-dashboard-panel] {
+    border-color: color-mix(in oklab, var(--border) 80%, white 20%);
+    background: color-mix(in oklab, var(--card) 92%, white 8%);
+    box-shadow: 0 8px 24px oklch(0.18 0.006 265 / 0.09);
   }
 }
 

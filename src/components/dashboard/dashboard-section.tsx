@@ -39,19 +39,19 @@ export function DashboardSection({
     >
       <CardHeader className={dashboardPanelHeaderClass}>
         <div className={cn("flex min-w-0 flex-1 flex-col", stack.compact)}>
-          <CardTitle className={cn("text-body-lg sm:text-heading")}>
+          <CardTitle className={cn("text-body-lg sm:text-heading", textStyle.truncate)}>
             {title}
           </CardTitle>
         </div>
         {action?.href ? (
-          <Button variant="outline" size="sm" className="w-full shrink-0 sm:w-auto" asChild>
+          <Button variant="outline" size="sm" className="shrink-0" asChild>
             <Link href={action.href}>{action.label}</Link>
           </Button>
         ) : action?.onClick ? (
           <Button
             variant="outline"
             size="sm"
-            className="w-full shrink-0 sm:w-auto"
+            className="shrink-0"
             type="button"
             onClick={action.onClick}
           >

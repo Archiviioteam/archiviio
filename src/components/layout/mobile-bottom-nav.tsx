@@ -28,11 +28,16 @@ export function MobileBottomNav() {
         aria-label={t(language, "navigation.bottomNavAria")}
         className={cn(
           responsive.phoneOnly,
-          "fixed inset-x-0 bottom-0 z-50 border-t border-border/80 bg-background/90 backdrop-blur-xl",
-          "pb-[env(safe-area-inset-bottom)]"
+          "fixed inset-x-0 bottom-0 z-50",
+          "pointer-events-none px-3 pb-[max(0.6rem,env(safe-area-inset-bottom))]"
         )}
       >
-        <div className="mx-auto flex h-14 max-w-lg items-stretch justify-around px-2">
+        <div
+          className={cn(
+            "pointer-events-auto mx-auto flex h-14 max-w-md items-stretch justify-around px-2",
+            "rounded-[20px] border border-white/60 bg-background/85 shadow-[0_8px_28px_rgba(15,23,42,0.14)] backdrop-blur-2xl"
+          )}
+        >
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive =
@@ -50,7 +55,7 @@ export function MobileBottomNav() {
                     radius.control,
                     "transition-colors",
                     isActive
-                      ? "text-primary"
+                      ? "text-foreground"
                       : "text-muted-foreground active:text-foreground"
                   )}
                 >
@@ -70,7 +75,7 @@ export function MobileBottomNav() {
                   radius.control,
                   "transition-colors",
                   isActive
-                    ? "text-primary"
+                    ? "text-foreground"
                     : "text-muted-foreground active:text-foreground"
                 )}
               >

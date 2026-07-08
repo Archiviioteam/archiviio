@@ -22,7 +22,8 @@ export function Topbar() {
   return (
     <header
       className={cn(
-        "relative flex h-14 shrink-0 items-center gap-2 bg-background pt-[env(safe-area-inset-top)] sm:h-16 sm:gap-3",
+        "relative flex h-14 shrink-0 items-center gap-2 pt-[env(safe-area-inset-top)] sm:h-16 sm:gap-3",
+        "max-md:bg-background/90 max-md:backdrop-blur-xl",
         responsive.contentShell,
         responsive.contentPaddingX
       )}
@@ -41,6 +42,7 @@ export function Topbar() {
       <h1
         className={cn(
           "min-w-0 flex-1 text-foreground",
+          "max-md:text-[17px] max-md:font-semibold",
           textStyle.bodyMedium,
           textStyle.truncate
         )}

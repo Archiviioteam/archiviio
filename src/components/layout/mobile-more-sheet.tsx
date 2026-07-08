@@ -76,12 +76,12 @@ export function MobileMoreSheet({ open, onOpenChange }: MobileMoreSheetProps) {
       <DialogContent
         showCloseButton={false}
         className={cn(
-          "inset-x-0 top-auto bottom-0 m-0 w-full max-w-none rounded-b-none rounded-t-[22px] border-0 p-0",
-          "max-h-[min(70dvh,520px)]"
+          "inset-x-0 top-auto bottom-0 m-0 w-full max-w-none rounded-b-none rounded-t-[24px] border-0 p-0",
+          "max-h-[min(72dvh,560px)] bg-background/94 backdrop-blur-2xl"
         )}
       >
         <div className="px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3">
-          <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-muted" />
+          <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-muted-foreground/30" />
           <DialogHeader className="px-1 pb-2">
             <DialogTitle>{t(language, "navigation.more")}</DialogTitle>
             <DialogDescription className="sr-only">
@@ -89,7 +89,7 @@ export function MobileMoreSheet({ open, onOpenChange }: MobileMoreSheetProps) {
             </DialogDescription>
           </DialogHeader>
 
-          <nav className="flex flex-col gap-1">
+          <nav className="flex flex-col gap-1 pb-1">
             {items.map((item) => (
               <MoreNavLink
                 key={item.href}
