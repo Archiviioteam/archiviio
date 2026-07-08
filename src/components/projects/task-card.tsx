@@ -27,12 +27,6 @@ function formatNumericDate(value: string): string {
   return `${padDatePart(date.getDate())}/${padDatePart(date.getMonth() + 1)}/${date.getFullYear()}`;
 }
 
-function formatReminderAt(value: string, language: "en" | "it"): string {
-  const date = new Date(value);
-
-  return `${t(language, "tasks.alertPrefix")}${padDatePart(date.getDate())}/${padDatePart(date.getMonth() + 1)}/${date.getFullYear()} ${padDatePart(date.getHours())}:${padDatePart(date.getMinutes())}`;
-}
-
 interface TaskCardProps {
   task: Task;
   projectLabel?: string;
@@ -163,17 +157,6 @@ export function TaskCard({
             ) : (
               <span className="min-w-0 flex-1" />
             )}
-
-            <p
-              className={cn(
-                textStyle.caption,
-                "shrink-0 text-left text-muted-foreground sm:text-right"
-              )}
-            >
-              {task.reminder_at
-                ? formatReminderAt(task.reminder_at, language)
-                : t(language, "tasks.noAlert")}
-            </p>
           </div>
         </div>
       </CardContent>

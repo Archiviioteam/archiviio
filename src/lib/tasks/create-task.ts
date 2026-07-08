@@ -14,7 +14,6 @@ export interface CreateTaskInput {
   dueDate?: string | null;
   urgency?: TaskUrgency | null;
   notes?: string | null;
-  reminderAt?: string | null;
 }
 
 export async function createTask({
@@ -25,7 +24,6 @@ export async function createTask({
   dueDate = null,
   urgency = null,
   notes = null,
-  reminderAt = null,
 }: CreateTaskInput): Promise<CreateTaskResult> {
   const trimmedTitle = title.trim();
   const trimmedNotes = notes?.trim() || null;
@@ -44,7 +42,6 @@ export async function createTask({
       due_date: dueDate || null,
       urgency: urgency || null,
       notes: trimmedNotes,
-      reminder_at: reminderAt || null,
       tags: [],
     })
     .select("*")

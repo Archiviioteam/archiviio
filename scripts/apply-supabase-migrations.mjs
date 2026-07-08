@@ -7,7 +7,6 @@ import {
   createPgClient,
   getProjectRef,
   getRequiredEnv,
-  isLocalSupabaseUrl,
 } from "./supabase-db-connect.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -96,8 +95,8 @@ async function checkSchemaViaPg(client) {
     activity_events: await pgTableExists(client, "activity_events"),
     task_details:
       (await pgColumnExists(client, "tasks", "notes")) &&
-      (await pgColumnExists(client, "tasks", "urgency")) &&
-      (await pgColumnExists(client, "tasks", "reminder_at")),
+      (await pgColumnExists(client, "tasks", "urgency")),
+    reminder_removed: !(await pgColumnExists(client, "tasks", "reminder_at")),
     contact_type: await pgColumnExists(client, "contacts", "type"),
     project_contacts: await pgTableExists(client, "project_contacts"),
     workspace_nomenclature_rules: await pgTableExists(
@@ -158,9 +157,13 @@ async function checkSchemaViaApi(supabase) {
     task_details: async () => {
       const { error } = await supabase
         .from("tasks")
-        .select("notes, urgency, reminder_at")
+        .select("notes, urgency")
         .limit(0);
       return !error;
+    },
+    reminder_removed: async () => {
+      const { error } = await supabase.from("tasks").select("reminder_at").limit(0);
+      return Boolean(error);
     },
     contact_type: async () => {
       const { error } = await supabase.from("contacts").select("type").limit(0);
@@ -271,6 +274,7 @@ function migrationsForStatus(status) {
   if (!status.invitation_token_function) {
     needed.add("026_fix_invitation_token_generation.sql");
   }
+  if (!status.reminder_removed) needed.add("027_remove_task_reminder.sql");
 
   return files.filter((file) => needed.has(file));
 }

@@ -15,7 +15,6 @@ export interface UpdateTaskInput {
   dueDate?: string | null;
   urgency?: TaskUrgency | null;
   notes?: string | null;
-  reminderAt?: string | null;
 }
 
 export async function updateTask({
@@ -27,7 +26,6 @@ export async function updateTask({
   dueDate = null,
   urgency = null,
   notes = null,
-  reminderAt = null,
 }: UpdateTaskInput): Promise<UpdateTaskResult> {
   const trimmedTitle = title.trim();
   const trimmedNotes = notes?.trim() || null;
@@ -43,7 +41,6 @@ export async function updateTask({
       due_date: dueDate || null,
       urgency: urgency || null,
       notes: trimmedNotes,
-      reminder_at: reminderAt || null,
     })
     .eq("id", taskId)
     .eq("workspace_id", workspaceId)

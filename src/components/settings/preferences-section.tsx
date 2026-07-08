@@ -157,24 +157,6 @@ export function PreferencesSection() {
         <div className="flex items-center justify-between gap-4">
           <div className="flex min-w-0 flex-col gap-1">
             <p className={textStyle.bodyMedium}>
-              {t(language, "settings.preferences.enableTaskReminders")}
-            </p>
-            <p className={cn(textStyle.caption, "text-muted-foreground")}>
-              {t(language, "settings.preferences.enableTaskRemindersDescription")}
-            </p>
-          </div>
-          <Switch
-            checked={preferences.taskReminders}
-            onCheckedChange={(checked) =>
-              updatePreference("taskReminders", checked)
-            }
-            aria-label={t(language, "settings.preferences.enableTaskReminders")}
-          />
-        </div>
-
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex min-w-0 flex-col gap-1">
-            <p className={textStyle.bodyMedium}>
               {t(language, "settings.preferences.enableProjectNotifications")}
             </p>
             <p className={cn(textStyle.caption, "text-muted-foreground")}>

@@ -5,7 +5,6 @@ export interface UserPreferences {
   language: AppLanguage;
   theme: AppTheme;
   openDashboardOnStartup: boolean;
-  taskReminders: boolean;
   projectNotifications: boolean;
 }
 
@@ -15,7 +14,6 @@ const DEFAULT_PREFERENCES: UserPreferences = {
   language: "en",
   theme: "system",
   openDashboardOnStartup: true,
-  taskReminders: true,
   projectNotifications: true,
 };
 

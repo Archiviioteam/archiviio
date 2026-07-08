@@ -53,24 +53,6 @@ const selectClassName = cn(
   transition.hover
 );
 
-function buildReminderAt(date: string, time: string): string | null {
-  if (!date || !time) {
-    return null;
-  }
-
-  const parsedDate = parseDateFromInput(date);
-  if (!parsedDate) {
-    return null;
-  }
-
-  const reminder = new Date(`${parsedDate}T${time}`);
-  if (Number.isNaN(reminder.getTime())) {
-    return null;
-  }
-
-  return reminder.toISOString();
-}
-
 function formatDateForInput(value: string | null): string {
   if (!value) {
     return "";
@@ -114,27 +96,6 @@ function parseDateFromInput(value: string): string | null {
   return `${yearText}-${monthText}-${dayText}`;
 }
 
-function parseReminderAt(value: string | null): {
-  date: string;
-  time: string;
-} {
-  if (!value) {
-    return { date: "", time: "" };
-  }
-
-  const reminder = new Date(value);
-  if (Number.isNaN(reminder.getTime())) {
-    return { date: "", time: "" };
-  }
-
-  const pad = (part: number) => String(part).padStart(2, "0");
-  const isoDate = `${reminder.getFullYear()}-${pad(reminder.getMonth() + 1)}-${pad(reminder.getDate())}`;
-
-  return {
-    date: formatDateForInput(isoDate),
-    time: `${pad(reminder.getHours())}:${pad(reminder.getMinutes())}`,
-  };
-}
 
 interface AddTaskDialogProps {
   open: boolean;
@@ -170,8 +131,6 @@ export function AddTaskDialog({
   const [dueDateInput, setDueDateInput] = useState("");
   const [urgency, setUrgency] = useState<TaskUrgencyLevel>("medium");
   const [notes, setNotes] = useState("");
-  const [reminderDate, setReminderDate] = useState("");
-  const [reminderTime, setReminderTime] = useState("");
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
@@ -222,9 +181,6 @@ export function AddTaskDialog({
       setDueDateInput(formatDateForInput(task.due_date));
       setUrgency(normalizeTaskUrgency(task.urgency));
       setNotes(task.notes ?? "");
-      const reminder = parseReminderAt(task.reminder_at);
-      setReminderDate(reminder.date);
-      setReminderTime(reminder.time);
       return;
     }
 
@@ -233,8 +189,6 @@ export function AddTaskDialog({
     setDueDateInput("");
     setUrgency("medium");
     setNotes("");
-    setReminderDate("");
-    setReminderTime("");
   }, [open, task]);
 
   const handleSubmit = useCallback(
@@ -283,7 +237,6 @@ export function AddTaskDialog({
         dueDate: parsedDueDate,
         urgency,
         notes: notes.trim() || null,
-        reminderAt: buildReminderAt(reminderDate, reminderTime),
       };
 
       const result = isEditing
@@ -322,12 +275,11 @@ export function AddTaskDialog({
     [
       dueDateInput,
       isEditing,
+      language,
       notes,
       onOpenChange,
       onTaskSaved,
       projects,
-      reminderDate,
-      reminderTime,
       resolvedProjectId,
       task,
       title,
@@ -519,38 +471,6 @@ export function AddTaskDialog({
               rows={4}
               className={cn(fieldClassName, "min-h-24 resize-y py-3")}
             />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Label>{language === "it" ? "Promemoria" : "Reminder"}</Label>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="task-reminder-date" className={textStyle.caption}>
-                  {language === "it" ? "Giorno" : "Day"}
-                </Label>
-                <Input
-                  id="task-reminder-date"
-                  type="text"
-                  inputMode="numeric"
-                  placeholder={language === "it" ? "gg/mm/aaaa" : "dd/mm/yyyy"}
-                  value={reminderDate}
-                  onChange={(event) => setReminderDate(event.target.value)}
-                  disabled={saving}
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="task-reminder-time" className={textStyle.caption}>
-                  {language === "it" ? "Ora" : "Time"}
-                </Label>
-                <Input
-                  id="task-reminder-time"
-                  type="time"
-                  value={reminderTime}
-                  onChange={(event) => setReminderTime(event.target.value)}
-                  disabled={saving}
-                />
-              </div>
-            </div>
           </div>
 
           <DialogFooter className="flex-row items-center justify-between gap-2 sm:justify-between">

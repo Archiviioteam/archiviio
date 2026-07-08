@@ -7,6 +7,12 @@ alter table public.projects
 
 notify pgrst, 'reload schema';
 
+-- 027_remove_task_reminder.sql
+alter table public.tasks
+  drop column if exists reminder_at;
+
+notify pgrst, 'reload schema';
+
 -- 014_activity_events.sql
 create table if not exists public.activity_events (
   id uuid primary key default uuid_generate_v4(),
@@ -49,8 +55,7 @@ notify pgrst, 'reload schema';
 -- 015_task_details.sql
 alter table public.tasks
   add column if not exists notes text,
-  add column if not exists urgency text check (urgency in ('low', 'medium', 'high', 'critical')),
-  add column if not exists reminder_at timestamptz;
+  add column if not exists urgency text check (urgency in ('low', 'medium', 'high', 'critical'));
 
 notify pgrst, 'reload schema';
 

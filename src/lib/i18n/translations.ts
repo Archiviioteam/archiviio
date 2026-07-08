@@ -178,8 +178,6 @@ export type TranslationKey =
   | "settings.preferences.behaviorDescription"
   | "settings.preferences.openDashboardOnStartup"
   | "settings.preferences.openDashboardOnStartupDescription"
-  | "settings.preferences.enableTaskReminders"
-  | "settings.preferences.enableTaskRemindersDescription"
   | "settings.preferences.enableProjectNotifications"
   | "settings.preferences.enableProjectNotificationsDescription"
   | "settings.preferences.managePreferences"
@@ -248,8 +246,6 @@ export type TranslationKey =
   | "tasks.markComplete"
   | "tasks.markIncomplete"
   | "tasks.notePrefix"
-  | "tasks.noAlert"
-  | "tasks.alertPrefix"
   | "tasks.urgencyLow"
   | "tasks.urgencyMedium"
   | "tasks.urgencyHigh"
@@ -491,13 +487,10 @@ const translations: Record<AppLanguage, Record<TranslationKey, string>> = {
     "settings.preferences.themeLabel": "Theme",
     "settings.preferences.behavior": "Behavior",
     "settings.preferences.behaviorDescription":
-      "Control startup and notification defaults.",
+      "Control startup and app notification defaults.",
     "settings.preferences.openDashboardOnStartup": "Open dashboard on startup",
     "settings.preferences.openDashboardOnStartupDescription":
       "Start in the dashboard when you open Archiviio.",
-    "settings.preferences.enableTaskReminders": "Enable task reminders",
-    "settings.preferences.enableTaskRemindersDescription":
-      "Receive reminders for upcoming task deadlines.",
     "settings.preferences.enableProjectNotifications":
       "Enable project notifications",
     "settings.preferences.enableProjectNotificationsDescription":
@@ -572,8 +565,6 @@ const translations: Record<AppLanguage, Record<TranslationKey, string>> = {
     "tasks.markComplete": "Mark task as complete",
     "tasks.markIncomplete": "Mark task as incomplete",
     "tasks.notePrefix": "Note: ",
-    "tasks.noAlert": "No alert",
-    "tasks.alertPrefix": "Alert: ",
     "tasks.urgencyLow": "Low",
     "tasks.urgencyMedium": "Medium",
     "tasks.urgencyHigh": "High",
@@ -822,13 +813,10 @@ const translations: Record<AppLanguage, Record<TranslationKey, string>> = {
     "settings.preferences.themeLabel": "Tema",
     "settings.preferences.behavior": "Comportamento",
     "settings.preferences.behaviorDescription":
-      "Gestisci avvio e notifiche predefinite.",
+      "Gestisci avvio e notifiche app predefinite.",
     "settings.preferences.openDashboardOnStartup": "Apri la dashboard all'avvio",
     "settings.preferences.openDashboardOnStartupDescription":
       "Apri Archiviio direttamente nella dashboard.",
-    "settings.preferences.enableTaskReminders": "Attiva promemoria attività",
-    "settings.preferences.enableTaskRemindersDescription":
-      "Ricevi promemoria per le prossime scadenze.",
     "settings.preferences.enableProjectNotifications":
       "Attiva notifiche progetto",
     "settings.preferences.enableProjectNotificationsDescription":
@@ -904,8 +892,6 @@ const translations: Record<AppLanguage, Record<TranslationKey, string>> = {
     "tasks.markComplete": "Segna attività come completata",
     "tasks.markIncomplete": "Segna attività come incompleta",
     "tasks.notePrefix": "Nota: ",
-    "tasks.noAlert": "Nessun promemoria",
-    "tasks.alertPrefix": "Promemoria: ",
     "tasks.urgencyLow": "Bassa",
     "tasks.urgencyMedium": "Media",
     "tasks.urgencyHigh": "Alta",

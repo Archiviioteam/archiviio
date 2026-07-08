@@ -958,12 +958,11 @@ notify pgrst, 'reload schema';
 -- 015_task_details.sql
 -- ========================================================================
 
--- Task details: notes, urgency, reminder
+-- Task details: notes and urgency
 
 alter table public.tasks
   add column if not exists notes text,
-  add column if not exists urgency text check (urgency in ('low', 'medium', 'high', 'critical')),
-  add column if not exists reminder_at timestamptz;
+  add column if not exists urgency text check (urgency in ('low', 'medium', 'high', 'critical'));
 
 notify pgrst, 'reload schema';
 
@@ -1405,3 +1404,13 @@ alter default privileges in schema public
 
 alter default privileges in schema public
   grant all on routines to anon, authenticated, service_role;
+
+-- ========================================================================
+-- 027_remove_task_reminder.sql
+-- ========================================================================
+
+-- Remove unused task reminder field
+alter table public.tasks
+  drop column if exists reminder_at;
+
+notify pgrst, 'reload schema';
