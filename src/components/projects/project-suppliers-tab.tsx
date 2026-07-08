@@ -29,12 +29,14 @@ import type { Supplier, SupplierCompanyType } from "@/types/database";
 interface ProjectSuppliersTabProps {
   projectId: string;
   projectName: string;
+  projectLocation: string | null;
   projectCode: string;
 }
 
 export function ProjectSuppliersTab({
   projectId,
   projectName,
+  projectLocation,
   projectCode,
 }: ProjectSuppliersTabProps) {
   const language = useAppLanguage();
@@ -88,8 +90,8 @@ export function ProjectSuppliersTab({
     }
 
     exportProjectSuppliersPdf({
-      language,
       projectName,
+      projectLocation,
       projectCode,
       suppliers,
     });
@@ -99,7 +101,7 @@ export function ProjectSuppliersTab({
         ? "PDF fornitori esportato"
         : "Suppliers PDF exported"
     );
-  }, [language, projectCode, projectName, suppliers]);
+  }, [language, projectCode, projectLocation, projectName, suppliers]);
 
   const handleSupplierLinked = useCallback((supplier: Supplier) => {
     setSuppliers((current) => {

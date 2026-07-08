@@ -1,10 +1,10 @@
 import { jsPDF } from "jspdf";
-import type { AppLanguage } from "@/lib/settings/preferences-storage";
+import { formatSupplierCompanyTypes } from "@/lib/suppliers/supplier-types";
 import type { Supplier } from "@/types/database";
 
 interface ExportProjectSuppliersPdfParams {
-  language: AppLanguage;
   projectName: string;
+  projectLocation: string | null;
   projectCode: string;
   suppliers: Supplier[];
 }
@@ -30,8 +30,8 @@ function normalizeFilename(value: string): string {
 }
 
 export function exportProjectSuppliersPdf({
-  language,
   projectName,
+  projectLocation,
   projectCode,
   suppliers,
 }: ExportProjectSuppliersPdfParams): void {
@@ -41,15 +41,11 @@ export function exportProjectSuppliersPdf({
   const marginY = 52;
   const lineGap = 16;
   const maxContentWidth = pageWidth - marginX * 2;
-  const header = language === "it" ? "Elenco fornitori progetto" : "Project suppliers list";
-  const projectLabel = language === "it" ? "Progetto" : "Project";
-  const countLabel = language === "it" ? "Fornitori" : "Suppliers";
-  const companyLabel = language === "it" ? "Azienda" : "Company";
-  const contactLabel = language === "it" ? "Referente" : "Contact";
-  const emailLabel = "Email";
-  const phoneLabel = language === "it" ? "Telefono" : "Phone";
-  const websiteLabel = language === "it" ? "Sito web" : "Website";
-  const categoriesLabel = language === "it" ? "Categorie" : "Categories";
+  const header = "Project suppliers list";
+  const projectLabel = "Project name";
+  const locationLabel = "Location";
+  const companyLabel = "Company";
+  const categoriesLabel = "Category";
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(18);
@@ -57,21 +53,15 @@ export function exportProjectSuppliersPdf({
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(11);
-  const projectValue = `${projectCode} - ${projectName}`;
-  doc.text(`${projectLabel}: ${projectValue}`, marginX, marginY + 24);
-  doc.text(`${countLabel}: ${suppliers.length}`, marginX, marginY + 40);
+  doc.text(`${projectLabel}: ${safeText(projectName)}`, marginX, marginY + 24);
+  doc.text(`${locationLabel}: ${safeText(projectLocation)}`, marginX, marginY + 40);
 
   let y = marginY + 68;
 
   suppliers.forEach((supplier, index) => {
-    const categories =
-      supplier.company_types.length > 0 ? supplier.company_types.join(", ") : "-";
+    const categories = formatSupplierCompanyTypes(supplier.company_types, "en");
     const entries = [
       `${companyLabel}: ${safeText(supplier.company)}`,
-      `${contactLabel}: ${safeText(supplier.contact_name)}`,
-      `${emailLabel}: ${safeText(supplier.email)}`,
-      `${phoneLabel}: ${safeText(supplier.phone)}`,
-      `${websiteLabel}: ${safeText(supplier.website)}`,
       `${categoriesLabel}: ${categories}`,
     ];
 

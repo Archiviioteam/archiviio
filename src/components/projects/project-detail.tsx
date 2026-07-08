@@ -134,6 +134,7 @@ export function ProjectDetail() {
           <ProjectSuppliersTab
             projectId={project.id}
             projectName={project.name}
+            projectLocation={project.location}
             projectCode={project.code}
           />
         )}
