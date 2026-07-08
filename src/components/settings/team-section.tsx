@@ -63,9 +63,7 @@ function roleLabel(role: MemberRole, language: "it" | "en"): string {
 export function TeamSection() {
   const language = useAppLanguage();
   const [members, setMembers] = useState<User[]>([]);
-  const [invitations, setInvitations] = useState<Array<{ id: string; email: string }>>([]);
   const [loading, setLoading] = useState(true);
-  const [loadingInvitations, setLoadingInvitations] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [removeTarget, setRemoveTarget] = useState<User | null>(null);
   const [removing, setRemoving] = useState(false);
@@ -84,38 +82,6 @@ export function TeamSection() {
 
       if (!cancelled && user) {
         setCurrentUserId(user.id);
-        const { data: profile } = await supabase
-          .from("users")
-          .select("workspace_id")
-          .eq("id", user.id)
-          .single();
-
-        const workspaceId = profile?.workspace_id as string | null;
-        if (workspaceId) {
-          const { data: invited, error: invitedError } = await supabase
-            .from("workspace_invitations")
-            .select("id,email,status")
-            .eq("workspace_id", workspaceId)
-            .eq("status", "pending")
-            .order("created_at", { ascending: false });
-
-          if (!cancelled) {
-            if (invitedError) {
-              toast.error(invitedError.message);
-            } else {
-              setInvitations(
-                (invited ?? []).map((invitation) => ({
-                  id: String(invitation.id),
-                  email: String(invitation.email ?? ""),
-                }))
-              );
-            }
-          }
-        }
-      }
-
-      if (!cancelled) {
-        setLoadingInvitations(false);
       }
 
       const { data, error } = await supabase
@@ -209,46 +175,7 @@ export function TeamSection() {
       title={t(language, "team.membersTitle")}
       description={t(language, "team.membersDescription")}
     >
-      <InviteTeamMemberForm
-        onInvited={(email) => {
-          setInvitations((current) =>
-            current.some((invitation) => invitation.email === email)
-              ? current
-              : [{ id: `temp-${email}`, email }, ...current]
-          );
-        }}
-      />
-
-      {loadingInvitations ? (
-        <p className={cn(textStyle.caption, "text-muted-foreground")}>
-          {t(language, "team.loading")}
-        </p>
-      ) : (
-        <div className="flex flex-col gap-2">
-          <p className={cn(textStyle.captionMedium, "text-muted-foreground")}>
-            {t(language, "workspace.invitedCollaborators")}
-          </p>
-          {invitations.length > 0 ? (
-            <ul className="flex flex-col gap-2">
-              {invitations.map((invitation) => (
-                <li
-                  key={invitation.id}
-                  className={cn(
-                    textStyle.bodyMedium,
-                    "rounded-control border border-border/60 bg-muted/20 px-3 py-2"
-                  )}
-                >
-                  {invitation.email}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className={cn(textStyle.caption, "text-muted-foreground")}>
-              {t(language, "workspace.noInvites")}
-            </p>
-          )}
-        </div>
-      )}
+      <InviteTeamMemberForm />
 
       {loading ? (
         <p className={cn(textStyle.body, "text-muted-foreground")}>
@@ -271,7 +198,10 @@ export function TeamSection() {
               last_name: member.last_name ?? names.lastName,
             });
             const canRemove = member.id !== currentUserId && member.role !== "owner";
-            const canEditRole = member.id !== currentUserId;
+            const canEditRole =
+              currentUserId !== null &&
+              member.id !== currentUserId &&
+              member.role !== "owner";
 
             return (
               <li
@@ -292,19 +222,20 @@ export function TeamSection() {
                     {member.email}
                   </p>
                 </div>
-                <button
-                  type="button"
-                  className="rounded-sm"
-                  onClick={() => {
-                    if (!canEditRole) {
-                      return;
-                    }
-                    setRoleChoice(member.role);
-                    setRoleTarget(member);
-                  }}
-                >
+                {canEditRole ? (
+                  <button
+                    type="button"
+                    className="rounded-sm"
+                    onClick={() => {
+                      setRoleChoice(member.role);
+                      setRoleTarget(member);
+                    }}
+                  >
+                    <Badge variant="secondary">{roleLabel(member.role, language)}</Badge>
+                  </button>
+                ) : (
                   <Badge variant="secondary">{roleLabel(member.role, language)}</Badge>
-                </button>
+                )}
                 {canRemove ? (
                   <Button
                     type="button"

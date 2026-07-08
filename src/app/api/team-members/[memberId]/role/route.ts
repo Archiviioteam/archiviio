@@ -83,6 +83,13 @@ export async function PATCH(
     return NextResponse.json({ error: "Member not found" }, { status: 404 });
   }
 
+  if (targetMember.role === "owner") {
+    return NextResponse.json(
+      { error: "Workspace owners cannot change role" },
+      { status: 400 }
+    );
+  }
+
   const supabaseAdmin = getSupabaseAdmin();
   if (!supabaseAdmin) {
     return NextResponse.json(
