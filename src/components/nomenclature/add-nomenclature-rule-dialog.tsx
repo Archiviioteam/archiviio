@@ -118,7 +118,10 @@ export function AddNomenclatureRuleDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent
+        className="max-w-lg"
+        onOpenAutoFocus={(event) => event.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle>
             {isEditing
@@ -139,7 +142,6 @@ export function AddNomenclatureRuleDialog({
             </Label>
             <Input
               id="nomenclature-title"
-              autoFocus
               placeholder={
                 language === "it"
                   ? "es. File progetto, Disegni, Report"

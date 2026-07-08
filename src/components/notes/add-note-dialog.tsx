@@ -120,7 +120,10 @@ export function AddNoteDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent
+        className="max-w-lg"
+        onOpenAutoFocus={(event) => event.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle>
             {isEditing
@@ -141,7 +144,6 @@ export function AddNoteDialog({
             </Label>
             <Input
               id="note-title"
-              autoFocus
               placeholder={
                 language === "it"
                   ? "es. Chiama Mario, Idee bagno"

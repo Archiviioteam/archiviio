@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   BookOpen,
@@ -139,7 +139,6 @@ export function CommandPalette({
   const language = useAppLanguage();
   const emptyStatePresets = getEmptyStatePresets(language);
   const { items: primaryNavItems } = useNavOrder(language);
-  const inputRef = useRef<HTMLInputElement>(null);
   const [internalOpen, setInternalOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [searching, setSearching] = useState(false);
@@ -203,11 +202,6 @@ export function CommandPalette({
     }
 
     setRecentSearches(readRecentSearches());
-    const timer = window.setTimeout(() => {
-      inputRef.current?.focus();
-    }, 0);
-
-    return () => window.clearTimeout(timer);
   }, [open]);
 
   useEffect(() => {
@@ -280,6 +274,7 @@ export function CommandPalette({
         <DialogContent
           showCloseButton={false}
           className="max-w-md gap-0 overflow-hidden p-0"
+          onOpenAutoFocus={(event) => event.preventDefault()}
         >
           <DialogHeader className="sr-only">
             <DialogTitle>{t(language, "search.dialogTitle")}</DialogTitle>
@@ -297,7 +292,6 @@ export function CommandPalette({
             >
               <Search className="size-4 shrink-0 text-muted-foreground" />
               <Input
-                ref={inputRef}
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder={t(language, "search.placeholder")}

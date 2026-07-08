@@ -269,6 +269,16 @@
 
 /* Dashboard iPhone layout and visual polish (mobile only). */
 @media (max-width: 767px) {
+  /*
+   * iOS Safari auto-zooms focused form controls when font-size < 16px.
+   * Keep 16px on phone inputs to prevent page zoom while typing.
+   */
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+
   [data-dashboard-grid] {
     display: flex !important;
     flex-direction: column !important;

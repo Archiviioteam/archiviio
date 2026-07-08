@@ -149,7 +149,10 @@ export function AddSupplierDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent
+        className="max-w-lg"
+        onOpenAutoFocus={(event) => event.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle>
             {isEditing
@@ -165,7 +168,6 @@ export function AddSupplierDialog({
             </Label>
             <Input
               id="supplier-company"
-              autoFocus
               placeholder={
                 language === "it" ? "Inserisci nome azienda" : "Enter company name"
               }

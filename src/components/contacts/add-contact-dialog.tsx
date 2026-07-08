@@ -146,7 +146,10 @@ export function AddContactDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent
+        className="max-w-lg"
+        onOpenAutoFocus={(event) => event.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle>
             {isEditing
@@ -162,7 +165,6 @@ export function AddContactDialog({
             </Label>
             <Input
               id="contact-name"
-              autoFocus
               placeholder={language === "it" ? "Inserisci nome" : "Enter name"}
               value={name}
               onChange={(event) => setName(event.target.value)}

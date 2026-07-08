@@ -314,7 +314,10 @@ export function AddTaskDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent
+        className="max-w-lg"
+        onOpenAutoFocus={(event) => event.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle>
             {isEditing
@@ -379,7 +382,6 @@ export function AddTaskDialog({
             </Label>
             <Input
               id="task-name"
-              autoFocus
               placeholder={
                 language === "it" ? "Inserisci nome attività" : "Enter task name"
               }
