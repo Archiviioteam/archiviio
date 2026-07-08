@@ -64,11 +64,10 @@ export function TeamSection() {
   const language = useAppLanguage();
   const [members, setMembers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [removeTarget, setRemoveTarget] = useState<User | null>(null);
   const [removing, setRemoving] = useState(false);
   const [roleTarget, setRoleTarget] = useState<User | null>(null);
-  const [roleChoice, setRoleChoice] = useState<MemberRole | "other">("member");
+  const [roleChoice, setRoleChoice] = useState<MemberRole>("member");
   const [updatingRole, setUpdatingRole] = useState(false);
 
   useEffect(() => {
@@ -76,13 +75,6 @@ export function TeamSection() {
 
     void (async () => {
       const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!cancelled && user) {
-        setCurrentUserId(user.id);
-      }
 
       const { data, error } = await supabase
         .from("users")
@@ -131,15 +123,6 @@ export function TeamSection() {
 
   async function handleUpdateRole() {
     if (!roleTarget) {
-      return;
-    }
-
-    if (roleChoice === "other") {
-      toast.error(
-        language === "it"
-          ? "Il ruolo Altro non è ancora disponibile"
-          : "The Other role is not available yet"
-      );
       return;
     }
 
@@ -197,11 +180,7 @@ export function TeamSection() {
               first_name: member.first_name ?? names.firstName,
               last_name: member.last_name ?? names.lastName,
             });
-            const canRemove = member.id !== currentUserId && member.role !== "owner";
-            const canEditRole =
-              currentUserId !== null &&
-              member.id !== currentUserId &&
-              member.role !== "owner";
+            const canRemove = member.role === "member";
 
             return (
               <li
@@ -222,20 +201,16 @@ export function TeamSection() {
                     {member.email}
                   </p>
                 </div>
-                {canEditRole ? (
-                  <button
-                    type="button"
-                    className="rounded-sm"
-                    onClick={() => {
-                      setRoleChoice(member.role);
-                      setRoleTarget(member);
-                    }}
-                  >
-                    <Badge variant="secondary">{roleLabel(member.role, language)}</Badge>
-                  </button>
-                ) : (
+                <button
+                  type="button"
+                  className="rounded-sm"
+                  onClick={() => {
+                    setRoleChoice(member.role);
+                    setRoleTarget(member);
+                  }}
+                >
                   <Badge variant="secondary">{roleLabel(member.role, language)}</Badge>
-                )}
+                </button>
                 {canRemove ? (
                   <Button
                     type="button"
@@ -320,14 +295,13 @@ export function TeamSection() {
             <select
               value={roleChoice}
               onChange={(event) =>
-                setRoleChoice(event.target.value as MemberRole | "other")
+                setRoleChoice(event.target.value as MemberRole)
               }
               disabled={updatingRole}
               className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <option value="owner">{language === "it" ? "Proprietario" : "Owner"}</option>
               <option value="member">{language === "it" ? "Membro" : "Member"}</option>
-              <option value="other">{language === "it" ? "Altro" : "Other"}</option>
             </select>
           </div>
           <DialogFooter className="flex flex-row justify-end gap-2">

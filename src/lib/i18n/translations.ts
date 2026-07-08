@@ -124,6 +124,12 @@ export type TranslationKey =
   | "suppliers.companyRequired"
   | "suppliers.createdToast"
   | "suppliers.updatedToast"
+  | "suppliers.inMaterialLibrary"
+  | "suppliers.inMaterialLibraryHint"
+  | "suppliers.filterAllSamples"
+  | "suppliers.filterSamplesInLibrary"
+  | "suppliers.filterSamplesNotInLibrary"
+  | "suppliers.materialLibraryBadge"
   | "nomenclature.addTitle"
   | "nomenclature.editTitle"
   | "nomenclature.addDescription"
@@ -426,6 +432,13 @@ const translations: Record<AppLanguage, Record<TranslationKey, string>> = {
     "suppliers.companyRequired": "Company is required.",
     "suppliers.createdToast": "Supplier created",
     "suppliers.updatedToast": "Supplier updated",
+    "suppliers.inMaterialLibrary": "Samples in material library",
+    "suppliers.inMaterialLibraryHint":
+      "Enable if you keep physical samples from this supplier in the studio.",
+    "suppliers.filterAllSamples": "All sample availability",
+    "suppliers.filterSamplesInLibrary": "Samples in library",
+    "suppliers.filterSamplesNotInLibrary": "No samples in library",
+    "suppliers.materialLibraryBadge": "In library",
     "nomenclature.addTitle": "Add rule",
     "nomenclature.editTitle": "Edit rule",
     "nomenclature.addDescription":
@@ -751,6 +764,13 @@ const translations: Record<AppLanguage, Record<TranslationKey, string>> = {
     "suppliers.companyRequired": "L'azienda è obbligatoria.",
     "suppliers.createdToast": "Fornitore creato",
     "suppliers.updatedToast": "Fornitore aggiornato",
+    "suppliers.inMaterialLibrary": "Presente in materioteca",
+    "suppliers.inMaterialLibraryHint":
+      "Attiva se conservi i campioni fisici di questo fornitore in studio.",
+    "suppliers.filterAllSamples": "Tutte le disponibilità campioni",
+    "suppliers.filterSamplesInLibrary": "Campioni in materioteca",
+    "suppliers.filterSamplesNotInLibrary": "Senza campioni in materioteca",
+    "suppliers.materialLibraryBadge": "In materioteca",
     "nomenclature.addTitle": "Aggiungi regola",
     "nomenclature.editTitle": "Modifica regola",
     "nomenclature.addDescription":

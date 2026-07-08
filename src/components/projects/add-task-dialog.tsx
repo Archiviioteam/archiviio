@@ -53,35 +53,29 @@ const selectClassName = cn(
   transition.hover
 );
 
-function formatDateForInput(value: string | null): string {
+function toDateInputValue(value: string | null): string {
   if (!value) {
     return "";
   }
 
-  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if (!match) {
-    return "";
-  }
-
-  const [, year, month, day] = match;
-  return `${day}/${month}/${year}`;
+  const match = value.match(/^(\d{4}-\d{2}-\d{2})/);
+  return match?.[1] ?? "";
 }
 
-function parseDateFromInput(value: string): string | null {
+function parseDateInputValue(value: string): string | null {
   const trimmed = value.trim();
   if (!trimmed) {
     return null;
   }
 
-  const match = trimmed.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
-  if (!match) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
     return null;
   }
 
-  const [, dayText, monthText, yearText] = match;
-  const day = Number(dayText);
-  const month = Number(monthText);
+  const [yearText, monthText, dayText] = trimmed.split("-");
   const year = Number(yearText);
+  const month = Number(monthText);
+  const day = Number(dayText);
   const candidate = new Date(year, month - 1, day);
 
   if (
@@ -93,7 +87,7 @@ function parseDateFromInput(value: string): string | null {
     return null;
   }
 
-  return `${yearText}-${monthText}-${dayText}`;
+  return trimmed;
 }
 
 
@@ -128,7 +122,7 @@ export function AddTaskDialog({
   const [loadingProjects, setLoadingProjects] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState("");
   const [title, setTitle] = useState("");
-  const [dueDateInput, setDueDateInput] = useState("");
+  const [dueDate, setDueDate] = useState("");
   const [urgency, setUrgency] = useState<TaskUrgencyLevel>("medium");
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
@@ -178,7 +172,7 @@ export function AddTaskDialog({
 
     if (task) {
       setTitle(task.title);
-      setDueDateInput(formatDateForInput(task.due_date));
+      setDueDate(toDateInputValue(task.due_date));
       setUrgency(normalizeTaskUrgency(task.urgency));
       setNotes(task.notes ?? "");
       return;
@@ -186,7 +180,7 @@ export function AddTaskDialog({
 
     setSelectedProjectId("");
     setTitle("");
-    setDueDateInput("");
+    setDueDate("");
     setUrgency("medium");
     setNotes("");
   }, [open, task]);
@@ -208,12 +202,12 @@ export function AddTaskDialog({
         return;
       }
 
-      const parsedDueDate = parseDateFromInput(dueDateInput);
-      if (dueDateInput.trim() && !parsedDueDate) {
+      const parsedDueDate = parseDateInputValue(dueDate);
+      if (dueDate.trim() && !parsedDueDate) {
         toast.error(
           language === "it"
-            ? "Formato data non valido. Usa gg/mm/aaaa."
-            : "Invalid date format. Use dd/mm/yyyy."
+            ? "Data di scadenza non valida."
+            : "Invalid due date."
         );
         return;
       }
@@ -273,7 +267,7 @@ export function AddTaskDialog({
       );
     },
     [
-      dueDateInput,
+      dueDate,
       isEditing,
       language,
       notes,
@@ -409,11 +403,9 @@ export function AddTaskDialog({
             </Label>
             <Input
               id="task-deadline"
-              type="text"
-              inputMode="numeric"
-              placeholder={language === "it" ? "gg/mm/aaaa" : "dd/mm/yyyy"}
-              value={dueDateInput}
-              onChange={(event) => setDueDateInput(event.target.value)}
+              type="date"
+              value={dueDate}
+              onChange={(event) => setDueDate(event.target.value)}
               disabled={saving}
             />
           </div>

@@ -15,6 +15,7 @@ export interface CreateSupplierInput {
   email?: string | null;
   phone?: string | null;
   website?: string | null;
+  inMaterialLibrary?: boolean;
 }
 
 export async function createSupplier({
@@ -26,6 +27,7 @@ export async function createSupplier({
   email = null,
   phone = null,
   website = null,
+  inMaterialLibrary = false,
 }: CreateSupplierInput): Promise<CreateSupplierResult> {
   const trimmedCompany = company.trim();
   const trimmedContactName = contactName?.trim() || null;
@@ -48,6 +50,7 @@ export async function createSupplier({
       email: trimmedEmail,
       phone: trimmedPhone,
       website: trimmedWebsite,
+      in_material_library: inMaterialLibrary,
       tags: [],
     })
     .select("*")

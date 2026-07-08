@@ -12,6 +12,9 @@ const SUPPLIER_COMPANY_TYPE_ORDER: SupplierCompanyType[] = [
   "outdoor",
   "curtains",
   "upholstery",
+  "trimmings",
+  "metals",
+  "wallpaper",
   "other",
 ];
 
@@ -30,6 +33,9 @@ const SUPPLIER_COMPANY_TYPE_LABELS: Record<
     outdoor: "Outdoor",
     curtains: "Curtains",
     upholstery: "Upholstery",
+    trimmings: "Trimmings",
+    metals: "Metals",
+    wallpaper: "Wallpaper",
     other: "Other",
   },
   it: {
@@ -43,6 +49,9 @@ const SUPPLIER_COMPANY_TYPE_LABELS: Record<
     outdoor: "Esterno",
     curtains: "Tende",
     upholstery: "Tessuti",
+    trimmings: "Passamanerie",
+    metals: "Metalli",
+    wallpaper: "Carte da parati",
     other: "Altro",
   },
 };

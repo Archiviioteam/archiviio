@@ -5,6 +5,7 @@ import { getSupplierCompanyTypeLabel } from "@/lib/suppliers/supplier-types";
 export interface SupplierSearchFilters {
   query: string;
   companyType: SupplierCompanyType | null;
+  inMaterialLibrary?: boolean | null;
   language?: AppLanguage;
 }
 
@@ -45,6 +46,17 @@ function matchesCompanyType(
   return supplier.company_types.includes(companyType);
 }
 
+function matchesMaterialLibrary(
+  supplier: Supplier,
+  inMaterialLibrary: boolean | null | undefined
+): boolean {
+  if (inMaterialLibrary === null || inMaterialLibrary === undefined) {
+    return true;
+  }
+
+  return (supplier.in_material_library ?? false) === inMaterialLibrary;
+}
+
 export function filterSuppliers(
   suppliers: Supplier[],
   filters: SupplierSearchFilters
@@ -52,6 +64,7 @@ export function filterSuppliers(
   return suppliers.filter(
     (supplier) =>
       matchesQuery(supplier, filters.query, filters.language) &&
-      matchesCompanyType(supplier, filters.companyType)
+      matchesCompanyType(supplier, filters.companyType) &&
+      matchesMaterialLibrary(supplier, filters.inMaterialLibrary)
   );
 }

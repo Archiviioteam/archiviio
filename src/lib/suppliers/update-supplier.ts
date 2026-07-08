@@ -16,6 +16,7 @@ export interface UpdateSupplierInput {
   email?: string | null;
   phone?: string | null;
   website?: string | null;
+  inMaterialLibrary?: boolean;
 }
 
 export async function updateSupplier({
@@ -28,6 +29,7 @@ export async function updateSupplier({
   email = null,
   phone = null,
   website = null,
+  inMaterialLibrary = false,
 }: UpdateSupplierInput): Promise<UpdateSupplierResult> {
   const trimmedCompany = company.trim();
   const trimmedContactName = contactName?.trim() || null;
@@ -49,6 +51,7 @@ export async function updateSupplier({
       email: trimmedEmail,
       phone: trimmedPhone,
       website: trimmedWebsite,
+      in_material_library: inMaterialLibrary,
     })
     .eq("id", supplierId)
     .eq("workspace_id", workspaceId)

@@ -88,6 +88,9 @@ export type SupplierCompanyType =
   | "outdoor"
   | "curtains"
   | "upholstery"
+  | "trimmings"
+  | "metals"
+  | "wallpaper"
   | "other";
 
 export interface Supplier {
@@ -99,6 +102,7 @@ export interface Supplier {
   email: string | null;
   phone: string | null;
   website: string | null;
+  in_material_library: boolean;
   tags: string[];
   created_at: string;
   updated_at: string;

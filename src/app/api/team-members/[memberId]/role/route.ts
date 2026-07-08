@@ -65,10 +65,6 @@ export async function PATCH(
     );
   }
 
-  if (memberId === currentMember.id) {
-    return NextResponse.json({ error: "You cannot change your own role" }, { status: 400 });
-  }
-
   const { data: targetMember, error: targetMemberError } = await supabase
     .from("users")
     .select("id,workspace_id,role")
@@ -81,13 +77,6 @@ export async function PATCH(
 
   if (targetMember.workspace_id !== currentMember.workspace_id) {
     return NextResponse.json({ error: "Member not found" }, { status: 404 });
-  }
-
-  if (targetMember.role === "owner") {
-    return NextResponse.json(
-      { error: "Workspace owners cannot change role" },
-      { status: 400 }
-    );
   }
 
   const supabaseAdmin = getSupabaseAdmin();

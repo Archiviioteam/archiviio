@@ -38,6 +38,7 @@ export function SuppliersContent() {
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<SupplierCompanyType | null>(null);
+  const [inMaterialLibrary, setInMaterialLibrary] = useState<boolean | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Supplier | null>(null);
@@ -71,11 +72,12 @@ export function SuppliersContent() {
   }, [router, searchParams]);
 
   const filteredSuppliers = useMemo(
-    () => filterSuppliers(suppliers, { query, companyType: category, language }),
-    [suppliers, query, category, language]
+    () => filterSuppliers(suppliers, { query, companyType: category, inMaterialLibrary, language }),
+    [suppliers, query, category, inMaterialLibrary, language]
   );
 
-  const hasActiveFilters = query.length > 0 || category !== null;
+  const hasActiveFilters =
+    query.length > 0 || category !== null || inMaterialLibrary !== null;
 
   const handleSupplierSaved = useCallback((supplier: Supplier) => {
     setSuppliers((current) => {
@@ -172,8 +174,10 @@ export function SuppliersContent() {
               <SupplierFilters
                 query={query}
                 companyType={category}
+                inMaterialLibrary={inMaterialLibrary}
                 onQueryChange={setQuery}
                 onCompanyTypeChange={setCategory}
+                onMaterialLibraryChange={setInMaterialLibrary}
                 onAddClick={openCreateDialog}
               />
 

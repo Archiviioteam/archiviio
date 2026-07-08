@@ -1,8 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Pencil } from "lucide-react";
+import { CheckSquare, Pencil, Upload } from "lucide-react";
 import { toast } from "sonner";
+import { DocumentUploader } from "@/components/documents/document-uploader";
+import { AddTaskDialog } from "@/components/projects/add-task-dialog";
 import { ProjectForm } from "@/components/projects/project-form";
 import { ProjectStatusBadge } from "@/components/projects/project-status-badge";
 import { TaskCard } from "@/components/projects/task-card";
@@ -29,6 +31,8 @@ import { useAppLanguage } from "@/lib/settings/language";
 import { cn } from "@/lib/utils";
 import type { Project, Task } from "@/types/database";
 
+const UPLOADER_INPUT_ID = "project-overview-document-uploader";
+
 function formatDate(iso: string, language: "it" | "en"): string {
   return new Date(iso).toLocaleDateString(language === "it" ? "it-IT" : "en-US", {
     year: "numeric",
@@ -42,12 +46,41 @@ interface ProjectOverviewTabProps {
   onProjectUpdated?: (project: Project) => void;
 }
 
+interface OverviewActionButtonProps {
+  icon: typeof Pencil;
+  label: string;
+  onClick: () => void;
+}
+
+function OverviewActionButton({
+  icon: Icon,
+  label,
+  onClick,
+}: OverviewActionButtonProps) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "flex flex-col items-center justify-center gap-2 text-muted-foreground hover:text-foreground",
+        transition.hover
+      )}
+    >
+      <Icon className="size-6" />
+      <span className={cn(textStyle.bodyMedium, "text-center text-foreground")}>
+        {label}
+      </span>
+    </button>
+  );
+}
+
 export function ProjectOverviewTab({
   project,
   onProjectUpdated,
 }: ProjectOverviewTabProps) {
   const language = useAppLanguage();
   const [editOpen, setEditOpen] = useState(false);
+  const [taskDialogOpen, setTaskDialogOpen] = useState(false);
   const [latestTask, setLatestTask] = useState<Task | null>(null);
   const [loadingTask, setLoadingTask] = useState(true);
   const [togglingTask, setTogglingTask] = useState(false);
@@ -157,6 +190,15 @@ export function ProjectOverviewTab({
     [language, loadLatestTask, project.id]
   );
 
+  const handleUploadClick = useCallback(() => {
+    document.getElementById(UPLOADER_INPUT_ID)?.click();
+  }, []);
+
+  const handleTaskSaved = useCallback(() => {
+    void loadLatestTask();
+    setTaskDialogOpen(false);
+  }, [loadLatestTask]);
+
   return (
     <>
       <div className={cn("flex flex-col", stack.default)}>
@@ -206,22 +248,39 @@ export function ProjectOverviewTab({
 
           <Card className="min-h-48">
             <CardContent className="flex h-full min-h-48 items-center justify-center p-6">
-              <button
-                type="button"
-                onClick={() => setEditOpen(true)}
-                className={cn(
-                  "flex flex-col items-center justify-center gap-2 text-muted-foreground hover:text-foreground",
-                  transition.hover
-                )}
-              >
-                <Pencil className="size-6" />
-                <span className={cn(textStyle.bodyMedium, "text-foreground")}>
-                  {language === "it" ? "Modifica progetto" : "Edit project"}
-                </span>
-              </button>
+              <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-3">
+                <OverviewActionButton
+                  icon={Pencil}
+                  label={language === "it" ? "Modifica progetto" : "Edit project"}
+                  onClick={() => setEditOpen(true)}
+                />
+                <OverviewActionButton
+                  icon={CheckSquare}
+                  label={language === "it" ? "Crea attività" : "Create task"}
+                  onClick={() => setTaskDialogOpen(true)}
+                />
+                <OverviewActionButton
+                  icon={Upload}
+                  label={language === "it" ? "Carica file" : "Upload file"}
+                  onClick={handleUploadClick}
+                />
+              </div>
             </CardContent>
           </Card>
         </div>
+
+        <DocumentUploader
+          projectId={project.id}
+          inputId={UPLOADER_INPUT_ID}
+          showDropzone={false}
+          onUploadComplete={(document) => {
+            toast.success(
+              language === "it"
+                ? `${document.name} caricato`
+                : `${document.name} uploaded`
+            );
+          }}
+        />
 
         {!loadingTask && latestTask ? (
           <TaskCard
@@ -249,6 +308,13 @@ export function ProjectOverviewTab({
           />
         </DialogContent>
       </Dialog>
+
+      <AddTaskDialog
+        open={taskDialogOpen}
+        onOpenChange={setTaskDialogOpen}
+        projectId={project.id}
+        onTaskSaved={handleTaskSaved}
+      />
     </>
   );
 }

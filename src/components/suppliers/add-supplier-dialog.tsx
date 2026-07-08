@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import type { Supplier, SupplierCompanyType } from "@/types/database";
 
@@ -45,6 +46,7 @@ export function AddSupplierDialog({
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [website, setWebsite] = useState("");
+  const [inMaterialLibrary, setInMaterialLibrary] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -59,6 +61,7 @@ export function AddSupplierDialog({
       setEmail(supplier.email ?? "");
       setPhone(supplier.phone ?? "");
       setWebsite(supplier.website ?? "");
+      setInMaterialLibrary(supplier.in_material_library ?? false);
       return;
     }
 
@@ -68,6 +71,7 @@ export function AddSupplierDialog({
     setEmail("");
     setPhone("");
     setWebsite("");
+    setInMaterialLibrary(false);
   }, [open, supplier]);
 
   const toggleCompanyType = useCallback((type: SupplierCompanyType) => {
@@ -108,6 +112,7 @@ export function AddSupplierDialog({
         email: email.trim() || null,
         phone: phone.trim() || null,
         website: website.trim() || null,
+        inMaterialLibrary,
       };
 
       const result = isEditing
@@ -137,6 +142,7 @@ export function AddSupplierDialog({
       companyTypes,
       contactName,
       email,
+      inMaterialLibrary,
       isEditing,
       language,
       onOpenChange,
@@ -208,6 +214,24 @@ export function AddSupplierDialog({
                 ? "Seleziona una o piu categorie."
                 : "Select one or more categories."}
             </p>
+          </div>
+
+          <div className="flex items-center justify-between gap-4 rounded-md border border-border/60 bg-muted/20 px-4 py-3">
+            <div className="flex min-w-0 flex-col gap-1">
+              <Label htmlFor="supplier-material-library">
+                {t(language, "suppliers.inMaterialLibrary")}
+              </Label>
+              <p className={cn(textStyle.caption, "text-muted-foreground")}>
+                {t(language, "suppliers.inMaterialLibraryHint")}
+              </p>
+            </div>
+            <Switch
+              id="supplier-material-library"
+              checked={inMaterialLibrary}
+              onCheckedChange={setInMaterialLibrary}
+              disabled={saving}
+              aria-label={t(language, "suppliers.inMaterialLibrary")}
+            />
           </div>
 
           <div className="flex flex-col gap-2">

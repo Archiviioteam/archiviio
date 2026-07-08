@@ -40,10 +40,6 @@ export async function DELETE(
     );
   }
 
-  if (memberId === currentMember.id) {
-    return NextResponse.json({ error: "You cannot remove yourself" }, { status: 400 });
-  }
-
   const { data: targetMember, error: targetMemberError } = await supabase
     .from("users")
     .select("id,workspace_id,role")

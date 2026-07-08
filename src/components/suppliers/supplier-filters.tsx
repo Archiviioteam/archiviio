@@ -22,16 +22,20 @@ const selectClassName = cn(
 interface SupplierFiltersProps {
   query: string;
   companyType: SupplierCompanyType | null;
+  inMaterialLibrary: boolean | null;
   onQueryChange: (value: string) => void;
   onCompanyTypeChange: (value: SupplierCompanyType | null) => void;
+  onMaterialLibraryChange: (value: boolean | null) => void;
   onAddClick: () => void;
 }
 
 export function SupplierFilters({
   query,
   companyType,
+  inMaterialLibrary,
   onQueryChange,
   onCompanyTypeChange,
+  onMaterialLibraryChange,
   onAddClick,
 }: SupplierFiltersProps) {
   const language = useAppLanguage();
@@ -67,6 +71,38 @@ export function SupplierFilters({
               {option.label}
             </option>
           ))}
+        </select>
+        <ChevronsUpDown
+          aria-hidden
+          className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-muted-foreground"
+        />
+      </div>
+
+      <div className="relative w-full shrink-0 sm:w-auto">
+        <select
+          value={
+            inMaterialLibrary === null
+              ? ""
+              : inMaterialLibrary
+                ? "true"
+                : "false"
+          }
+          onChange={(event) => {
+            const value = event.target.value;
+            onMaterialLibraryChange(
+              value === "" ? null : value === "true"
+            );
+          }}
+          className={cn(selectClassName, "w-full sm:w-auto")}
+          aria-label={t(language, "suppliers.filterAllSamples")}
+        >
+          <option value="">{t(language, "suppliers.filterAllSamples")}</option>
+          <option value="true">
+            {t(language, "suppliers.filterSamplesInLibrary")}
+          </option>
+          <option value="false">
+            {t(language, "suppliers.filterSamplesNotInLibrary")}
+          </option>
         </select>
         <ChevronsUpDown
           aria-hidden

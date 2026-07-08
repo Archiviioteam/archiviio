@@ -54,7 +54,10 @@ function AppShellFrame({ children }: AppShellProps) {
       <Sidebar workspaceName={workspaceName ?? "Workspace"} />
       <div className={desktopColumnWrapperClass(false, true)}>
         <Topbar />
-        <ContentArea scrollable={!isFullHeightGrid}>
+        <ContentArea
+          scrollable={!isFullHeightGrid}
+          className={isFullHeightGrid ? "max-w-none" : undefined}
+        >
           {loading ? (
             <p className={cn(textStyle.body, "text-muted-foreground")}>
               Loading...

@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { getSupplierCompanyTypeLabel } from "@/lib/suppliers/supplier-types";
 import { transition } from "@/lib/animation";
 import { useAppLanguage } from "@/lib/settings/language";
+import { t } from "@/lib/i18n/translations";
 import { textStyle } from "@/lib/typography";
 import { cn } from "@/lib/utils";
 import type { Supplier } from "@/types/database";
@@ -122,6 +123,11 @@ export function SupplierCard({
         </div>
 
         <div className="flex shrink-0 items-center gap-2">
+          {supplier.in_material_library ? (
+            <Badge variant="secondary" size="lg">
+              {t(language, "suppliers.materialLibraryBadge")}
+            </Badge>
+          ) : null}
           {supplier.company_types.length > 0 ? (
             <div className="flex max-w-[10rem] flex-wrap justify-end gap-1.5">
               {supplier.company_types.map((type) => (

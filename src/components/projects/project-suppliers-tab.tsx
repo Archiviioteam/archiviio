@@ -44,6 +44,7 @@ export function ProjectSuppliersTab({
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<SupplierCompanyType | null>(null);
+  const [inMaterialLibrary, setInMaterialLibrary] = useState<boolean | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [unlinkTarget, setUnlinkTarget] = useState<Supplier | null>(null);
   const [unlinking, setUnlinking] = useState(false);
@@ -73,11 +74,12 @@ export function ProjectSuppliersTab({
   );
 
   const filteredSuppliers = useMemo(
-    () => filterSuppliers(suppliers, { query, companyType: category }),
-    [suppliers, query, category]
+    () => filterSuppliers(suppliers, { query, companyType: category, inMaterialLibrary, language }),
+    [suppliers, query, category, inMaterialLibrary, language]
   );
 
-  const hasActiveFilters = query.length > 0 || category !== null;
+  const hasActiveFilters =
+    query.length > 0 || category !== null || inMaterialLibrary !== null;
 
   const handleExportPdf = useCallback(() => {
     if (suppliers.length === 0) {
@@ -181,8 +183,10 @@ export function ProjectSuppliersTab({
             <SupplierFilters
               query={query}
               companyType={category}
+              inMaterialLibrary={inMaterialLibrary}
               onQueryChange={setQuery}
               onCompanyTypeChange={setCategory}
+              onMaterialLibraryChange={setInMaterialLibrary}
               onAddClick={() => setDialogOpen(true)}
             />
 
