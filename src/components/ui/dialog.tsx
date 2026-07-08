@@ -57,7 +57,7 @@ function DialogContent({
         {...radiusTierProps("surface")}
         className={cn(
           radius.surface,
-          "fixed inset-0 z-[100] m-auto flex h-fit max-h-[calc(100dvh-var(--spacing-8))] w-[calc(100%-var(--spacing-8))] max-w-4xl flex-col gap-4 overflow-y-auto bg-card p-6 outline-none",
+          "fixed inset-0 z-[100] m-auto flex h-fit max-h-[calc(100dvh-var(--spacing-8))] w-[calc(100%-var(--spacing-8))] max-w-4xl flex-col gap-4 overflow-y-auto overflow-x-hidden bg-card p-6 outline-none max-md:touch-pan-y max-md:[&_input]:text-base max-md:[&_textarea]:text-base max-md:[&_select]:text-base",
           elevation.lg,
           motion.modalContent,
           className
@@ -125,7 +125,7 @@ function DialogFooter({ className, ...props }: React.ComponentProps<"div">) {
       data-slot="dialog-footer"
       className={cn(
         "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end",
-        "max-md:sticky max-md:bottom-0 max-md:-mx-6 max-md:mt-2 max-md:border-t max-md:border-border/70 max-md:bg-card/95 max-md:px-6 max-md:pb-[max(1rem,env(safe-area-inset-bottom))] max-md:pt-3 max-md:backdrop-blur-xl",
+        "max-md:sticky max-md:bottom-0 max-md:mt-2 max-md:border-t max-md:border-border/70 max-md:bg-card/95 max-md:pb-[max(1rem,env(safe-area-inset-bottom))] max-md:pt-3 max-md:backdrop-blur-xl",
         className
       )}
       {...props}
