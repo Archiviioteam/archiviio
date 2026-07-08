@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Download } from "lucide-react";
 import { toast } from "sonner";
 import { AddProjectSupplierDialog } from "@/components/projects/add-project-supplier-dialog";
 import { SupplierCard } from "@/components/suppliers/supplier-card";
@@ -16,6 +17,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
+import { exportProjectSuppliersPdf } from "@/lib/suppliers/export-project-suppliers-pdf";
 import { filterSuppliers } from "@/lib/suppliers/filter-suppliers";
 import { fetchProjectSuppliers } from "@/lib/suppliers/fetch-project-suppliers";
 import { unlinkSupplierFromProject } from "@/lib/suppliers/unlink-supplier-from-project";
@@ -26,9 +28,15 @@ import type { Supplier, SupplierCompanyType } from "@/types/database";
 
 interface ProjectSuppliersTabProps {
   projectId: string;
+  projectName: string;
+  projectCode: string;
 }
 
-export function ProjectSuppliersTab({ projectId }: ProjectSuppliersTabProps) {
+export function ProjectSuppliersTab({
+  projectId,
+  projectName,
+  projectCode,
+}: ProjectSuppliersTabProps) {
   const language = useAppLanguage();
   const [loading, setLoading] = useState(true);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
@@ -68,6 +76,30 @@ export function ProjectSuppliersTab({ projectId }: ProjectSuppliersTabProps) {
   );
 
   const hasActiveFilters = query.length > 0 || category !== null;
+
+  const handleExportPdf = useCallback(() => {
+    if (suppliers.length === 0) {
+      toast.error(
+        language === "it"
+          ? "Nessun fornitore da esportare"
+          : "No suppliers to export"
+      );
+      return;
+    }
+
+    exportProjectSuppliersPdf({
+      language,
+      projectName,
+      projectCode,
+      suppliers,
+    });
+
+    toast.success(
+      language === "it"
+        ? "PDF fornitori esportato"
+        : "Suppliers PDF exported"
+    );
+  }, [language, projectCode, projectName, suppliers]);
 
   const handleSupplierLinked = useCallback((supplier: Supplier) => {
     setSuppliers((current) => {
@@ -131,6 +163,17 @@ export function ProjectSuppliersTab({ projectId }: ProjectSuppliersTabProps) {
   return (
     <>
       <div className="flex flex-col gap-3">
+        <div className="flex justify-end">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleExportPdf}
+            disabled={suppliers.length === 0}
+          >
+            <Download className="size-4" aria-hidden />
+            {language === "it" ? "Esporta PDF" : "Export PDF"}
+          </Button>
+        </div>
         {suppliers.length > 0 ? (
           <>
             <SupplierFilters

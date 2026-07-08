@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Users } from "lucide-react";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
+import { removeWorkspaceMember } from "@/lib/settings/remove-workspace-member";
 import { TEAM_FEATURES_ENABLED } from "@/lib/settings/constants";
 import { t } from "@/lib/i18n/translations";
 import { useAppLanguage } from "@/lib/settings/language";
@@ -12,6 +13,15 @@ import { textStyle } from "@/lib/typography";
 import { cn } from "@/lib/utils";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
 import { InviteTeamMemberForm } from "@/components/settings/invite-team-member-form";
 import { SettingsSectionCard } from "@/components/settings/settings-section-card";
@@ -55,6 +65,9 @@ export function TeamSection() {
   const [invitations, setInvitations] = useState<Array<{ id: string; email: string }>>([]);
   const [loading, setLoading] = useState(true);
   const [loadingInvitations, setLoadingInvitations] = useState(true);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [removeTarget, setRemoveTarget] = useState<User | null>(null);
+  const [removing, setRemoving] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -66,6 +79,7 @@ export function TeamSection() {
       } = await supabase.auth.getUser();
 
       if (!cancelled && user) {
+        setCurrentUserId(user.id);
         const { data: profile } = await supabase
           .from("users")
           .select("workspace_id")
@@ -121,6 +135,29 @@ export function TeamSection() {
       cancelled = true;
     };
   }, []);
+
+  async function handleRemoveMember() {
+    if (!removeTarget) {
+      return;
+    }
+
+    setRemoving(true);
+    const result = await removeWorkspaceMember(removeTarget.id);
+    setRemoving(false);
+
+    if (!result.ok) {
+      toast.error(result.error);
+      return;
+    }
+
+    setMembers((current) => current.filter((member) => member.id !== removeTarget.id));
+    toast.success(
+      language === "it"
+        ? "Utente rimosso dallo spazio di lavoro"
+        : "Member removed from workspace"
+    );
+    setRemoveTarget(null);
+  }
 
   const showEmptyState = !TEAM_FEATURES_ENABLED || members.length <= 1;
 
@@ -190,6 +227,7 @@ export function TeamSection() {
               first_name: member.first_name ?? names.firstName,
               last_name: member.last_name ?? names.lastName,
             });
+            const canRemove = member.id !== currentUserId && member.role !== "owner";
 
             return (
               <li
@@ -211,11 +249,63 @@ export function TeamSection() {
                   </p>
                 </div>
                 <Badge variant="secondary">{roleLabel(member.role, language)}</Badge>
+                {canRemove ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setRemoveTarget(member)}
+                  >
+                    {language === "it" ? "Elimina" : "Remove"}
+                  </Button>
+                ) : null}
               </li>
             );
           })}
         </ul>
       )}
+
+      <Dialog
+        open={removeTarget !== null}
+        onOpenChange={(open) => {
+          if (!open && !removing) {
+            setRemoveTarget(null);
+          }
+        }}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {language === "it"
+                ? "Rimuovi utente dallo spazio"
+                : "Remove member from workspace"}
+            </DialogTitle>
+            <DialogDescription>
+              {language === "it"
+                ? `Vuoi rimuovere ${removeTarget?.email ?? "questo utente"} dallo spazio di lavoro?`
+                : `Do you want to remove ${removeTarget?.email ?? "this member"} from the workspace?`}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex flex-row justify-end gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setRemoveTarget(null)}
+              disabled={removing}
+            >
+              {t(language, "common.cancel")}
+            </Button>
+            <Button onClick={() => void handleRemoveMember()} disabled={removing}>
+              {removing
+                ? language === "it"
+                  ? "Rimozione..."
+                  : "Removing..."
+                : language === "it"
+                  ? "Elimina"
+                  : "Remove"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </SettingsSectionCard>
   );
 }

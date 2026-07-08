@@ -131,7 +131,11 @@ export function ProjectDetail() {
           <ProjectContactsTab projectId={project.id} />
         )}
         {activeTab === "suppliers" && (
-          <ProjectSuppliersTab projectId={project.id} />
+          <ProjectSuppliersTab
+            projectId={project.id}
+            projectName={project.name}
+            projectCode={project.code}
+          />
         )}
         </div>
       </PageContent>
