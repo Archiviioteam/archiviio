@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { isMailboxEncryptionConfigured } from "@/lib/email/encrypt-credentials";
-import { syncMailboxConnection } from "@/lib/email/sync-mailbox";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import type { MailboxConnection } from "@/types/database";
@@ -54,6 +53,7 @@ export async function POST() {
   }
 
   try {
+    const { syncMailboxConnection } = await import("@/lib/email/sync-mailbox");
     const result = await syncMailboxConnection(
       admin,
       connection as MailboxConnection

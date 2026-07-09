@@ -10,10 +10,13 @@ function htmlResponseMessage(status: number): string {
   if (status === 401 || status === 403) {
     return "Sessione scaduta. Ricarica la pagina e accedi di nuovo.";
   }
+  if (status === 504 || status === 524) {
+    return "Sincronizzazione troppo lunga. Clicca di nuovo Sincronizza per continuare a importare le mail.";
+  }
   if (status >= 500) {
     return "Errore del server. Riprova tra qualche minuto.";
   }
-  return "Il server ha risposto con HTML invece di JSON. Ricarica la pagina (Cmd+Shift+R).";
+  return "Risposta inattesa dal server. Ricarica la pagina (Cmd+Shift+R) e riprova.";
 }
 
 export async function readJsonResponse<T>(response: Response): Promise<T> {

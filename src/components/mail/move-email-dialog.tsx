@@ -13,6 +13,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { fetchApi } from "@/lib/http/fetch-api";
 import { readJsonResponse } from "@/lib/http/read-json-response";
 import { formatProjectCodeDisplay } from "@/lib/projects";
 import { useAppLanguage } from "@/lib/settings/language";
@@ -87,7 +88,7 @@ export function MoveEmailDialog({
     if (!email || !selectedProjectId) return;
     setSaving(true);
     try {
-      const response = await fetch(`/api/archived-emails/${email.id}/move`, {
+      const response = await fetchApi(`/api/archived-emails/${email.id}/move`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ projectId: selectedProjectId }),

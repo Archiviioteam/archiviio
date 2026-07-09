@@ -35,7 +35,10 @@ interface SyncMailboxResult {
   imported: number;
   matched: number;
   errors: string[];
+  hasMore: boolean;
 }
+
+const MAX_MESSAGES_PER_FOLDER_SYNC = 40;
 
 function toIsoDate(value: string | Date | undefined | null): string {
   if (!value) return new Date().toISOString();
@@ -88,6 +91,7 @@ async function listNewMessages(
     try {
       const uidRange = afterUid > 0 ? `${afterUid + 1}:*` : "1:*";
       const messages: ParsedImapMessage[] = [];
+      let fetched = 0;
 
       for await (const message of client.fetch(uidRange, {
         uid: true,
@@ -95,6 +99,10 @@ async function listNewMessages(
         internalDate: true,
       })) {
         if (!message.uid) continue;
+        if (fetched >= MAX_MESSAGES_PER_FOLDER_SYNC) {
+          break;
+        }
+        fetched += 1;
 
         const envelope = message.envelope;
         const from = firstAddress(envelope?.from);
@@ -231,6 +239,7 @@ export async function syncMailboxConnection(
     imported: 0,
     matched: 0,
     errors: [],
+    hasMore: false,
   };
 
   const folders: Array<{
@@ -270,6 +279,10 @@ export async function syncMailboxConnection(
         folderConfig.direction,
         folderConfig.afterUid
       );
+
+      if (messages.length >= MAX_MESSAGES_PER_FOLDER_SYNC) {
+        result.hasMore = true;
+      }
 
       for (const message of messages) {
         if (folderConfig.uidField === "last_uid_inbox") {

@@ -15,6 +15,7 @@ import {
   formatEmailAddress,
 } from "@/lib/email/imap-constants";
 import { formatDateTime } from "@/lib/date-format";
+import { fetchApi } from "@/lib/http/fetch-api";
 import { readJsonResponse } from "@/lib/http/read-json-response";
 import { useAppLanguage } from "@/lib/settings/language";
 import { textStyle } from "@/lib/typography";
@@ -53,7 +54,7 @@ export function EmailDetailDialog({
 
     void (async () => {
       try {
-        const response = await fetch(`/api/archived-emails/${email.id}/body`);
+        const response = await fetchApi(`/api/archived-emails/${email.id}/body`);
         const payload = await readJsonResponse<{ body?: string; error?: string }>(
           response
         );

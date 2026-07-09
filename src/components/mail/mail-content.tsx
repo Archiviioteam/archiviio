@@ -13,6 +13,7 @@ import {
   getSyncErrorMessage,
   type MailboxSyncResult,
 } from "@/lib/email/sync-feedback";
+import { fetchApi } from "@/lib/http/fetch-api";
 import { readJsonResponse } from "@/lib/http/read-json-response";
 import { useAppLanguage } from "@/lib/settings/language";
 import { textStyle } from "@/lib/typography";
@@ -38,7 +39,7 @@ export function MailContent() {
   const loadStatus = useCallback(async () => {
     setStatusLoading(true);
     try {
-      const response = await fetch("/api/mailbox");
+      const response = await fetchApi("/api/mailbox");
       const payload = await readJsonResponse<{
         connected?: boolean;
         connection?: {
@@ -71,7 +72,7 @@ export function MailContent() {
 
   const handleSync = async () => {
     try {
-      const response = await fetch("/api/mailbox/sync", { method: "POST" });
+      const response = await fetchApi("/api/mailbox/sync", { method: "POST" });
       const payload = await readJsonResponse<MailboxSyncResult & { error?: string }>(
         response
       );

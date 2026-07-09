@@ -10,6 +10,7 @@ import {
   SettingsSectionCard,
 } from "@/components/settings/settings-section-card";
 import { formatDateTime } from "@/lib/date-format";
+import { fetchApi } from "@/lib/http/fetch-api";
 import { readJsonResponse } from "@/lib/http/read-json-response";
 import {
   formatSyncSuccessMessage,
@@ -64,7 +65,7 @@ export function MailboxConnectionCard() {
   const loadStatus = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await fetch("/api/mailbox");
+      const response = await fetchApi("/api/mailbox");
       const payload = await readJsonResponse<{
         connected?: boolean;
         encryptionConfigured?: boolean;
@@ -101,7 +102,7 @@ export function MailboxConnectionCard() {
   const runSync = useCallback(async () => {
     setSyncing(true);
     try {
-      const response = await fetch("/api/mailbox/sync", { method: "POST" });
+      const response = await fetchApi("/api/mailbox/sync", { method: "POST" });
       const payload = await readJsonResponse<MailboxSyncResult & { error?: string }>(
         response
       );
@@ -139,7 +140,7 @@ export function MailboxConnectionCard() {
   const handleConnect = async () => {
     setSaving(true);
     try {
-      const response = await fetch("/api/mailbox", {
+      const response = await fetchApi("/api/mailbox", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -182,7 +183,7 @@ export function MailboxConnectionCard() {
   const handleDisconnect = async () => {
     setSaving(true);
     try {
-      const response = await fetch("/api/mailbox", { method: "DELETE" });
+      const response = await fetchApi("/api/mailbox", { method: "DELETE" });
       const payload = await readJsonResponse<{ error?: string }>(response);
       if (!response.ok) {
         throw new Error(payload.error ?? "Disconnect failed");
