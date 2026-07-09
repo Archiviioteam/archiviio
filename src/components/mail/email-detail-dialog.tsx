@@ -14,6 +14,7 @@ import {
   buildAppleMailOpenUrl,
   formatEmailAddress,
 } from "@/lib/email/imap-constants";
+import { formatDateTime } from "@/lib/date-format";
 import { useAppLanguage } from "@/lib/settings/language";
 import { textStyle } from "@/lib/typography";
 import { cn } from "@/lib/utils";
@@ -78,7 +79,7 @@ export function EmailDetailDialog({
             {email.subject || (it ? "(Senza oggetto)" : "(No subject)")}
           </DialogTitle>
           <DialogDescription>
-            {formatSentAt(email.sent_at, language)}
+            {formatDateTime(email.sent_at)}
           </DialogDescription>
         </DialogHeader>
 
@@ -123,8 +124,4 @@ export function EmailDetailDialog({
       </DialogContent>
     </Dialog>
   );
-}
-
-function formatSentAt(value: string, language: "it" | "en"): string {
-  return new Date(value).toLocaleString(language === "it" ? "it-IT" : "en-GB");
 }

@@ -9,6 +9,7 @@ import {
   SettingsField,
   SettingsSectionCard,
 } from "@/components/settings/settings-section-card";
+import { formatDateTime } from "@/lib/date-format";
 import {
   DEFAULT_IMAP_HOST,
   DEFAULT_SENT_FOLDER,
@@ -207,9 +208,7 @@ export function MailboxConnectionCard() {
             {connection.last_sync_at ? (
               <p className="text-muted-foreground">
                 {it ? "Ultima sync" : "Last sync"}:{" "}
-                {new Date(connection.last_sync_at).toLocaleString(
-                  language === "it" ? "it-IT" : "en-GB"
-                )}
+                {formatDateTime(connection.last_sync_at)}
               </p>
             ) : null}
             {connection.last_sync_error ? (

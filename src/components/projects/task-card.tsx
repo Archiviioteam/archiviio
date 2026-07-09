@@ -15,18 +15,7 @@ import { useAppLanguage } from "@/lib/settings/language";
 import { t } from "@/lib/i18n/translations";
 import type { Task } from "@/types/database";
 
-function padDatePart(value: number): string {
-  return String(value).padStart(2, "0");
-}
-
-function formatNumericDate(value: string): string {
-  const date = value.includes("T")
-    ? new Date(value)
-    : new Date(`${value}T00:00:00`);
-
-  return `${padDatePart(date.getDate())}/${padDatePart(date.getMonth() + 1)}/${date.getFullYear()}`;
-}
-
+import { formatDate } from "@/lib/date-format";
 interface TaskCardProps {
   task: Task;
   projectLabel?: string;
@@ -118,7 +107,7 @@ export function TaskCard({
                 !task.due_date && "italic"
               )}
             >
-              {task.due_date ? formatNumericDate(task.due_date) : "—"}
+              {task.due_date ? formatDate(task.due_date) : "—"}
             </span>
 
             {task.urgency ? (

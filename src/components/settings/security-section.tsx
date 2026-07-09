@@ -12,6 +12,7 @@ import { transition } from "@/lib/animation";
 import { radius } from "@/lib/theme";
 import { textStyle } from "@/lib/typography";
 import { cn } from "@/lib/utils";
+import { formatDateTime } from "@/lib/date-format";
 import { t } from "@/lib/i18n/translations";
 import { useAppLanguage } from "@/lib/settings/language";
 import { Button } from "@/components/ui/button";
@@ -136,12 +137,8 @@ export function SecuritySettingsCards() {
     router.replace("/login");
   }, [language, router]);
 
-  const locale = language === "it" ? "it-IT" : "en-US";
   const formattedLastSignIn = lastSignIn
-    ? new Intl.DateTimeFormat(locale, {
-        dateStyle: "medium",
-        timeStyle: "short",
-      }).format(new Date(lastSignIn))
+    ? formatDateTime(lastSignIn)
     : t(language, "settings.security.lastSignInUnknown");
 
   const deleteConfirmDescription =

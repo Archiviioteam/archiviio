@@ -36,6 +36,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { formatDate } from "@/lib/date-format";
 import { formatProjectCodeDisplay } from "@/lib/projects";
 import { useAppLanguage } from "@/lib/settings/language";
 import { cn } from "@/lib/utils";
@@ -44,27 +45,6 @@ import type { Document, Project, Task } from "@/types/database";
 const UPLOADER_INPUT_ID = "project-overview-document-uploader";
 const RECENT_TASKS_LIMIT = 5;
 const RECENT_DOCUMENTS_LIMIT = 4;
-
-function formatDate(iso: string, language: "it" | "en"): string {
-  return new Date(iso).toLocaleDateString(language === "it" ? "it-IT" : "en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-}
-
-function formatTaskDate(value: string | null, language: "it" | "en"): string {
-  if (!value) return "—";
-
-  const date = value.includes("T")
-    ? new Date(value)
-    : new Date(`${value}T00:00:00`);
-
-  return date.toLocaleDateString(language === "it" ? "it-IT" : "en-US", {
-    day: "numeric",
-    month: "short",
-  });
-}
 
 interface OverviewTaskReminderProps {
   task: Task;
@@ -121,7 +101,7 @@ function OverviewTaskReminder({
             {task.title}
           </span>
           <span className={cn(textStyle.caption, "shrink-0 text-muted-foreground")}>
-            {formatTaskDate(task.due_date, language)}
+            {formatDate(task.due_date)}
           </span>
         </div>
       </div>
@@ -361,7 +341,7 @@ export function ProjectOverviewTab({
                   {language === "it" ? "Creato" : "Created"}
                 </span>
                 <span className={cn(textStyle.bodyMedium, "text-foreground")}>
-                  {formatDate(project.created_at, language)}
+                  {formatDate(project.created_at)}
                 </span>
               </div>
 

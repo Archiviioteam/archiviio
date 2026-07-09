@@ -6,12 +6,10 @@ export function formatFileSize(bytes: number | null): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+import { formatDate } from "@/lib/date-format";
+
 export function formatUploadDate(iso: string): string {
-  return new Date(iso).toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
+  return formatDate(iso);
 }
 
 export function getFileTypeLabel(fileType: string | null): string {

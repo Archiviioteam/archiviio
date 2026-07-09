@@ -40,9 +40,11 @@ import { cn } from "@/lib/utils";
 import type { DashboardData } from "@/lib/dashboard";
 import type { Contact, Project, Supplier, Task } from "@/types/database";
 
+import { formatDate } from "@/lib/date-format";
+
 function formatDueDate(value: string | null): string {
   if (!value) return "";
-  return new Date(`${value}T00:00:00`).toLocaleDateString();
+  return formatDate(value);
 }
 
 export function DashboardContent() {

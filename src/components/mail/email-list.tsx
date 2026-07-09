@@ -20,6 +20,7 @@ import { useAppLanguage } from "@/lib/settings/language";
 import { textStyle } from "@/lib/typography";
 import { createClient } from "@/lib/supabase/client";
 import { getWorkspaceId } from "@/lib/workspace";
+import { formatDateTime } from "@/lib/date-format";
 import { cn } from "@/lib/utils";
 import type { ArchivedEmail, EmailDirection } from "@/types/database";
 
@@ -29,14 +30,8 @@ interface EmailListProps {
   showMoveAction?: boolean;
 }
 
-function formatSentAt(value: string, language: "it" | "en"): string {
-  return new Date(value).toLocaleString(language === "it" ? "it-IT" : "en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+function formatSentAt(value: string): string {
+  return formatDateTime(value);
 }
 
 export function EmailList({
@@ -174,7 +169,7 @@ export function EmailList({
                       </p>
                     </div>
                     <span className={cn(textStyle.caption, "shrink-0 text-muted-foreground")}>
-                      {formatSentAt(email.sent_at, language)}
+                      {formatSentAt(email.sent_at)}
                     </span>
                   </div>
                   {email.snippet ? (

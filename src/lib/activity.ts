@@ -1,5 +1,5 @@
-import type { AppLanguage } from "@/lib/settings/preferences-storage";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { formatActivityDate } from "@/lib/date-format";
 import { formatProjectCodeDisplay } from "@/lib/projects";
 import {
   contactHref,
@@ -10,32 +10,10 @@ import {
 } from "@/lib/search/search-routes";
 import type { ActivityAction, ActivityEntityType } from "@/types/database";
 
+export { formatActivityDate };
+
 export const ACTIVITY_FEED_DEFAULT_LIMIT = 8;
 export const PROJECT_ACTIVITY_LIMIT = 20;
-
-export function formatActivityDate(
-  value: string,
-  language: AppLanguage = "en"
-): string {
-  const date = value.includes("T")
-    ? new Date(value)
-    : new Date(`${value}T00:00:00`);
-
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const target = new Date(date);
-  target.setHours(0, 0, 0, 0);
-
-  if (target.getTime() === today.getTime()) {
-    return language === "it" ? "Oggi" : "Today";
-  }
-
-  const locale = language === "it" ? "it-IT" : "en-US";
-  return date.toLocaleDateString(locale, {
-    month: "short",
-    day: "numeric",
-  });
-}
 
 export interface LogActivityInput {
   workspaceId: string;

@@ -26,13 +26,11 @@ import { t } from "@/lib/i18n/translations";
 import { useAppLanguage } from "@/lib/settings/language";
 import { textStyle } from "@/lib/typography";
 import { cn } from "@/lib/utils";
+import { formatDateTime } from "@/lib/date-format";
 import type { WorkspaceNote } from "@/types/database";
 
 function formatNoteDate(value: string): string {
-  return new Intl.DateTimeFormat(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value));
+  return formatDateTime(value);
 }
 
 export function NotesContent() {

@@ -14,14 +14,11 @@ import { t } from "@/lib/i18n/translations";
 import { textStyle } from "@/lib/typography";
 import { cn } from "@/lib/utils";
 import { getWorkspaceId } from "@/lib/workspace";
+import { formatDateTime } from "@/lib/date-format";
 import type { WorkspaceNote } from "@/types/database";
 
-function formatNoteDate(value: string, language: "it" | "en"): string {
-  return new Date(value).toLocaleDateString(language === "it" ? "it-IT" : "en-US", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
+function formatNoteDate(value: string): string {
+  return formatDateTime(value);
 }
 
 export function DashboardNotesComposer() {
@@ -155,7 +152,7 @@ export function DashboardNotesComposer() {
                   "shrink-0 text-muted-foreground"
                 )}
               >
-                {formatNoteDate(latestNote.created_at, language)}
+                {formatNoteDate(latestNote.created_at)}
               </span>
             </div>
             {latestNote.content ? (
