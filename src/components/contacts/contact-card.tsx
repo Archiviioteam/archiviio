@@ -25,7 +25,7 @@ export function ContactListHeader({ className }: ContactListHeaderProps) {
   const language = useAppLanguage();
 
   return (
-    <div className={cn("flex items-center gap-2", className)}>
+    <div className={cn("hidden items-center gap-2 md:flex", className)}>
       <div
         className={cn(
           contactRowGridClassName,
@@ -112,10 +112,10 @@ export function ContactCard({
 
   return (
     <Card variant={onClick ? "interactive" : "default"}>
-      <CardContent className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:gap-2 sm:py-2.5">
+      <CardContent className="flex flex-col gap-3 px-4 py-4 md:flex-row md:items-center md:gap-2 md:py-2.5">
         <div
           className={cn(
-            "hidden sm:grid",
+            "hidden md:grid",
             contactRowGridClassName,
             onClick && "cursor-pointer",
             onClick && transition.hover
@@ -183,7 +183,7 @@ export function ContactCard({
 
         <div
           className={cn(
-            "flex min-w-0 flex-1 flex-col gap-1.5 sm:hidden",
+            "flex min-w-0 flex-1 flex-col gap-1 md:hidden",
             onClick && "cursor-pointer",
             onClick && transition.hover
           )}
@@ -201,24 +201,33 @@ export function ContactCard({
           role={onClick ? "button" : undefined}
           tabIndex={onClick ? 0 : undefined}
         >
-          <span className={cn(textStyle.bodyMedium, "truncate text-foreground")} title={contact.name}>
+          <span
+            className={cn(textStyle.bodyMedium, "text-foreground")}
+            title={contact.name}
+          >
             {contact.name}
           </span>
-          <span className={cn(textStyle.caption, "truncate text-muted-foreground")} title={typeLabel ?? undefined}>
+          <span
+            className={cn(textStyle.body, "text-muted-foreground")}
+            title={typeLabel ?? undefined}
+          >
             {contactField(typeLabel)}
           </span>
-          <span className={cn(textStyle.caption, "truncate text-muted-foreground")} title={contact.company ?? undefined}>
+          <span
+            className={cn(textStyle.body, "text-muted-foreground")}
+            title={contact.company ?? undefined}
+          >
             {company}
           </span>
           <ContactValue
             value={contact.email}
             href={`mailto:${contact.email?.trim() ?? ""}`}
-            className={cn(textStyle.caption, "truncate text-muted-foreground")}
+            className={cn(textStyle.body, "break-all text-muted-foreground")}
           />
           <ContactValue
             value={contact.phone}
             href={`tel:${normalizePhoneHref(contact.phone?.trim() ?? "")}`}
-            className={cn(textStyle.caption, "truncate text-muted-foreground")}
+            className={cn(textStyle.body, "text-muted-foreground")}
           />
         </div>
 
@@ -229,7 +238,7 @@ export function ContactCard({
             size="icon"
             className={cn(
               deleteButtonClassName,
-              "self-end sm:self-auto",
+              "self-end md:self-auto",
               "text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
             )}
             aria-label={removeAriaLabel}

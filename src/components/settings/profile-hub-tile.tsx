@@ -3,7 +3,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { Loader2, Pencil } from "lucide-react";
 import { toast } from "sonner";
-import { settingsHubTileClass } from "@/lib/settings/hub-control-styles";
+import {
+  settingsHubSaveButtonClass,
+  settingsHubTileBodyClass,
+  settingsHubTileClass,
+} from "@/lib/settings/hub-control-styles";
 import {
   isRequired,
   isValidPhone,
@@ -168,9 +172,9 @@ export function ProfileHubTile() {
     <Card
       data-dashboard-panel
       variant="nested"
-      className={cn(settingsHubTileClass, "justify-between gap-5")}
+      className={cn(settingsHubTileClass, "gap-5 overflow-hidden")}
     >
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex shrink-0 items-center justify-between gap-3">
         <span className={textStyle.pageTitle}>
           {t(language, "settings.profile.label")}
         </span>
@@ -197,7 +201,7 @@ export function ProfileHubTile() {
           {t(language, "settings.profile.loading")}
         </p>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className={cn(settingsHubTileBodyClass, "grid gap-4 sm:grid-cols-2")}>
           <div className="flex flex-col gap-2">
             <p className={cn(textStyle.captionMedium, "text-muted-foreground")}>
               {t(language, "profile.firstName")}
@@ -282,7 +286,7 @@ export function ProfileHubTile() {
       )}
 
       {isEditing ? (
-        <div className="flex items-center justify-end gap-2">
+        <div className="flex shrink-0 items-center justify-end gap-2">
           <Button
             type="button"
             variant="outline"
@@ -295,6 +299,7 @@ export function ProfileHubTile() {
           <Button
             type="button"
             size="sm"
+            className={settingsHubSaveButtonClass}
             onClick={() => void handleSave()}
             disabled={saving}
           >

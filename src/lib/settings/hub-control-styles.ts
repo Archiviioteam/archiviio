@@ -33,3 +33,8 @@ export const settingsHubSegmentedIndicatorClass = cn(
   radius.pill,
   "pointer-events-none absolute inset-y-1 left-1 bg-card shadow-[var(--shadow-sm)]"
 );
+
+export const settingsHubTileBodyClass = "min-h-0 flex-1 overflow-y-auto";
+
+export const settingsHubSaveButtonClass =
+  "border-foreground bg-foreground text-background hover:bg-foreground/90 hover:text-background";

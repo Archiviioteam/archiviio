@@ -171,7 +171,7 @@ export function ProjectContactsTab({ projectId }: ProjectContactsTabProps) {
           </Card>
         ) : (
           <div className="flex flex-col gap-3">
-            <Card className="hidden sm:block">
+            <Card className="hidden md:block">
               <CardContent className="px-4 py-2">
                 <ContactListHeader />
               </CardContent>

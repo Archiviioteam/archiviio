@@ -51,7 +51,7 @@ function ContactRow({
   const content = (
     <>
       <Icon className="size-4 shrink-0 text-muted-foreground" strokeWidth={1.5} />
-      <span className={cn(textStyle.body, "truncate text-muted-foreground")}>
+      <span className={cn(textStyle.body, "break-all text-muted-foreground md:truncate")}>
         {value}
       </span>
     </>
@@ -91,6 +91,23 @@ export function SupplierCard({
   const email = supplier.email?.trim();
   const phone = supplier.phone?.trim();
   const website = supplier.website?.trim();
+  const hasBadges =
+    supplier.in_material_library || supplier.company_types.length > 0;
+
+  const badges = (
+    <>
+      {supplier.in_material_library ? (
+        <Badge variant="secondary" size="lg">
+          {t(language, "suppliers.materialLibraryBadge")}
+        </Badge>
+      ) : null}
+      {supplier.company_types.map((type) => (
+        <Badge key={type} variant="muted" size="lg">
+          {getSupplierCompanyTypeLabel(type, language)}
+        </Badge>
+      ))}
+    </>
+  );
 
   return (
     <Card
@@ -117,14 +134,20 @@ export function SupplierCard({
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <p
-            className={cn(textStyle.bodyMedium, "truncate font-semibold text-foreground")}
+            className={cn(
+              textStyle.bodyMedium,
+              "font-semibold text-foreground md:truncate"
+            )}
             title={supplier.company}
           >
             {supplier.company}
           </p>
           {contactName ? (
             <p
-              className={cn(textStyle.body, "mt-1 truncate text-muted-foreground")}
+              className={cn(
+                textStyle.body,
+                "mt-1 text-muted-foreground md:truncate"
+              )}
               title={contactName}
             >
               {contactName}
@@ -133,18 +156,9 @@ export function SupplierCard({
         </div>
 
         <div className="flex shrink-0 items-center gap-2">
-          {supplier.in_material_library ? (
-            <Badge variant="secondary" size="lg">
-              {t(language, "suppliers.materialLibraryBadge")}
-            </Badge>
-          ) : null}
-          {supplier.company_types.length > 0 ? (
-            <div className="flex max-w-[10rem] flex-wrap justify-end gap-1.5">
-              {supplier.company_types.map((type) => (
-                <Badge key={type} variant="muted" size="lg">
-                  {getSupplierCompanyTypeLabel(type, language)}
-                </Badge>
-              ))}
+          {hasBadges ? (
+            <div className="hidden max-w-[10rem] flex-wrap justify-end gap-1.5 md:flex">
+              {badges}
             </div>
           ) : null}
 
@@ -186,6 +200,10 @@ export function SupplierCard({
           ) : null}
         </div>
       )}
+
+      {hasBadges ? (
+        <div className="flex flex-wrap gap-1.5 md:hidden">{badges}</div>
+      ) : null}
     </Card>
   );
 }

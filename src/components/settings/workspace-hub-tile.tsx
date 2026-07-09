@@ -3,7 +3,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { Loader2, Pencil } from "lucide-react";
 import { toast } from "sonner";
-import { settingsHubTileClass } from "@/lib/settings/hub-control-styles";
+import {
+  settingsHubSaveButtonClass,
+  settingsHubTileBodyClass,
+  settingsHubTileClass,
+} from "@/lib/settings/hub-control-styles";
 import {
   isRequired,
   isValidEmail,
@@ -254,9 +258,9 @@ export function WorkspaceHubTile() {
     <Card
       data-dashboard-panel
       variant="nested"
-      className={cn(settingsHubTileClass, "justify-between gap-5")}
+      className={cn(settingsHubTileClass, "gap-5 overflow-hidden")}
     >
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex shrink-0 items-center justify-between gap-3">
         <span className={textStyle.pageTitle}>
           {t(language, "settings.workspace.label")}
         </span>
@@ -283,7 +287,7 @@ export function WorkspaceHubTile() {
           {t(language, "settings.workspace.loading")}
         </p>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className={cn(settingsHubTileBodyClass, "grid gap-4 sm:grid-cols-2")}>
           <div className="sm:col-span-2">
             <HubField
               label={t(language, "workspace.name")}
@@ -371,7 +375,7 @@ export function WorkspaceHubTile() {
       )}
 
       {isEditing ? (
-        <div className="flex items-center justify-end gap-2">
+        <div className="flex shrink-0 items-center justify-end gap-2">
           <Button
             type="button"
             variant="outline"
@@ -384,6 +388,7 @@ export function WorkspaceHubTile() {
           <Button
             type="button"
             size="sm"
+            className={settingsHubSaveButtonClass}
             onClick={() => void handleSave()}
             disabled={saving}
           >
