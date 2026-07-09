@@ -27,6 +27,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ImageUploadField } from "@/components/settings/image-upload-field";
+import { MailboxConnectionCard } from "@/components/mail/mailbox-connection-card";
 import {
   SettingsField,
   SettingsSectionCard,
@@ -265,7 +266,8 @@ export function ProfileSection() {
   }
 
   return (
-    <SettingsSectionCard
+    <div className="flex flex-col gap-6">
+      <SettingsSectionCard
         title={t(language, "settings.profile.sectionTitle")}
         description={t(language, "settings.profile.pageDescription")}
         footer={
@@ -367,5 +369,8 @@ export function ProfileSection() {
           />
         </SettingsField>
       </SettingsSectionCard>
+
+      <MailboxConnectionCard />
+    </div>
   );
 }

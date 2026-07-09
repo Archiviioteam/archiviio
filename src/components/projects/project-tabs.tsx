@@ -9,6 +9,7 @@ export const PROJECT_TABS = [
   { id: "overview", label: "Overview" },
   { id: "tasks", label: "Tasks" },
   { id: "documents", label: "Deliverables" },
+  { id: "mail", label: "Mail" },
   { id: "contacts", label: "Contacts" },
   { id: "suppliers", label: "Suppliers" },
 ] as const;
@@ -26,6 +27,7 @@ export function ProjectTabs({ activeTab, onTabChange }: ProjectTabsProps) {
     overview: language === "it" ? "Panoramica" : "Overview",
     tasks: language === "it" ? "Attività" : "Tasks",
     documents: language === "it" ? "Elaborati" : "Deliverables",
+    mail: language === "it" ? "Mail" : "Mail",
     contacts: language === "it" ? "Contatti" : "Contacts",
     suppliers: language === "it" ? "Fornitori" : "Suppliers",
   };

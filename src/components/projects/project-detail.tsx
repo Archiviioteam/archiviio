@@ -14,6 +14,7 @@ import { ProjectOverviewTab } from "@/components/projects/project-overview-tab";
 import { ProjectContactsTab } from "@/components/projects/project-contacts-tab";
 import { ProjectSuppliersTab } from "@/components/projects/project-suppliers-tab";
 import { ProjectDocumentsTab } from "@/components/projects/project-documents-tab";
+import { ProjectMailsTab } from "@/components/projects/project-mails-tab";
 import { ProjectTasksTab } from "@/components/projects/project-tasks-tab";
 import {
   PROJECT_TABS,
@@ -140,6 +141,7 @@ export function ProjectDetail() {
           {activeTab === "documents" && (
             <ProjectDocumentsTab projectId={project.id} />
           )}
+          {activeTab === "mail" && <ProjectMailsTab projectId={project.id} />}
           {activeTab === "contacts" && (
             <ProjectContactsTab projectId={project.id} />
           )}

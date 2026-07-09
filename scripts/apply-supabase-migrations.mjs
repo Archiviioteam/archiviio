@@ -117,6 +117,7 @@ async function checkSchemaViaPg(client) {
       (await pgColumnExists(client, "workspaces", "address")) &&
       (await pgColumnExists(client, "workspaces", "logo_url")),
     workspace_postal_code: await pgColumnExists(client, "workspaces", "postal_code"),
+    email_archiving: await pgTableExists(client, "archived_emails"),
     user_profile_settings:
       (await pgColumnExists(client, "users", "first_name")) &&
       (await pgColumnExists(client, "users", "avatar_url")),
@@ -256,6 +257,13 @@ async function checkSchemaViaApi(supabase) {
       const { data, error } = await supabase.rpc("new_invitation_token");
       return !error && typeof data === "string" && data.length > 0;
     },
+    email_archiving: async () => {
+      const { error } = await supabase
+        .from("archived_emails")
+        .select("id")
+        .limit(0);
+      return !error;
+    },
   };
 
   const status = { coreReady: true };
@@ -301,6 +309,7 @@ function migrationsForStatus(status) {
     needed.add("026_fix_invitation_token_generation.sql");
   }
   if (!status.reminder_removed) needed.add("027_remove_task_reminder.sql");
+  if (!status.email_archiving) needed.add("031_email_archiving.sql");
 
   return files.filter((file) => needed.has(file));
 }

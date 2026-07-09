@@ -5,6 +5,7 @@ import {
   FileText,
   FolderKanban,
   LayoutDashboard,
+  Mail,
   Settings,
   StickyNote,
   Truck,
@@ -31,6 +32,7 @@ export function getPrimaryNavItems(language: AppLanguage): NavItem[] {
     { href: "/contacts", label: t(language, "navigation.contacts"), icon: Users },
     { href: "/suppliers", label: t(language, "navigation.suppliers"), icon: Truck },
     { href: "/documents", label: t(language, "navigation.documents"), icon: FileText },
+    { href: "/mail", label: t(language, "navigation.mail"), icon: Mail },
     { href: "/notes", label: t(language, "navigation.notes"), icon: StickyNote },
     {
       href: "/nomenclature",
@@ -100,6 +102,7 @@ export function getPageTitle(pathname: string, language: AppLanguage = "en"): st
   if (path === "/contacts") return t(language, "navigation.contacts");
   if (path === "/suppliers") return t(language, "navigation.suppliers");
   if (path === "/documents") return t(language, "navigation.documents");
+  if (path === "/mail") return t(language, "navigation.mail");
   if (path === "/tasks") return t(language, "navigation.tasks");
   if (path === "/notes") return t(language, "navigation.notes");
   if (path === "/nomenclature") return t(language, "navigation.nomenclature");
