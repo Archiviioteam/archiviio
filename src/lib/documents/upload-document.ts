@@ -24,7 +24,7 @@ const CONTENT_TYPE_BY_EXTENSION: Record<string, string> = {
 export type UploadDocumentOptions = {
   supabase: SupabaseClient;
   workspaceId: string;
-  projectId: string;
+  projectId: string | null;
   file: File;
   onProgress?: (percent: number) => void;
 };
@@ -193,7 +193,7 @@ export async function uploadDocument(
     action: "document.uploaded",
     entityType: "document",
     entityId: documentId,
-    projectId,
+    projectId: projectId ?? undefined,
     title: file.name,
   });
 

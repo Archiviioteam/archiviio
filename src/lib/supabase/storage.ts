@@ -136,12 +136,13 @@ export function validateDocumentFile(file: File): DocumentFileValidationResult {
   return { ok: true };
 }
 
-/** Storage object path: {workspace_id}/{project_id}/{document_id}/{filename} */
+/** Storage object path: {workspace_id}/{project_id|_studio}/{document_id}/{filename} */
 export function buildDocumentStoragePath(
   workspaceId: string,
-  projectId: string,
+  projectId: string | null,
   documentId: string,
   filename: string
 ): string {
-  return `${workspaceId}/${projectId}/${documentId}/${filename}`;
+  const scope = projectId ?? "_studio";
+  return `${workspaceId}/${scope}/${documentId}/${filename}`;
 }

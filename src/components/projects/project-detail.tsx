@@ -111,33 +111,46 @@ export function ProjectDetail() {
     );
   }
 
+  const isOverview = activeTab === "overview";
+
   return (
-    <PageLayout>
-      <PageContent>
+    <PageLayout className={isOverview ? "h-full min-h-0" : undefined}>
+      <PageContent
+        className={cn(
+          isOverview && "h-full min-h-0 flex-1",
+          !isOverview && "min-h-0 flex-1"
+        )}
+      >
         <ProjectTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
-        <div>
-        {activeTab === "overview" && (
-          <ProjectOverviewTab
-            project={project}
-            onProjectUpdated={setProject}
-          />
-        )}
-        {activeTab === "tasks" && <ProjectTasksTab projectId={project.id} />}
-        {activeTab === "documents" && (
-          <ProjectDocumentsTab projectId={project.id} />
-        )}
-        {activeTab === "contacts" && (
-          <ProjectContactsTab projectId={project.id} />
-        )}
-        {activeTab === "suppliers" && (
-          <ProjectSuppliersTab
-            projectId={project.id}
-            projectName={project.name}
-            projectLocation={project.location}
-            projectCode={project.code}
-          />
-        )}
+        <div
+          className={cn(
+            isOverview
+              ? "flex min-h-0 flex-1 flex-col"
+              : "min-h-0 flex-1 overflow-y-auto"
+          )}
+        >
+          {isOverview && (
+            <ProjectOverviewTab
+              project={project}
+              onProjectUpdated={setProject}
+            />
+          )}
+          {activeTab === "tasks" && <ProjectTasksTab projectId={project.id} />}
+          {activeTab === "documents" && (
+            <ProjectDocumentsTab projectId={project.id} />
+          )}
+          {activeTab === "contacts" && (
+            <ProjectContactsTab projectId={project.id} />
+          )}
+          {activeTab === "suppliers" && (
+            <ProjectSuppliersTab
+              projectId={project.id}
+              projectName={project.name}
+              projectLocation={project.location}
+              projectCode={project.code}
+            />
+          )}
         </div>
       </PageContent>
     </PageLayout>

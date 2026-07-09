@@ -149,6 +149,8 @@ export type TranslationKey =
   | "notes.createdToast"
   | "notes.updatedToast"
   | "documents.emptyTitle"
+  | "documents.emptySearchTitle"
+  | "documents.loading"
   | "documents.uploadTitle"
   | "documents.uploadDescription"
   | "documents.uploadedToast"
@@ -312,7 +314,7 @@ const translations: Record<AppLanguage, Record<TranslationKey, string>> = {
     "navigation.tasks": "Tasks",
     "navigation.contacts": "Contacts",
     "navigation.suppliers": "Suppliers",
-    "navigation.documents": "Documents",
+    "navigation.documents": "Studio documents",
     "navigation.notes": "Notes",
     "navigation.nomenclature": "Nomenclature",
     "navigation.settings": "Settings",
@@ -355,10 +357,10 @@ const translations: Record<AppLanguage, Record<TranslationKey, string>> = {
     "team.manage": "Manage team",
     "search.open": "Open search",
     "search.trigger": "Search",
-    "search.triggerLong": "Search projects, contacts, documents...",
+    "search.triggerLong": "Search projects, contacts, studio documents...",
     "search.dialogTitle": "Search",
     "search.dialogDescription":
-      "Search projects, contacts, documents and more in Archiviio",
+      "Search projects, contacts, studio documents and more in Archiviio",
     "search.placeholder": "Search by name...",
     "search.running": "Searching...",
     "search.error": "Search error. Try again.",
@@ -366,7 +368,7 @@ const translations: Record<AppLanguage, Record<TranslationKey, string>> = {
     "search.projectCodes": "Project codes",
     "search.contacts": "Contacts",
     "search.suppliers": "Suppliers",
-    "search.documents": "Documents",
+    "search.documents": "Studio documents",
     "search.tags": "Tags",
     "search.nomenclature": "Nomenclature",
     "search.quickActions": "Quick actions",
@@ -466,16 +468,18 @@ const translations: Record<AppLanguage, Record<TranslationKey, string>> = {
     "notes.contentRequired": "Add a title or some content.",
     "notes.createdToast": "Note created",
     "notes.updatedToast": "Note updated",
-    "documents.emptyTitle": "No deliverables yet",
-    "documents.uploadTitle": "Upload deliverable",
+    "documents.emptyTitle": "No studio documents yet",
+    "documents.emptySearchTitle": "No studio documents match your search",
+    "documents.loading": "Loading studio documents...",
+    "documents.uploadTitle": "Upload studio document",
     "documents.uploadDescription":
-      "Choose a project, then select a file to upload.",
+      "Upload contracts, schedules, and other studio files not tied to a project.",
     "documents.uploadedToast": "{name} uploaded",
     "documents.dropzoneHint": "Drag files here or click to upload",
     "documents.dropzoneActive": "Drop files to upload",
     "documents.dropzoneAllowed": "{types} · max {size} per file",
     "documents.uploadFailed": "Failed",
-    "documents.deleteTitle": "Delete document",
+    "documents.deleteTitle": "Delete studio document",
     "documents.deleteDescription":
       "Delete {name}? This removes the file and all stored versions. This action cannot be undone.",
     "documents.deletedToast": "{name} deleted",
@@ -648,7 +652,7 @@ const translations: Record<AppLanguage, Record<TranslationKey, string>> = {
     "navigation.tasks": "Attività",
     "navigation.contacts": "Contatti",
     "navigation.suppliers": "Fornitori",
-    "navigation.documents": "Documenti",
+    "navigation.documents": "Documenti di studio",
     "navigation.notes": "Note",
     "navigation.nomenclature": "Nomenclatura",
     "navigation.settings": "Impostazioni",
@@ -691,10 +695,10 @@ const translations: Record<AppLanguage, Record<TranslationKey, string>> = {
     "team.manage": "Gestisci team",
     "search.open": "Apri ricerca",
     "search.trigger": "Cerca",
-    "search.triggerLong": "Cerca progetti, contatti, documenti...",
+    "search.triggerLong": "Cerca progetti, contatti, documenti di studio...",
     "search.dialogTitle": "Ricerca",
     "search.dialogDescription":
-      "Cerca progetti, contatti, documenti e altro in Archiviio",
+      "Cerca progetti, contatti, documenti di studio e altro in Archiviio",
     "search.placeholder": "Cerca per nome...",
     "search.running": "Ricerca in corso...",
     "search.error": "Errore durante la ricerca. Riprova.",
@@ -702,7 +706,7 @@ const translations: Record<AppLanguage, Record<TranslationKey, string>> = {
     "search.projectCodes": "Codici progetto",
     "search.contacts": "Contatti",
     "search.suppliers": "Fornitori",
-    "search.documents": "Documenti",
+    "search.documents": "Documenti di studio",
     "search.tags": "Tag",
     "search.nomenclature": "Nomenclatura",
     "search.quickActions": "Azioni rapide",
@@ -804,16 +808,18 @@ const translations: Record<AppLanguage, Record<TranslationKey, string>> = {
     "notes.contentRequired": "Aggiungi un titolo o del contenuto.",
     "notes.createdToast": "Nota creata",
     "notes.updatedToast": "Nota aggiornata",
-    "documents.emptyTitle": "Nessun elaborato",
-    "documents.uploadTitle": "Carica elaborato",
+    "documents.emptyTitle": "Nessun documento di studio",
+    "documents.emptySearchTitle": "Nessun documento di studio corrisponde alla ricerca",
+    "documents.loading": "Caricamento documenti di studio...",
+    "documents.uploadTitle": "Carica documento di studio",
     "documents.uploadDescription":
-      "Seleziona un file da caricare nello studio.",
+      "Carica contratti, tabulati e altri file dello studio non legati a un progetto.",
     "documents.uploadedToast": "{name} caricato",
     "documents.dropzoneHint": "Trascina i file qui o clicca per caricare",
     "documents.dropzoneActive": "Rilascia i file per caricare",
     "documents.dropzoneAllowed": "{types} · max {size} per file",
     "documents.uploadFailed": "Errore",
-    "documents.deleteTitle": "Elimina elaborato",
+    "documents.deleteTitle": "Elimina documento di studio",
     "documents.deleteDescription":
       "Eliminare {name}? Verranno rimossi il file e tutte le versioni salvate. Questa azione non può essere annullata.",
     "documents.deletedToast": "{name} eliminato",

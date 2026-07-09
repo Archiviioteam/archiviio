@@ -41,15 +41,17 @@ export function getEmptyStatePresets(language: AppLanguage = "en") {
     documents: {
       icon: FileText,
       title: isItalian
-        ? "Nessun elaborato caricato"
-        : "No deliverables uploaded yet",
-      actionLabel: isItalian ? "Carica elaborato" : "Upload deliverable",
+        ? "Nessun documento di studio"
+        : "No studio documents yet",
+      actionLabel: isItalian
+        ? "Carica documento di studio"
+        : "Upload studio document",
     },
     documentsSearch: {
       icon: Search,
       title: isItalian
-        ? "Nessun elaborato corrisponde alla ricerca"
-        : "No deliverables match your search",
+        ? "Nessun documento di studio corrisponde alla ricerca"
+        : "No studio documents match your search",
       actionLabel: isItalian ? "Pulisci filtri" : "Clear filters",
     },
     elaborati: {

@@ -2,16 +2,23 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { CheckSquare, FileText, Pencil, Upload } from "lucide-react";
+import { Check, CheckSquare, FileText, Pencil, Upload } from "lucide-react";
 import { toast } from "sonner";
+import { DashboardSection } from "@/components/dashboard/dashboard-section";
 import { DocumentUploader } from "@/components/documents/document-uploader";
 import { AddTaskDialog } from "@/components/projects/add-task-dialog";
 import { ProjectForm } from "@/components/projects/project-form";
 import { ProjectStatusBadge } from "@/components/projects/project-status-badge";
-import { TaskCard } from "@/components/projects/task-card";
-import { Button } from "@/components/ui/button";
-import { stack } from "@/lib/spacing";
 import { textStyle } from "@/lib/typography";
+import { radius } from "@/lib/theme";
+import {
+  dashboardGridClassDesktop,
+  dashboardGridClassMobile,
+  dashboardGridGapClass,
+  dashboardPanelClassDesktop,
+  dashboardPanelClassMobile,
+  dashboardPanelContentClass,
+} from "@/lib/dashboard-layout";
 import { transition } from "@/lib/animation";
 import {
   formatUploadDate,
@@ -22,12 +29,7 @@ import { projectHref } from "@/lib/search/search-routes";
 import { createClient } from "@/lib/supabase/client";
 import { toggleTaskCompletion } from "@/lib/tasks/toggle-task-completion";
 import { getWorkspaceId } from "@/lib/workspace";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -37,10 +39,10 @@ import {
 import { formatProjectCodeDisplay } from "@/lib/projects";
 import { useAppLanguage } from "@/lib/settings/language";
 import { cn } from "@/lib/utils";
-import type { Document, Project, Task, WorkspaceNote } from "@/types/database";
+import type { Document, Project, Task } from "@/types/database";
 
 const UPLOADER_INPUT_ID = "project-overview-document-uploader";
-const RECENT_NOTES_LIMIT = 3;
+const RECENT_TASKS_LIMIT = 5;
 const RECENT_DOCUMENTS_LIMIT = 4;
 
 function formatDate(iso: string, language: "it" | "en"): string {
@@ -51,12 +53,80 @@ function formatDate(iso: string, language: "it" | "en"): string {
   });
 }
 
-function formatNoteDate(iso: string, language: "it" | "en"): string {
-  return new Date(iso).toLocaleDateString(language === "it" ? "it-IT" : "en-US", {
+function formatTaskDate(value: string | null, language: "it" | "en"): string {
+  if (!value) return "—";
+
+  const date = value.includes("T")
+    ? new Date(value)
+    : new Date(`${value}T00:00:00`);
+
+  return date.toLocaleDateString(language === "it" ? "it-IT" : "en-US", {
     day: "numeric",
     month: "short",
-    year: "numeric",
   });
+}
+
+interface OverviewTaskReminderProps {
+  task: Task;
+  language: "it" | "en";
+  toggling: boolean;
+  onToggleComplete: (task: Task, completed: boolean) => void;
+}
+
+function OverviewTaskReminder({
+  task,
+  language,
+  toggling,
+  onToggleComplete,
+}: OverviewTaskReminderProps) {
+  const isDone = task.status === "done";
+
+  return (
+    <Card variant="nested" className={cn(isDone && "opacity-75")}>
+      <div className="flex items-center gap-2 p-2">
+        <button
+          type="button"
+          role="checkbox"
+          aria-checked={isDone}
+          aria-label={
+            isDone
+              ? language === "it"
+                ? "Segna come da fare"
+                : "Mark as incomplete"
+              : language === "it"
+                ? "Segna come completata"
+                : "Mark as complete"
+          }
+          disabled={toggling}
+          onClick={() => onToggleComplete(task, !isDone)}
+          className={cn(
+            "flex size-4 shrink-0 items-center justify-center border-2 border-input bg-card",
+            radius.control,
+            transition.hover,
+            isDone && "border-primary bg-primary text-primary-foreground",
+            toggling && "opacity-50"
+          )}
+        >
+          {isDone ? <Check className="size-2.5" strokeWidth={3} /> : null}
+        </button>
+
+        <div className="flex min-w-0 flex-1 items-center justify-between gap-2">
+          <span
+            className={cn(
+              textStyle.captionMedium,
+              "min-w-0 truncate text-foreground",
+              isDone && "text-muted-foreground line-through"
+            )}
+          >
+            {task.title}
+          </span>
+          <span className={cn(textStyle.caption, "shrink-0 text-muted-foreground")}>
+            {formatTaskDate(task.due_date, language)}
+          </span>
+        </div>
+      </div>
+    </Card>
+  );
 }
 
 interface ProjectOverviewTabProps {
@@ -99,23 +169,21 @@ export function ProjectOverviewTab({
   const language = useAppLanguage();
   const [editOpen, setEditOpen] = useState(false);
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
-  const [latestTask, setLatestTask] = useState<Task | null>(null);
-  const [loadingTask, setLoadingTask] = useState(true);
-  const [togglingTask, setTogglingTask] = useState(false);
-  const [recentNotes, setRecentNotes] = useState<WorkspaceNote[]>([]);
+  const [recentTasks, setRecentTasks] = useState<Task[]>([]);
+  const [loadingTasks, setLoadingTasks] = useState(true);
+  const [togglingTaskId, setTogglingTaskId] = useState<string | null>(null);
   const [recentDocuments, setRecentDocuments] = useState<Document[]>([]);
-  const [loadingNotes, setLoadingNotes] = useState(true);
   const [loadingDocuments, setLoadingDocuments] = useState(true);
 
-  const loadLatestTask = useCallback(async () => {
-    setLoadingTask(true);
+  const loadRecentTasks = useCallback(async () => {
+    setLoadingTasks(true);
 
     const supabase = createClient();
     const workspaceId = await getWorkspaceId(supabase);
 
     if (!workspaceId) {
-      setLatestTask(null);
-      setLoadingTask(false);
+      setRecentTasks([]);
+      setLoadingTasks(false);
       return null;
     }
 
@@ -124,39 +192,13 @@ export function ProjectOverviewTab({
       .select("*")
       .eq("workspace_id", workspaceId)
       .eq("project_id", project.id)
-      .neq("status", "done")
-      .order("due_date", { ascending: true, nullsFirst: false })
-      .order("created_at", { ascending: true })
-      .limit(1)
-      .maybeSingle();
+      .order("updated_at", { ascending: false })
+      .limit(RECENT_TASKS_LIMIT);
 
-    setLatestTask((data as Task | null) ?? null);
-    setLoadingTask(false);
+    setRecentTasks((data as Task[]) ?? []);
+    setLoadingTasks(false);
     return workspaceId;
   }, [project.id]);
-
-  const loadRecentNotes = useCallback(async () => {
-    setLoadingNotes(true);
-
-    const supabase = createClient();
-    const workspaceId = await getWorkspaceId(supabase);
-
-    if (!workspaceId) {
-      setRecentNotes([]);
-      setLoadingNotes(false);
-      return;
-    }
-
-    const { data } = await supabase
-      .from("workspace_notes")
-      .select("*")
-      .eq("workspace_id", workspaceId)
-      .order("updated_at", { ascending: false })
-      .limit(RECENT_NOTES_LIMIT);
-
-    setRecentNotes((data as WorkspaceNote[]) ?? []);
-    setLoadingNotes(false);
-  }, []);
 
   const loadRecentDocuments = useCallback(async () => {
     setLoadingDocuments(true);
@@ -188,12 +230,8 @@ export function ProjectOverviewTab({
   }, [project.id]);
 
   useEffect(() => {
-    void loadLatestTask();
-  }, [loadLatestTask]);
-
-  useEffect(() => {
-    void loadRecentNotes();
-  }, [loadRecentNotes]);
+    void loadRecentTasks();
+  }, [loadRecentTasks]);
 
   useEffect(() => {
     void loadRecentDocuments();
@@ -222,7 +260,7 @@ export function ProjectOverviewTab({
             filter: `project_id=eq.${project.id}`,
           },
           () => {
-            void loadLatestTask();
+            void loadRecentTasks();
           }
         )
         .subscribe();
@@ -236,18 +274,18 @@ export function ProjectOverviewTab({
         void supabase.removeChannel(channel);
       }
     };
-  }, [loadLatestTask, project.id]);
+  }, [loadRecentTasks, project.id]);
 
   const handleToggleComplete = useCallback(
     async (task: Task, completed: boolean) => {
-      setTogglingTask(true);
+      setTogglingTaskId(task.id);
 
       const supabase = createClient();
       const workspaceId = await getWorkspaceId(supabase);
 
       if (!workspaceId) {
         toast.error(language === "it" ? "Workspace non trovato" : "Workspace not found");
-        setTogglingTask(false);
+        setTogglingTaskId(null);
         return;
       }
 
@@ -260,16 +298,16 @@ export function ProjectOverviewTab({
         completed,
       });
 
-      setTogglingTask(false);
+      setTogglingTaskId(null);
 
       if (!result.ok) {
         toast.error(result.error);
         return;
       }
 
-      await loadLatestTask();
+      await loadRecentTasks();
     },
-    [language, loadLatestTask, project.id]
+    [language, loadRecentTasks, project.id]
   );
 
   const handleUploadClick = useCallback(() => {
@@ -277,21 +315,29 @@ export function ProjectOverviewTab({
   }, []);
 
   const handleTaskSaved = useCallback(() => {
-    void loadLatestTask();
+    void loadRecentTasks();
     setTaskDialogOpen(false);
-  }, [loadLatestTask]);
+  }, [loadRecentTasks]);
+
+  const panelClass = cn(dashboardPanelClassMobile, dashboardPanelClassDesktop);
 
   return (
     <>
-      <div className={cn("flex flex-col", stack.default)}>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Card className="min-h-48">
-            <CardHeader>
-              <CardTitle>
-                {language === "it" ? "Dettagli progetto" : "Project details"}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-4">
+      <div className="flex min-h-0 flex-1 flex-col">
+        <div
+          data-dashboard-grid
+          className={cn(
+            dashboardGridClassMobile,
+            dashboardGridClassDesktop,
+            dashboardGridGapClass,
+            "min-h-0 flex-1"
+          )}
+        >
+          <DashboardSection
+            title={language === "it" ? "Dettagli progetto" : "Project details"}
+            className={panelClass}
+          >
+            <div className="flex flex-col gap-4">
               <p
                 className={cn(
                   "w-full text-foreground",
@@ -325,12 +371,24 @@ export function ProjectOverviewTab({
                 </span>
                 <ProjectStatusBadge status={project.status} />
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </DashboardSection>
 
-          <Card className="min-h-48">
-            <CardContent className="flex h-full min-h-48 items-center justify-center p-6">
-              <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-3">
+          <Card
+            data-dashboard-panel
+            className={cn(
+              "flex min-h-0 min-w-0 flex-col overflow-hidden",
+              "h-auto max-lg:h-auto lg:h-full",
+              panelClass
+            )}
+          >
+            <CardContent
+              className={cn(
+                dashboardPanelContentClass,
+                "flex min-h-0 flex-1 items-center justify-center"
+              )}
+            >
+              <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-3 lg:h-full">
                 <OverviewActionButton
                   icon={Pencil}
                   label={language === "it" ? "Modifica progetto" : "Edit project"}
@@ -349,96 +407,59 @@ export function ProjectOverviewTab({
               </div>
             </CardContent>
           </Card>
-        </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Card className="min-h-48">
-            <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0">
-              <CardTitle>
-                {language === "it" ? "Note" : "Notes"}
-              </CardTitle>
-              <Button variant="outline" size="sm" className="shrink-0" asChild>
-                <Link href="/notes">{t(language, "dashboard.viewAll")}</Link>
-              </Button>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-2">
-              {loadingNotes ? (
-                <p className={cn(textStyle.body, "text-muted-foreground")}>
-                  {language === "it" ? "Caricamento..." : "Loading..."}
-                </p>
-              ) : recentNotes.length === 0 ? (
-                <p className={cn(textStyle.body, "text-muted-foreground")}>
-                  {language === "it" ? "Nessuna nota" : "No notes yet"}
-                </p>
-              ) : (
-                recentNotes.map((note) => (
-                  <Card key={note.id} variant="nested" asChild>
-                    <Link
-                      href="/notes"
-                      className={cn(
-                        "flex flex-col gap-1 p-3 sm:p-4",
-                        transition.hover
-                      )}
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <span
-                          className={cn(
-                            textStyle.bodyMedium,
-                            "line-clamp-1 text-foreground"
-                          )}
-                        >
-                          {note.title}
-                        </span>
-                        <span
-                          className={cn(
-                            textStyle.caption,
-                            "shrink-0 text-muted-foreground"
-                          )}
-                        >
-                          {formatNoteDate(note.updated_at, language)}
-                        </span>
-                      </div>
-                      {note.content ? (
-                        <p
-                          className={cn(
-                            textStyle.body,
-                            "line-clamp-2 text-muted-foreground"
-                          )}
-                        >
-                          {note.content}
-                        </p>
-                      ) : null}
-                    </Link>
-                  </Card>
-                ))
-              )}
-            </CardContent>
-          </Card>
+          <DashboardSection
+            title={language === "it" ? "Ultime attività" : "Recent tasks"}
+            className={panelClass}
+            action={{
+              label: t(language, "dashboard.viewAll"),
+              href: projectHref(project.id, "tasks"),
+            }}
+          >
+            {loadingTasks ? (
+              <p className={cn(textStyle.body, "text-muted-foreground")}>
+                {language === "it" ? "Caricamento..." : "Loading..."}
+              </p>
+            ) : recentTasks.length === 0 ? (
+              <p className={cn(textStyle.body, "text-muted-foreground")}>
+                {language === "it" ? "Nessuna attività" : "No tasks yet"}
+              </p>
+            ) : (
+              <div className="dashboard-panel-list flex w-full flex-col gap-1.5 overflow-y-auto lg:h-full">
+                {recentTasks.map((task) => (
+                  <OverviewTaskReminder
+                    key={task.id}
+                    task={task}
+                    language={language}
+                    toggling={togglingTaskId === task.id}
+                    onToggleComplete={handleToggleComplete}
+                  />
+                ))}
+              </div>
+            )}
+          </DashboardSection>
 
-          <Card className="min-h-48">
-            <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0">
-              <CardTitle>
-                {language === "it" ? "Ultimi file caricati" : "Latest uploads"}
-              </CardTitle>
-              <Button variant="outline" size="sm" className="shrink-0" asChild>
-                <Link href={projectHref(project.id, "documents")}>
-                  {t(language, "dashboard.viewAll")}
-                </Link>
-              </Button>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-2">
-              {loadingDocuments ? (
-                <p className={cn(textStyle.body, "text-muted-foreground")}>
-                  {language === "it" ? "Caricamento..." : "Loading..."}
-                </p>
-              ) : recentDocuments.length === 0 ? (
-                <p className={cn(textStyle.body, "text-muted-foreground")}>
-                  {language === "it"
-                    ? "Nessun file caricato"
-                    : "No files uploaded yet"}
-                </p>
-              ) : (
-                recentDocuments.map((document) => (
+          <DashboardSection
+            title={language === "it" ? "Ultimi file caricati" : "Latest uploads"}
+            className={panelClass}
+            action={{
+              label: t(language, "dashboard.viewAll"),
+              href: projectHref(project.id, "documents"),
+            }}
+          >
+            {loadingDocuments ? (
+              <p className={cn(textStyle.body, "text-muted-foreground")}>
+                {language === "it" ? "Caricamento..." : "Loading..."}
+              </p>
+            ) : recentDocuments.length === 0 ? (
+              <p className={cn(textStyle.body, "text-muted-foreground")}>
+                {language === "it"
+                  ? "Nessun file caricato"
+                  : "No files uploaded yet"}
+              </p>
+            ) : (
+              <div className="dashboard-panel-list flex w-full flex-col gap-2 overflow-y-auto lg:h-full">
+                {recentDocuments.map((document) => (
                   <Card key={document.id} variant="nested" asChild>
                     <Link
                       href={projectHref(project.id, "documents")}
@@ -466,10 +487,10 @@ export function ProjectOverviewTab({
                       </div>
                     </Link>
                   </Card>
-                ))
-              )}
-            </CardContent>
-          </Card>
+                ))}
+              </div>
+            )}
+          </DashboardSection>
         </div>
 
         <DocumentUploader
@@ -492,13 +513,6 @@ export function ProjectOverviewTab({
           }}
         />
 
-        {!loadingTask && latestTask ? (
-          <TaskCard
-            task={latestTask}
-            onToggleComplete={handleToggleComplete}
-            toggling={togglingTask}
-          />
-        ) : null}
       </div>
 
       <Dialog open={editOpen} onOpenChange={setEditOpen}>

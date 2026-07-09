@@ -29,11 +29,13 @@ import type { Document } from "@/types/database";
 interface DocumentListProps {
   documents: Document[];
   onDocumentDeleted: (documentId: string) => void;
+  variant?: "studio" | "elaborati";
 }
 
 export function DocumentList({
   documents,
   onDocumentDeleted,
+  variant = "elaborati",
 }: DocumentListProps) {
   const language = useAppLanguage();
   const [preview, setPreview] = useState<{
@@ -103,6 +105,15 @@ export function DocumentList({
     toast.success(`${document.name} downloaded`);
   };
 
+  const deleteTitleKey =
+    variant === "studio" ? "documents.deleteTitle" : "elaborati.deleteTitle";
+  const deleteDescriptionKey =
+    variant === "studio"
+      ? "documents.deleteDescription"
+      : "elaborati.deleteDescription";
+  const deletedToastKey =
+    variant === "studio" ? "documents.deletedToast" : "elaborati.deletedToast";
+
   const handleDelete = async () => {
     if (!deleteTarget) return;
 
@@ -123,7 +134,7 @@ export function DocumentList({
     }
 
     toast.success(
-      t(language, "elaborati.deletedToast").replace("{name}", deleteTarget.name)
+      t(language, deletedToastKey).replace("{name}", deleteTarget.name)
     );
     onDocumentDeleted(deleteTarget.id);
     setDeleteTarget(null);
@@ -173,9 +184,9 @@ export function DocumentList({
       >
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>{t(language, "elaborati.deleteTitle")}</DialogTitle>
+            <DialogTitle>{t(language, deleteTitleKey)}</DialogTitle>
             <DialogDescription>
-              {t(language, "elaborati.deleteDescription").replace(
+              {t(language, deleteDescriptionKey).replace(
                 "{name}",
                 deleteTarget?.name ?? ""
               )}

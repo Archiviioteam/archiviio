@@ -29,7 +29,7 @@ interface UploadItem {
 }
 
 interface DocumentUploaderProps {
-  projectId: string;
+  projectId?: string;
   onUploadComplete?: (document: Document) => void;
   disabled?: boolean;
   /** @deprecated Use inputId instead */
@@ -108,7 +108,7 @@ export function DocumentUploader({
       const result = await uploadDocument({
         supabase,
         workspaceId,
-        projectId,
+        projectId: projectId ?? null,
         file,
         onProgress: (progress) => updateUpload(uploadId, { progress }),
       });
@@ -120,7 +120,10 @@ export function DocumentUploader({
       }
 
       setUploads((current) => current.filter((item) => item.id !== uploadId));
-      toast.success(t(language, "documents.uploadedToast").replace("{name}", file.name));
+      const uploadedToastKey = projectId
+        ? "elaborati.uploadedToast"
+        : "documents.uploadedToast";
+      toast.success(t(language, uploadedToastKey).replace("{name}", file.name));
       onUploadComplete?.(result.document);
     },
     [language, onUploadComplete, projectId, updateUpload]
@@ -242,6 +245,10 @@ export function DocumentUploader({
     inputRef.current?.click();
   };
 
+  const uploadTitleKey = projectId
+    ? "elaborati.uploadTitle"
+    : "documents.uploadTitle";
+
   const dropzoneHint = isDragging
     ? t(language, "documents.dropzoneActive")
     : t(language, "documents.dropzoneHint");
@@ -258,7 +265,7 @@ export function DocumentUploader({
           variant="dashed"
           role="button"
           tabIndex={disabled || isUploading ? -1 : 0}
-          aria-label={t(language, "documents.uploadTitle")}
+          aria-label={t(language, uploadTitleKey)}
           aria-disabled={disabled || isUploading}
           onKeyDown={(event) => {
             if (event.key === "Enter" || event.key === " ") {

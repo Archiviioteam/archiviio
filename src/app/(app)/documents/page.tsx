@@ -1,5 +1,5 @@
-import { ModuleEmptyPage } from "@/components/layout/module-empty-page";
+import { StudioDocumentsContent } from "@/components/documents/studio-documents-content";
 
 export default function DocumentsPage() {
-  return <ModuleEmptyPage module="documents" plain />;
+  return <StudioDocumentsContent />;
 }

@@ -43,8 +43,8 @@ export const modulePageEmptyStates: Record<ModulePageId, ModulePageEmptyState> =
   },
   documents: {
     icon: FileText,
-    message: "No deliverables yet",
-    actionLabel: "Upload deliverable",
+    message: "No studio documents yet",
+    actionLabel: "Upload studio document",
   },
   nomenclature: {
     icon: BookOpen,
@@ -62,7 +62,7 @@ export const modulePageDescriptions: Record<ModulePageId, string> = {
   tasks: "Track deadlines and assignments across projects.",
   contacts: "Manage clients and collaborators.",
   suppliers: "Manage vendors and external partners.",
-  documents: "Browse and manage deliverables across your workspace.",
+  documents: "Browse and manage studio documents not tied to projects.",
   nomenclature: "Define naming conventions and file rules across projects.",
   settings: "Workspace and account preferences.",
 };

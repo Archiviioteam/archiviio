@@ -28,7 +28,9 @@ function AppShellFrame({ children }: AppShellProps) {
   const isMobile = useIsMobile();
   const isDashboardOrSettings =
     pathname === "/dashboard" || pathname === "/settings";
-  const isFullHeightGrid = !isMobile && isDashboardOrSettings;
+  const isProjectDetail = /^\/projects\/[^/]+$/.test(pathname);
+  const isFullHeightGrid =
+    !isMobile && (isDashboardOrSettings || isProjectDetail);
   const [workspaceName, setWorkspaceName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
