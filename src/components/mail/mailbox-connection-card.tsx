@@ -12,11 +12,22 @@ import {
 import { formatDateTime } from "@/lib/date-format";
 import { readJsonResponse } from "@/lib/http/read-json-response";
 import {
+  formatSyncSuccessMessage,
+  getSyncErrorMessage,
+  type MailboxSyncResult,
+} from "@/lib/email/sync-feedback";
+import {
   DEFAULT_IMAP_HOST,
   DEFAULT_SENT_FOLDER,
 } from "@/lib/email/imap-constants";
 import { useAppLanguage } from "@/lib/settings/language";
 import type { MailboxConnection } from "@/types/database";
+
+interface MailboxStats {
+  total: number;
+  unassigned: number;
+  assigned: number;
+}
 
 type MailboxConnectionSummary = Pick<
   MailboxConnection,
@@ -48,6 +59,7 @@ export function MailboxConnectionCard() {
   const [imapUsername, setImapUsername] = useState("");
   const [imapPassword, setImapPassword] = useState("");
   const [sentFolder, setSentFolder] = useState(DEFAULT_SENT_FOLDER);
+  const [stats, setStats] = useState<MailboxStats | null>(null);
 
   const loadStatus = useCallback(async () => {
     setLoading(true);
@@ -57,6 +69,7 @@ export function MailboxConnectionCard() {
         connected?: boolean;
         encryptionConfigured?: boolean;
         connection?: MailboxConnectionSummary | null;
+        stats?: MailboxStats | null;
         error?: string;
       }>(response);
       if (!response.ok) {
@@ -65,6 +78,7 @@ export function MailboxConnectionCard() {
       setConnected(Boolean(payload.connected));
       setEncryptionConfigured(payload.encryptionConfigured !== false);
       setConnection(payload.connection ?? null);
+      setStats(payload.stats ?? null);
       if (payload.connection) {
         setEmail(payload.connection.email);
         setImapHost(payload.connection.imap_host || DEFAULT_IMAP_HOST);
@@ -83,6 +97,40 @@ export function MailboxConnectionCard() {
       setLoading(false);
     }
   }, [it]);
+
+  const runSync = useCallback(async () => {
+    setSyncing(true);
+    try {
+      const response = await fetch("/api/mailbox/sync", { method: "POST" });
+      const payload = await readJsonResponse<MailboxSyncResult & { error?: string }>(
+        response
+      );
+      if (!response.ok) {
+        throw new Error(payload.error ?? "Sync failed");
+      }
+
+      const syncError = getSyncErrorMessage(payload);
+      if (syncError) {
+        toast.error(syncError);
+      } else {
+        toast.success(formatSyncSuccessMessage(payload, it));
+      }
+
+      await loadStatus();
+      return payload;
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : it
+            ? "Sincronizzazione fallita"
+            : "Sync failed"
+      );
+      return null;
+    } finally {
+      setSyncing(false);
+    }
+  }, [it, loadStatus]);
 
   useEffect(() => {
     void loadStatus();
@@ -113,6 +161,7 @@ export function MailboxConnectionCard() {
       setConnection(payload.connection ?? null);
       setImapPassword("");
       toast.success(it ? "Casella IMAP collegata" : "IMAP mailbox connected");
+      await runSync();
     } catch (error) {
       toast.error(
         error instanceof Error
@@ -127,34 +176,7 @@ export function MailboxConnectionCard() {
   };
 
   const handleSync = async () => {
-    setSyncing(true);
-    try {
-      const response = await fetch("/api/mailbox/sync", { method: "POST" });
-      const payload = await readJsonResponse<{
-        error?: string;
-        imported?: number;
-        matched?: number;
-      }>(response);
-      if (!response.ok) {
-        throw new Error(payload.error ?? "Sync failed");
-      }
-      toast.success(
-        it
-          ? `Sincronizzate ${payload.imported ?? 0} mail (${payload.matched ?? 0} assegnate)`
-          : `Synced ${payload.imported ?? 0} emails (${payload.matched ?? 0} matched)`
-      );
-      await loadStatus();
-    } catch (error) {
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : it
-            ? "Sincronizzazione fallita"
-            : "Sync failed"
-      );
-    } finally {
-      setSyncing(false);
-    }
+    await runSync();
   };
 
   const handleDisconnect = async () => {
@@ -228,6 +250,19 @@ export function MailboxConnectionCard() {
             ) : null}
             {connection.last_sync_error ? (
               <p className="mt-2 text-destructive">{connection.last_sync_error}</p>
+            ) : null}
+            {stats && stats.total > 0 ? (
+              <p className="mt-2 text-muted-foreground">
+                {it
+                  ? `${stats.total} mail archiviate (${stats.assigned} nei progetti, ${stats.unassigned} da assegnare)`
+                  : `${stats.total} archived emails (${stats.assigned} in projects, ${stats.unassigned} unassigned)`}
+              </p>
+            ) : stats && connection.last_sync_at ? (
+              <p className="mt-2 text-muted-foreground">
+                {it
+                  ? "Nessuna mail importata. Controlla la cartella inviata o riprova la sync."
+                  : "No emails imported yet. Check the sent folder name or retry sync."}
+              </p>
             ) : null}
           </div>
 

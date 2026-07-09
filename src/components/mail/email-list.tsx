@@ -143,6 +143,17 @@ export function EmailList({
                     ? "Nessuna mail inviata"
                     : "No sent emails"
               }
+              description={
+                unassignedOnly
+                  ? it
+                    ? direction === "inbound"
+                      ? "Prova il tab Inviate, sincronizza la casella, oppure controlla il tab Mail nei progetti se le mail sono già state assegnate automaticamente."
+                      : "Prova il tab Ricevute, sincronizza la casella, oppure controlla il tab Mail nei progetti."
+                    : direction === "inbound"
+                      ? "Try the Sent tab, sync your mailbox, or check project Mail tabs if emails were auto-assigned."
+                      : "Try the Inbox tab, sync your mailbox, or check project Mail tabs."
+                  : undefined
+              }
             />
           </CardContent>
         </Card>

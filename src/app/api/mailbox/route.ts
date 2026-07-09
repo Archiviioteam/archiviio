@@ -8,8 +8,6 @@ import {
   DEFAULT_IMAP_PORT,
   DEFAULT_SENT_FOLDER,
 } from "@/lib/email/imap-constants";
-import { testImapConnection } from "@/lib/email/sync-mailbox";
-import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { getWorkspaceId } from "@/lib/workspace";
 
@@ -54,7 +52,40 @@ export async function GET() {
     connected: Boolean(data),
     encryptionConfigured: isMailboxEncryptionConfigured(),
     connection: data ?? null,
+    stats: data
+      ? await getMailboxEmailStats(supabase, data.id, user.id)
+      : null,
   });
+}
+
+async function getMailboxEmailStats(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  connectionId: string,
+  userId: string
+) {
+  const { count: total, error: totalError } = await supabase
+    .from("archived_emails")
+    .select("id", { count: "exact", head: true })
+    .eq("mailbox_connection_id", connectionId);
+
+  if (totalError) return null;
+
+  const { count: unassigned, error: unassignedError } = await supabase
+    .from("archived_emails")
+    .select("id", { count: "exact", head: true })
+    .eq("mailbox_connection_id", connectionId)
+    .is("project_id", null);
+
+  if (unassignedError) return null;
+
+  const assigned = (total ?? 0) - (unassigned ?? 0);
+
+  return {
+    total: total ?? 0,
+    unassigned: unassigned ?? 0,
+    assigned,
+    mailboxUserId: userId,
+  };
 }
 
 export async function POST(request: Request) {
@@ -102,6 +133,7 @@ export async function POST(request: Request) {
   const sentFolder = body.sentFolder?.trim() || DEFAULT_SENT_FOLDER;
 
   try {
+    const { testImapConnection } = await import("@/lib/email/sync-mailbox");
     await testImapConnection({
       host: imapHost,
       port: imapPort,

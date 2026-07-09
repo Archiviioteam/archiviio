@@ -92,18 +92,12 @@ async function listNewMessages(
       for await (const message of client.fetch(uidRange, {
         uid: true,
         envelope: true,
-        source: true,
         internalDate: true,
       })) {
         if (!message.uid) continue;
 
         const envelope = message.envelope;
         const from = firstAddress(envelope?.from);
-        const source = message.source
-          ? Buffer.isBuffer(message.source)
-            ? message.source
-            : Buffer.from(message.source)
-          : null;
 
         messages.push({
           uid: message.uid,
@@ -116,8 +110,8 @@ async function listNewMessages(
           toAddresses: addressList(envelope?.to),
           ccAddresses: addressList(envelope?.cc),
           sentAt: toIsoDate(envelope?.date ?? message.internalDate),
-          snippet: source ? extractSnippet(source) : "",
-          source,
+          snippet: "",
+          source: null,
         });
       }
 
