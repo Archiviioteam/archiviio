@@ -1,13 +1,16 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { Loader2, Pencil } from "lucide-react";
 import { toast } from "sonner";
+import { transition } from "@/lib/animation";
 import {
   settingsHubSaveButtonClass,
   settingsHubTileBodyClass,
   settingsHubTileClass,
 } from "@/lib/settings/hub-control-styles";
+import { settingsSectionHref } from "@/lib/settings/constants";
 import {
   isRequired,
   isValidEmail,
@@ -16,7 +19,6 @@ import {
   normalizeWebsite,
 } from "@/lib/settings/validation";
 import { textStyle } from "@/lib/typography";
-import { transition } from "@/lib/animation";
 import { cn } from "@/lib/utils";
 import { t } from "@/lib/i18n/translations";
 import { useAppLanguage } from "@/lib/settings/language";
@@ -295,7 +297,7 @@ export function WorkspaceHubTile() {
     <Card
       data-dashboard-panel
       variant="nested"
-      className={cn(settingsHubTileClass, "gap-5 overflow-hidden")}
+      className={cn(settingsHubTileClass, "justify-between gap-5 overflow-hidden")}
     >
       <div className="flex shrink-0 items-center justify-between gap-3">
         <span className={textStyle.pageTitle}>
@@ -439,6 +441,18 @@ export function WorkspaceHubTile() {
             )}
           </Button>
         </div>
+      ) : !loading ? (
+        <Link
+          href={settingsSectionHref("workspace")}
+          className={cn(
+            textStyle.captionMedium,
+            "text-muted-foreground",
+            transition.hover,
+            "hover:text-foreground"
+          )}
+        >
+          {t(language, "workspace.manage")}
+        </Link>
       ) : null}
     </Card>
   );

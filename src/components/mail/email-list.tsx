@@ -16,6 +16,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { buildAppleMailOpenUrl, formatEmailAddress } from "@/lib/email/imap-constants";
 import { fetchArchivedEmails } from "@/lib/email/archived-emails";
+import { settingsHubActiveToggleClass } from "@/lib/settings/hub-control-styles";
 import { useAppLanguage } from "@/lib/settings/language";
 import { textStyle } from "@/lib/typography";
 import { createClient } from "@/lib/supabase/client";
@@ -111,6 +112,7 @@ export function EmailList({
           type="button"
           size="sm"
           variant={direction === "inbound" ? "default" : "outline"}
+          className={cn(direction === "inbound" && settingsHubActiveToggleClass)}
           onClick={() => setDirection("inbound")}
         >
           <ArrowDownLeft />
@@ -120,6 +122,7 @@ export function EmailList({
           type="button"
           size="sm"
           variant={direction === "outbound" ? "default" : "outline"}
+          className={cn(direction === "outbound" && settingsHubActiveToggleClass)}
           onClick={() => setDirection("outbound")}
         >
           <ArrowUpRight />
