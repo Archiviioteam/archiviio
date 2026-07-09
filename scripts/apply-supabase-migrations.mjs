@@ -67,6 +67,19 @@ async function pgTableExists(client, table) {
   return rows[0]?.exists === true;
 }
 
+async function pgColumnDefaultIncludes(client, table, column, fragment) {
+  const { rows } = await client.query(
+    `select column_default
+     from information_schema.columns
+     where table_schema = 'public'
+       and table_name = $1
+       and column_name = $2`,
+    [table, column]
+  );
+  const value = rows[0]?.column_default ?? "";
+  return value.includes(fragment);
+}
+
 async function pgFunctionExists(client, functionName) {
   const { rows } = await client.query(
     `select exists (
@@ -118,6 +131,12 @@ async function checkSchemaViaPg(client) {
       (await pgColumnExists(client, "workspaces", "logo_url")),
     workspace_postal_code: await pgColumnExists(client, "workspaces", "postal_code"),
     email_archiving: await pgTableExists(client, "archived_emails"),
+    interhost_imap_default: await pgColumnDefaultIncludes(
+      client,
+      "mailbox_connections",
+      "imap_host",
+      "interhost"
+    ),
     user_profile_settings:
       (await pgColumnExists(client, "users", "first_name")) &&
       (await pgColumnExists(client, "users", "avatar_url")),
@@ -310,6 +329,7 @@ function migrationsForStatus(status) {
   }
   if (!status.reminder_removed) needed.add("027_remove_task_reminder.sql");
   if (!status.email_archiving) needed.add("031_email_archiving.sql");
+  if (!status.interhost_imap_default) needed.add("032_interhost_imap_default.sql");
 
   return files.filter((file) => needed.has(file));
 }

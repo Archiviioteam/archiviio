@@ -1,4 +1,4 @@
-export const DEFAULT_IMAP_HOST = "imaps.aruba.it";
+export const DEFAULT_IMAP_HOST = "imaps.interhost.it";
 export const DEFAULT_IMAP_PORT = 993;
 export const DEFAULT_SENT_FOLDER = "INBOX.Sent";
 

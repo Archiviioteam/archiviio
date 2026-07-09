@@ -43,6 +43,7 @@ export function MailboxConnectionCard() {
     null
   );
   const [email, setEmail] = useState("");
+  const [imapHost, setImapHost] = useState(DEFAULT_IMAP_HOST);
   const [imapUsername, setImapUsername] = useState("");
   const [imapPassword, setImapPassword] = useState("");
   const [sentFolder, setSentFolder] = useState(DEFAULT_SENT_FOLDER);
@@ -61,6 +62,7 @@ export function MailboxConnectionCard() {
       setConnection(payload.connection ?? null);
       if (payload.connection) {
         setEmail(payload.connection.email);
+        setImapHost(payload.connection.imap_host || DEFAULT_IMAP_HOST);
         setImapUsername(payload.connection.imap_username);
         setSentFolder(payload.connection.sent_folder);
       }
@@ -81,9 +83,9 @@ export function MailboxConnectionCard() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email,
+          imapHost,
           imapUsername: imapUsername || email,
           imapPassword,
-          imapHost: DEFAULT_IMAP_HOST,
           sentFolder,
         }),
       });
@@ -180,8 +182,8 @@ export function MailboxConnectionCard() {
       title={it ? "Casella mail IMAP" : "IMAP mailbox"}
       description={
         it
-          ? "Collega la tua casella @andreaauletta.net per archiviare automaticamente le mail nei progetti."
-          : "Connect your @andreaauletta.net mailbox to archive emails into projects automatically."
+          ? "Collega la tua casella @andreaauletta.net (Interhost) per archiviare automaticamente le mail nei progetti."
+          : "Connect your @andreaauletta.net mailbox (Interhost) to archive emails into projects automatically."
       }
     >
       {!encryptionConfigured ? (
@@ -248,6 +250,19 @@ export function MailboxConnectionCard() {
           </SettingsField>
 
           <SettingsField
+            label={it ? "Server IMAP" : "IMAP server"}
+            htmlFor="mailbox-imap-host"
+            hint={it ? "Hosting Solutions / Interhost: imaps.interhost.it:993" : "Hosting Solutions / Interhost: imaps.interhost.it:993"}
+          >
+            <Input
+              id="mailbox-imap-host"
+              value={imapHost}
+              onChange={(event) => setImapHost(event.target.value)}
+              placeholder="imaps.interhost.it"
+            />
+          </SettingsField>
+
+          <SettingsField
             label={it ? "Username IMAP" : "IMAP username"}
             htmlFor="mailbox-username"
             hint={it ? "Di solito coincide con l'email." : "Usually the same as your email."}
@@ -277,8 +292,8 @@ export function MailboxConnectionCard() {
             htmlFor="mailbox-sent-folder"
             hint={
               it
-                ? "Su Aruba di solito è INBOX.Sent."
-                : "On Aruba this is usually INBOX.Sent."
+                ? "Su Interhost di solito è INBOX.Sent oppure Sent."
+                : "On Interhost this is usually INBOX.Sent or Sent."
             }
           >
             <Input
