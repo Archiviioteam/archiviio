@@ -340,3 +340,9 @@ create policy workspace_assets_delete_own_workspace
   );
 
 notify pgrst, 'reload schema';
+
+-- 030_workspace_postal_code.sql
+alter table public.workspaces
+  add column if not exists postal_code text;
+
+notify pgrst, 'reload schema';

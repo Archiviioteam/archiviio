@@ -116,6 +116,7 @@ async function checkSchemaViaPg(client) {
     workspace_settings:
       (await pgColumnExists(client, "workspaces", "address")) &&
       (await pgColumnExists(client, "workspaces", "logo_url")),
+    workspace_postal_code: await pgColumnExists(client, "workspaces", "postal_code"),
     user_profile_settings:
       (await pgColumnExists(client, "users", "first_name")) &&
       (await pgColumnExists(client, "users", "avatar_url")),
@@ -223,6 +224,13 @@ async function checkSchemaViaApi(supabase) {
         .limit(0);
       return !error;
     },
+    workspace_postal_code: async () => {
+      const { error } = await supabase
+        .from("workspaces")
+        .select("postal_code")
+        .limit(0);
+      return !error;
+    },
     user_profile_settings: async () => {
       const { error } = await supabase
         .from("users")
@@ -281,6 +289,9 @@ function migrationsForStatus(status) {
   if (!status.workspace_notes) needed.add("021_workspace_notes.sql");
   if (!status.workspace_settings || !status.user_profile_settings) {
     needed.add("022_user_workspace_settings.sql");
+  }
+  if (!status.workspace_postal_code) {
+    needed.add("030_workspace_postal_code.sql");
   }
   if (!status.workspace_invitations) needed.add("023_workspace_invitations.sql");
   if (!status.workspace_invitation_tokens) {

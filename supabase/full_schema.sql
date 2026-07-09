@@ -1220,6 +1220,7 @@ alter table public.workspaces
   add column if not exists logo_url text,
   add column if not exists address text,
   add column if not exists city text,
+  add column if not exists postal_code text,
   add column if not exists country text,
   add column if not exists email text,
   add column if not exists phone text,

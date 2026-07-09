@@ -22,6 +22,10 @@ import { t } from "@/lib/i18n/translations";
 import { useAppLanguage } from "@/lib/settings/language";
 import { createClient } from "@/lib/supabase/client";
 import { getUserWorkspace } from "@/lib/workspace";
+import {
+  buildWorkspaceAddressUpdate,
+  workspaceSupportsPostalCode,
+} from "@/lib/workspaces/workspace-postal-code";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -143,16 +147,32 @@ export function WorkspaceHubTile() {
     website: "",
   });
   const [errors, setErrors] = useState<WorkspaceErrors>({});
+  const [postalCodeSupported, setPostalCodeSupported] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
 
     void (async () => {
       const supabase = createClient();
+      let supportsPostalCode = await workspaceSupportsPostalCode(supabase);
+
+      if (!supportsPostalCode) {
+        const response = await fetch("/api/migrations/workspace-postal-code", {
+          method: "POST",
+        });
+
+        if (response.ok) {
+          supportsPostalCode = await workspaceSupportsPostalCode(supabase);
+        }
+      }
+
       const workspace = await getUserWorkspace(supabase);
 
       if (!workspace || cancelled) {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          setPostalCodeSupported(supportsPostalCode);
+          setLoading(false);
+        }
         return;
       }
 
@@ -167,6 +187,7 @@ export function WorkspaceHubTile() {
       };
 
       setWorkspaceId(typed.id);
+      setPostalCodeSupported(supportsPostalCode);
       setForm(nextForm);
       setSavedForm(nextForm);
       setLoading(false);
@@ -212,16 +233,32 @@ export function WorkspaceHubTile() {
     setSaving(true);
 
     const supabase = createClient();
+    const updatePayload: {
+      name: string;
+      email: string | null;
+      phone: string | null;
+      address: string | null;
+      website: string | null;
+      postal_code?: string | null;
+    } = {
+      name: form.name.trim(),
+      email: form.email.trim() || null,
+      phone: form.phone.trim() || null,
+      address: buildWorkspaceAddressUpdate(
+        form.address,
+        form.postalCode,
+        postalCodeSupported
+      ),
+      website: form.website.trim() ? normalizeWebsite(form.website) : null,
+    };
+
+    if (postalCodeSupported) {
+      updatePayload.postal_code = form.postalCode.trim() || null;
+    }
+
     const { error } = await supabase
       .from("workspaces")
-      .update({
-        name: form.name.trim(),
-        email: form.email.trim() || null,
-        phone: form.phone.trim() || null,
-        address: form.address.trim() || null,
-        postal_code: form.postalCode.trim() || null,
-        website: form.website.trim() ? normalizeWebsite(form.website) : null,
-      })
+      .update(updatePayload)
       .eq("id", workspaceId);
 
     setSaving(false);
@@ -245,7 +282,7 @@ export function WorkspaceHubTile() {
     setErrors({});
     setIsEditing(false);
     toast.success(t(language, "settings.workspace.updated"));
-  }, [form, language, validate, workspaceId]);
+  }, [form, language, postalCodeSupported, validate, workspaceId]);
 
   const fieldsDisabled = loading || !isEditing;
   const mapsHref = buildMapsUrl(savedForm.address, savedForm.postalCode);

@@ -1,13 +1,7 @@
 import dns from "node:dns";
 import pg from "pg";
 
-const PLACEHOLDER_VALUES = new Set([
-  "your_supabase_project_url",
-  "https://your-project-ref.supabase.co",
-  "your_supabase_anon_key",
-]);
-
-export function configureDns() {
+function configureDns() {
   if (process.env.SUPABASE_DNS_SERVERS?.trim()) {
     dns.setServers(
       process.env.SUPABASE_DNS_SERVERS.split(",")
@@ -20,7 +14,7 @@ export function configureDns() {
   dns.setServers(["8.8.8.8", "1.1.1.1"]);
 }
 
-export function isLocalSupabaseUrl(url) {
+function isLocalSupabaseUrl(url: string) {
   try {
     const { hostname, port } = new URL(url);
     return (
@@ -32,7 +26,7 @@ export function isLocalSupabaseUrl(url) {
   }
 }
 
-export function getProjectRef(url) {
+function getProjectRef(url: string) {
   if (isLocalSupabaseUrl(url)) return "local";
 
   const match = url.match(/https:\/\/([^.]+)\.supabase\.co/);
@@ -40,8 +34,8 @@ export function getProjectRef(url) {
   return match[1];
 }
 
-export function buildDatabaseUrlCandidates(projectRef, password) {
-  const urls = [];
+function buildDatabaseUrlCandidates(projectRef: string, password?: string) {
+  const urls: string[] = [];
 
   if (process.env.DATABASE_URL?.trim()) {
     urls.push(process.env.DATABASE_URL.trim());
@@ -67,7 +61,7 @@ export function buildDatabaseUrlCandidates(projectRef, password) {
     process.env.SUPABASE_POOLER_PREFIX?.trim(),
     "aws-1",
     "aws-0",
-  ].filter(Boolean);
+  ].filter(Boolean) as string[];
 
   for (const prefix of poolerPrefixes) {
     for (const port of [5432, 6543]) {
@@ -84,36 +78,50 @@ export function buildDatabaseUrlCandidates(projectRef, password) {
   return [...new Set(urls)];
 }
 
-export function createPgClient(databaseUrl, supabaseUrl) {
-  const options = {
+function createPgClient(databaseUrl: string, supabaseUrl: string) {
+  const options: pg.ClientConfig = {
     connectionString: databaseUrl,
     connectionTimeoutMillis: 15_000,
   };
 
-  if (!isLocalSupabaseUrl(supabaseUrl ?? "")) {
+  if (!isLocalSupabaseUrl(supabaseUrl)) {
     options.ssl = { rejectUnauthorized: false };
   }
 
   return new pg.Client(options);
 }
 
-export async function connectDatabase({ projectRef, password, supabaseUrl }) {
+export async function withDatabaseConnection<T>(
+  fn: (client: pg.Client) => Promise<T>
+): Promise<T> {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+  const password = process.env.SUPABASE_DB_PASSWORD?.trim();
+
+  if (!supabaseUrl) {
+    throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL.");
+  }
+
+  if (!password && !process.env.DATABASE_URL?.trim()) {
+    throw new Error("Missing SUPABASE_DB_PASSWORD or DATABASE_URL.");
+  }
+
   configureDns();
+  const projectRef = getProjectRef(supabaseUrl);
   const candidates = buildDatabaseUrlCandidates(projectRef, password);
-  let lastError;
+  let lastError: unknown;
 
   for (const databaseUrl of candidates) {
     const client = createPgClient(databaseUrl, supabaseUrl);
-    const hostLabel = databaseUrl.replace(/:[^:@]+@/, ":***@");
 
     try {
       await client.connect();
-      return { client, databaseUrl };
+      try {
+        return await fn(client);
+      } finally {
+        await client.end();
+      }
     } catch (error) {
       lastError = error;
-      const message =
-        error instanceof Error ? error.message.split("\n")[0] : String(error);
-      console.error(`Database connection failed (${hostLabel}): ${message}`);
       try {
         await client.end();
       } catch {
@@ -122,13 +130,7 @@ export async function connectDatabase({ projectRef, password, supabaseUrl }) {
     }
   }
 
-  throw lastError ?? new Error("Could not connect to database.");
-}
-
-export function getRequiredEnv(name) {
-  const value = process.env[name]?.trim();
-  if (!value || PLACEHOLDER_VALUES.has(value)) {
-    throw new Error(`Missing or placeholder value for ${name}.`);
-  }
-  return value;
+  throw lastError instanceof Error
+    ? lastError
+    : new Error("Could not connect to database.");
 }

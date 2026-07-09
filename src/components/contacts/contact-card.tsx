@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import type { Contact } from "@/types/database";
 
 const contactRowGridClassName =
-  "grid min-w-0 flex-1 grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1.2fr)_minmax(0,1.4fr)_minmax(0,1fr)] items-center gap-4";
+  "min-w-0 flex-1 grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1.2fr)_minmax(0,1.4fr)_minmax(0,1fr)] items-center gap-4";
 
 const contactCellClassName = "min-w-0 truncate text-center";
 
@@ -28,6 +28,7 @@ export function ContactListHeader({ className }: ContactListHeaderProps) {
     <div className={cn("hidden items-center gap-2 md:flex", className)}>
       <div
         className={cn(
+          "grid",
           contactRowGridClassName,
           textStyle.captionMedium,
           "text-muted-foreground"
