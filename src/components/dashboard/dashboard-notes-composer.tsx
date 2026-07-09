@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { getCommandEnterShortcutLabel } from "@/lib/layout/keyboard-shortcuts";
@@ -14,13 +14,51 @@ import { t } from "@/lib/i18n/translations";
 import { textStyle } from "@/lib/typography";
 import { cn } from "@/lib/utils";
 import { getWorkspaceId } from "@/lib/workspace";
+import type { WorkspaceNote } from "@/types/database";
+
+function formatNoteDate(value: string, language: "it" | "en"): string {
+  return new Date(value).toLocaleDateString(language === "it" ? "it-IT" : "en-US", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
 
 export function DashboardNotesComposer() {
-  const router = useRouter();
   const language = useAppLanguage();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [saving, setSaving] = useState(false);
+  const [latestNote, setLatestNote] = useState<WorkspaceNote | null>(null);
+  const [loadingLatestNote, setLoadingLatestNote] = useState(true);
+
+  const loadLatestNote = useCallback(async () => {
+    setLoadingLatestNote(true);
+
+    const supabase = createClient();
+    const workspaceId = await getWorkspaceId(supabase);
+
+    if (!workspaceId) {
+      setLatestNote(null);
+      setLoadingLatestNote(false);
+      return;
+    }
+
+    const { data } = await supabase
+      .from("workspace_notes")
+      .select("*")
+      .eq("workspace_id", workspaceId)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    setLatestNote((data as WorkspaceNote | null) ?? null);
+    setLoadingLatestNote(false);
+  }, []);
+
+  useEffect(() => {
+    void loadLatestNote();
+  }, [loadLatestNote]);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -60,8 +98,8 @@ export function DashboardNotesComposer() {
 
     setTitle("");
     setContent("");
+    setLatestNote(result.note);
     toast.success(t(language, "notes.createdToast"));
-    router.push("/notes");
   }
 
   function handleSubmitShortcut(
@@ -98,6 +136,45 @@ export function DashboardNotesComposer() {
         onKeyDown={handleSubmitShortcut}
         disabled={saving}
       />
+
+      {!loadingLatestNote && latestNote ? (
+        <Card variant="nested" className="shrink-0">
+          <div className="flex flex-col gap-1 p-2.5">
+            <div className="flex items-start justify-between gap-2">
+              <span
+                className={cn(
+                  textStyle.captionMedium,
+                  "min-w-0 truncate text-foreground"
+                )}
+              >
+                {latestNote.title}
+              </span>
+              <span
+                className={cn(
+                  textStyle.caption,
+                  "shrink-0 text-muted-foreground"
+                )}
+              >
+                {formatNoteDate(latestNote.created_at, language)}
+              </span>
+            </div>
+            {latestNote.content ? (
+              <p
+                className={cn(
+                  textStyle.caption,
+                  "line-clamp-2 whitespace-pre-wrap text-muted-foreground"
+                )}
+              >
+                {latestNote.content}
+              </p>
+            ) : (
+              <p className={cn(textStyle.caption, "text-muted-foreground/70")}>
+                {t(language, "notes.noContent")}
+              </p>
+            )}
+          </div>
+        </Card>
+      ) : null}
 
       <div className="flex items-center justify-end gap-2">
         <Button

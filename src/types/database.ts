@@ -20,6 +20,7 @@ export interface Workspace {
   logo_url: string | null;
   address: string | null;
   city: string | null;
+  postal_code: string | null;
   country: string | null;
   email: string | null;
   phone: string | null;

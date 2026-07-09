@@ -44,6 +44,7 @@ export type TranslationKey =
   | "profile.detailsPlaceholder"
   | "profile.manage"
   | "workspace.name"
+  | "workspace.generalEmail"
   | "workspace.invitedCollaborators"
   | "workspace.noInvites"
   | "workspace.manage"
@@ -227,6 +228,7 @@ export type TranslationKey =
   | "settings.workspace.address"
   | "settings.workspace.city"
   | "settings.workspace.country"
+  | "settings.workspace.postalCode"
   | "settings.workspace.website"
   | "settings.workspace.websitePlaceholder"
   | "settings.security.changePassword"
@@ -247,6 +249,19 @@ export type TranslationKey =
   | "settings.security.lastSignInUnknown"
   | "settings.security.logoutCurrent"
   | "settings.security.logoutAll"
+  | "settings.security.sendPasswordReset"
+  | "settings.security.sendingPasswordReset"
+  | "settings.security.passwordResetSent"
+  | "settings.security.passwordResetHint"
+  | "settings.security.resetPasswordPageDescription"
+  | "settings.security.deleteAccount"
+  | "settings.security.deleteAccountDescription"
+  | "settings.security.deleteAccountConfirmTitle"
+  | "settings.security.deleteAccountConfirmDescriptionOwner"
+  | "settings.security.deleteAccountConfirmDescriptionMember"
+  | "settings.security.deleteAccountConfirm"
+  | "settings.security.deletingAccount"
+  | "settings.security.accountDeleted"
   | "nomenclature.loading"
   | "nomenclature.loadError"
   | "nomenclature.noNotes"
@@ -350,7 +365,8 @@ const translations: Record<AppLanguage, Record<TranslationKey, string>> = {
     "profile.phone": "Phone number",
     "profile.detailsPlaceholder": "Profile details will appear here.",
     "profile.manage": "Manage profile",
-    "workspace.name": "Workspace name",
+    "workspace.name": "Studio name",
+    "workspace.generalEmail": "General email",
     "workspace.invitedCollaborators": "Invited collaborators",
     "workspace.noInvites": "No invited collaborators yet.",
     "workspace.manage": "Manage workspace",
@@ -555,13 +571,14 @@ const translations: Record<AppLanguage, Record<TranslationKey, string>> = {
     "settings.workspace.code": "Workspace code",
     "settings.workspace.codeHint": "Internal reference for your studio.",
     "settings.workspace.address": "Address",
+    "settings.workspace.postalCode": "Postal code",
     "settings.workspace.city": "City",
     "settings.workspace.country": "Country",
     "settings.workspace.website": "Website",
     "settings.workspace.websitePlaceholder": "www.studio.com",
     "settings.security.changePassword": "Change password",
     "settings.security.changePasswordDescription":
-      "Use a strong password you do not use elsewhere.",
+      "We will send a secure link to your email so you can choose a new password.",
     "settings.security.newPassword": "New password",
     "settings.security.confirmPassword": "Confirm password",
     "settings.security.passwordMinLength":
@@ -570,6 +587,25 @@ const translations: Record<AppLanguage, Record<TranslationKey, string>> = {
     "settings.security.updating": "Updating...",
     "settings.security.updatePassword": "Update password",
     "settings.security.passwordUpdated": "Password updated",
+    "settings.security.sendPasswordReset": "Send reset email",
+    "settings.security.sendingPasswordReset": "Sending...",
+    "settings.security.passwordResetSent":
+      "Check your inbox for the password reset email from Archiviio.",
+    "settings.security.passwordResetHint":
+      "The email contains a secure link to set a new password.",
+    "settings.security.resetPasswordPageDescription":
+      "Choose a new password for your Archiviio account.",
+    "settings.security.deleteAccount": "Delete account",
+    "settings.security.deleteAccountDescription":
+      "Permanently remove your account and related data.",
+    "settings.security.deleteAccountConfirmTitle": "Delete account permanently?",
+    "settings.security.deleteAccountConfirmDescriptionOwner":
+      "This will permanently delete your profile, your entire workspace, and all projects, files, contacts, tasks, and other data inside it. This action cannot be undone.",
+    "settings.security.deleteAccountConfirmDescriptionMember":
+      "This will permanently delete your profile and remove your access to this workspace. The workspace and its data will remain for the other members.",
+    "settings.security.deleteAccountConfirm": "Delete permanently",
+    "settings.security.deletingAccount": "Deleting...",
+    "settings.security.accountDeleted": "Account deleted",
     "settings.security.activeSessions": "Active sessions",
     "settings.security.activeSessionsDescription":
       "Devices where you are currently signed in.",
@@ -688,7 +724,8 @@ const translations: Record<AppLanguage, Record<TranslationKey, string>> = {
     "profile.phone": "Telefono",
     "profile.detailsPlaceholder": "I dettagli profilo appariranno qui.",
     "profile.manage": "Gestisci profilo",
-    "workspace.name": "Nome workspace",
+    "workspace.name": "Nome studio",
+    "workspace.generalEmail": "Email generale",
     "workspace.invitedCollaborators": "Collaboratori invitati",
     "workspace.noInvites": "Nessun collaboratore invitato.",
     "workspace.manage": "Gestisci workspace",
@@ -896,13 +933,14 @@ const translations: Record<AppLanguage, Record<TranslationKey, string>> = {
     "settings.workspace.code": "Codice workspace",
     "settings.workspace.codeHint": "Riferimento interno per il tuo studio.",
     "settings.workspace.address": "Indirizzo",
+    "settings.workspace.postalCode": "CAP",
     "settings.workspace.city": "Città",
     "settings.workspace.country": "Paese",
     "settings.workspace.website": "Sito web",
     "settings.workspace.websitePlaceholder": "www.studio.com",
     "settings.security.changePassword": "Cambia password",
     "settings.security.changePasswordDescription":
-      "Usa una password robusta che non usi altrove.",
+      "Ti invieremo un link sicuro via email per scegliere una nuova password.",
     "settings.security.newPassword": "Nuova password",
     "settings.security.confirmPassword": "Conferma password",
     "settings.security.passwordMinLength":
@@ -911,6 +949,25 @@ const translations: Record<AppLanguage, Record<TranslationKey, string>> = {
     "settings.security.updating": "Aggiornamento...",
     "settings.security.updatePassword": "Aggiorna password",
     "settings.security.passwordUpdated": "Password aggiornata",
+    "settings.security.sendPasswordReset": "Invia email di reset",
+    "settings.security.sendingPasswordReset": "Invio...",
+    "settings.security.passwordResetSent":
+      "Controlla la posta: ti abbiamo inviato l'email da Archiviio per cambiare la password.",
+    "settings.security.passwordResetHint":
+      "L'email contiene un link sicuro per impostare una nuova password.",
+    "settings.security.resetPasswordPageDescription":
+      "Scegli una nuova password per il tuo account Archiviio.",
+    "settings.security.deleteAccount": "Elimina account",
+    "settings.security.deleteAccountDescription":
+      "Rimuove in modo permanente il tuo account e i dati collegati.",
+    "settings.security.deleteAccountConfirmTitle": "Eliminare l'account in modo definitivo?",
+    "settings.security.deleteAccountConfirmDescriptionOwner":
+      "Eliminerai in modo permanente il tuo profilo, l'intero spazio di lavoro e tutti i progetti, file, contatti, attività e altri dati al suo interno. Questa azione non può essere annullata.",
+    "settings.security.deleteAccountConfirmDescriptionMember":
+      "Eliminerai in modo permanente il tuo profilo e perderai l'accesso a questo spazio di lavoro. Lo spazio e i suoi dati resteranno per gli altri membri.",
+    "settings.security.deleteAccountConfirm": "Elimina definitivamente",
+    "settings.security.deletingAccount": "Eliminazione...",
+    "settings.security.accountDeleted": "Account eliminato",
     "settings.security.activeSessions": "Sessioni attive",
     "settings.security.activeSessionsDescription":
       "Dispositivi in cui sei attualmente connesso.",
