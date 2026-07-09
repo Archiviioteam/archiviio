@@ -10,6 +10,7 @@ import {
   SettingsSectionCard,
 } from "@/components/settings/settings-section-card";
 import { formatDateTime } from "@/lib/date-format";
+import { readJsonResponse } from "@/lib/http/read-json-response";
 import {
   DEFAULT_IMAP_HOST,
   DEFAULT_SENT_FOLDER,
@@ -52,11 +53,15 @@ export function MailboxConnectionCard() {
     setLoading(true);
     try {
       const response = await fetch("/api/mailbox");
-      const payload = (await response.json()) as {
+      const payload = await readJsonResponse<{
         connected?: boolean;
         encryptionConfigured?: boolean;
         connection?: MailboxConnectionSummary | null;
-      };
+        error?: string;
+      }>(response);
+      if (!response.ok) {
+        throw new Error(payload.error ?? "Impossibile caricare lo stato della casella mail.");
+      }
       setConnected(Boolean(payload.connected));
       setEncryptionConfigured(payload.encryptionConfigured !== false);
       setConnection(payload.connection ?? null);
@@ -66,10 +71,18 @@ export function MailboxConnectionCard() {
         setImapUsername(payload.connection.imap_username);
         setSentFolder(payload.connection.sent_folder);
       }
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : it
+            ? "Impossibile caricare la casella mail"
+            : "Unable to load mailbox status"
+      );
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [it]);
 
   useEffect(() => {
     void loadStatus();
@@ -89,10 +102,10 @@ export function MailboxConnectionCard() {
           sentFolder,
         }),
       });
-      const payload = (await response.json()) as {
+      const payload = await readJsonResponse<{
         error?: string;
         connection?: MailboxConnectionSummary;
-      };
+      }>(response);
       if (!response.ok) {
         throw new Error(payload.error ?? "Connection failed");
       }
@@ -117,11 +130,11 @@ export function MailboxConnectionCard() {
     setSyncing(true);
     try {
       const response = await fetch("/api/mailbox/sync", { method: "POST" });
-      const payload = (await response.json()) as {
+      const payload = await readJsonResponse<{
         error?: string;
         imported?: number;
         matched?: number;
-      };
+      }>(response);
       if (!response.ok) {
         throw new Error(payload.error ?? "Sync failed");
       }
@@ -148,7 +161,7 @@ export function MailboxConnectionCard() {
     setSaving(true);
     try {
       const response = await fetch("/api/mailbox", { method: "DELETE" });
-      const payload = (await response.json()) as { error?: string };
+      const payload = await readJsonResponse<{ error?: string }>(response);
       if (!response.ok) {
         throw new Error(payload.error ?? "Disconnect failed");
       }

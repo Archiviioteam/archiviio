@@ -36,6 +36,10 @@ export async function updateSession(request: NextRequest) {
   );
 
   if (redirectPath) {
+    if (pathname.startsWith("/api/")) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     return NextResponse.redirect(new URL(redirectPath, request.nextUrl));
   }
 

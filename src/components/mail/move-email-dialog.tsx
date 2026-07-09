@@ -13,6 +13,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { readJsonResponse } from "@/lib/http/read-json-response";
 import { formatProjectCodeDisplay } from "@/lib/projects";
 import { useAppLanguage } from "@/lib/settings/language";
 import { createClient } from "@/lib/supabase/client";
@@ -91,10 +92,10 @@ export function MoveEmailDialog({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ projectId: selectedProjectId }),
       });
-      const payload = (await response.json()) as {
+      const payload = await readJsonResponse<{
         error?: string;
         email?: ArchivedEmail;
-      };
+      }>(response);
       if (!response.ok || !payload.email) {
         throw new Error(payload.error ?? "Move failed");
       }

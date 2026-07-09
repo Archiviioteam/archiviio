@@ -6,7 +6,8 @@ export function isPublicPath(pathname: string): boolean {
     pathname.startsWith("/invite/") ||
     pathname.startsWith("/auth/callback") ||
     pathname === "/api/signup" ||
-    pathname.startsWith("/api/invite/")
+    pathname.startsWith("/api/invite/") ||
+    pathname.startsWith("/api/cron/")
   );
 }
 

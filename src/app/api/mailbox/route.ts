@@ -35,13 +35,20 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("mailbox_connections")
     .select(
       "id, email, imap_host, imap_port, imap_secure, imap_username, sent_folder, sync_enabled, last_sync_at, last_sync_error, created_at, updated_at"
     )
     .eq("user_id", user.id)
     .maybeSingle();
+
+  if (error) {
+    const message = error.message.includes("mailbox_connections")
+      ? "Tabella mailbox non trovata. Applica la migration 031 su Supabase."
+      : error.message;
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 
   return NextResponse.json({
     connected: Boolean(data),

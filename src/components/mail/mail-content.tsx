@@ -7,6 +7,7 @@ import { EmailList } from "@/components/mail/email-list";
 import { PageContent, PageLayout } from "@/components/layout/page-layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { readJsonResponse } from "@/lib/http/read-json-response";
 import { useAppLanguage } from "@/lib/settings/language";
 import { textStyle } from "@/lib/typography";
 import { cn } from "@/lib/utils";
@@ -18,11 +19,11 @@ export function MailContent() {
   const handleSync = async () => {
     try {
       const response = await fetch("/api/mailbox/sync", { method: "POST" });
-      const payload = (await response.json()) as {
+      const payload = await readJsonResponse<{
         error?: string;
         imported?: number;
         matched?: number;
-      };
+      }>(response);
       if (!response.ok) {
         throw new Error(payload.error ?? "Sync failed");
       }
