@@ -10,8 +10,8 @@ import { projectHref } from "@/lib/search/search-routes";
 import { compareTasksByPriorityAndDueDate } from "@/lib/tasks/sort-tasks-by-due-date";
 import type { Project, TaskUrgency } from "@/types/database";
 
-export const DASHBOARD_RECENT_PROJECTS_LIMIT = 3;
-export const DASHBOARD_DEADLINES_LIMIT = 3;
+export const DASHBOARD_RECENT_PROJECTS_LIMIT = 5;
+export const DASHBOARD_DEADLINES_LIMIT = 5;
 export const DASHBOARD_DEADLINES_FETCH_LIMIT = 50;
 export const DASHBOARD_ACTIVITY_LIMIT = 3;
 export const COMMAND_CENTER_ACTIVITY_LIMIT = 5;
@@ -69,30 +69,42 @@ async function fetchRecentDashboardProjects(
     .slice(0, DASHBOARD_RECENT_PROJECTS_LIMIT)
     .map((project) => project.id);
 
-  if (orderedIds.length === 0) {
+  let projects: Project[] = [];
+
+  if (orderedIds.length > 0) {
     const { data } = await supabase
       .from("projects")
       .select("*")
       .eq("workspace_id", workspaceId)
-      .order("created_at", { ascending: false })
-      .limit(DASHBOARD_RECENT_PROJECTS_LIMIT);
+      .in("id", orderedIds);
 
-    return (data as Project[]) ?? [];
+    const projectsById = new Map(
+      ((data as Project[]) ?? []).map((project) => [project.id, project])
+    );
+
+    projects = orderedIds
+      .map((id) => projectsById.get(id))
+      .filter((project): project is Project => project !== undefined);
   }
 
-  const { data } = await supabase
-    .from("projects")
-    .select("*")
-    .eq("workspace_id", workspaceId)
-    .in("id", orderedIds);
+  if (projects.length < DASHBOARD_RECENT_PROJECTS_LIMIT) {
+    const existingIds = projects.map((project) => project.id);
+    let query = supabase
+      .from("projects")
+      .select("*")
+      .eq("workspace_id", workspaceId)
+      .order("created_at", { ascending: false })
+      .limit(DASHBOARD_RECENT_PROJECTS_LIMIT - projects.length);
 
-  const projectsById = new Map(
-    ((data as Project[]) ?? []).map((project) => [project.id, project])
-  );
+    if (existingIds.length > 0) {
+      query = query.not("id", "in", `(${existingIds.join(",")})`);
+    }
 
-  return orderedIds
-    .map((id) => projectsById.get(id))
-    .filter((project): project is Project => project !== undefined);
+    const { data: filler } = await query;
+    projects = [...projects, ...((filler as Project[]) ?? [])];
+  }
+
+  return projects.slice(0, DASHBOARD_RECENT_PROJECTS_LIMIT);
 }
 
 export async function fetchDashboardData(

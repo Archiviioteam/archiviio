@@ -54,16 +54,16 @@ export const dashboardPanelContentClass = cn(
 export const dashboardPanelCompactHeaderClass = cn(
   "flex shrink-0 flex-col items-stretch gap-1",
   "sm:flex-row sm:items-center sm:justify-between sm:gap-2",
-  "p-3 pb-0",
+  "p-3 pb-1",
   "min-h-0"
 );
 
 export const dashboardPanelCompactContentClass = cn(
   "flex min-h-0 flex-1 flex-col overflow-hidden",
-  "p-3 pt-2"
+  "p-3 pt-3"
 );
 
-export const projectOverviewGridGapClass = "gap-2";
+export const projectOverviewGridGapClass = "gap-3";
 
 /** Gap between items inside a panel (lists, action tiles). */
 export const dashboardPanelInnerGapClass = "gap-2";

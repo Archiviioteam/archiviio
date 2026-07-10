@@ -133,7 +133,7 @@ function OverviewActionButton({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex flex-col items-center justify-center gap-1 text-muted-foreground hover:text-foreground",
+        "flex flex-col items-center justify-center gap-1.5 text-muted-foreground hover:text-foreground",
         transition.hover
       )}
     >
@@ -332,23 +332,20 @@ export function ProjectOverviewTab({
             className={panelClass}
             compact
           >
-            <div className="flex flex-col gap-2">
-              <p
-                className={cn(
-                  textStyle.bodyMedium,
-                  "w-full leading-snug text-foreground"
-                )}
-              >
-                {formatProjectCodeDisplay(project.code)}
-                <br />
-                {project.name}
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-1.5">
+                <span className={cn(textStyle.bodyMedium, "text-foreground")}>
+                  {formatProjectCodeDisplay(project.code)}
+                </span>
+                <span className={cn(textStyle.bodyMedium, "text-foreground")}>
+                  {project.name}
+                </span>
                 {project.location ? (
-                  <>
-                    <br />
+                  <span className={cn(textStyle.body, "text-muted-foreground")}>
                     {project.location}
-                  </>
+                  </span>
                 ) : null}
-              </p>
+              </div>
 
               <div className="flex items-center gap-2">
                 <span className={cn(textStyle.caption, "text-muted-foreground")}>
@@ -399,10 +396,10 @@ export function ProjectOverviewTab({
             <CardContent
               className={cn(
                 dashboardPanelCompactContentClass,
-                "flex min-h-0 flex-1 items-center justify-center py-2"
+                "flex min-h-0 flex-1 items-center justify-center py-3"
               )}
             >
-              <div className="grid w-full grid-cols-1 gap-1 sm:grid-cols-3 lg:h-full">
+              <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-3 lg:h-full">
                 <OverviewActionButton
                   icon={Pencil}
                   label={language === "it" ? "Modifica progetto" : "Edit project"}
