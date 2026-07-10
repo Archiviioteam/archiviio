@@ -141,6 +141,10 @@ async function checkSchemaViaPg(client) {
       "token"
     ),
     invitation_token_function: await pgFunctionExists(client, "new_invitation_token"),
+    project_members: await pgTableExists(client, "project_members"),
+    task_assignee:
+      (await pgTableExists(client, "project_members")) &&
+      (await pgColumnExists(client, "tasks", "assignee_user_id")),
     documents_bucket: await client
       .query(
         `select exists (
@@ -277,6 +281,20 @@ async function checkSchemaViaApi(supabase) {
         .limit(0);
       return !error;
     },
+    project_members: async () => {
+      const { error } = await supabase
+        .from("project_members")
+        .select("id")
+        .limit(0);
+      return !error;
+    },
+    task_assignee: async () => {
+      const { error } = await supabase
+        .from("tasks")
+        .select("assignee_user_id")
+        .limit(0);
+      return !error;
+    },
   };
 
   const status = { coreReady: true };
@@ -323,6 +341,9 @@ function migrationsForStatus(status) {
   }
   if (!status.reminder_removed) needed.add("027_remove_task_reminder.sql");
   if (status.email_archiving) needed.add("033_remove_email_archiving.sql");
+  if (!status.project_members || !status.task_assignee) {
+    needed.add("034_project_members_and_task_assignee.sql");
+  }
 
   return files.filter((file) => needed.has(file));
 }
