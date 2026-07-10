@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { Check, CheckSquare, FileText, Pencil, Upload } from "lucide-react";
 import { toast } from "sonner";
@@ -142,6 +142,21 @@ function OverviewActionButton({
         {label}
       </span>
     </button>
+  );
+}
+
+interface ProjectDetailFieldProps {
+  label: string;
+  children: ReactNode;
+  className?: string;
+}
+
+function ProjectDetailField({ label, children, className }: ProjectDetailFieldProps) {
+  return (
+    <div className={cn("flex min-w-0 flex-col gap-2", className)}>
+      <span className={cn(textStyle.bodyMedium, "text-muted-foreground")}>{label}</span>
+      <div className="min-w-0">{children}</div>
+    </div>
   );
 }
 
@@ -331,57 +346,59 @@ export function ProjectOverviewTab({
             title={language === "it" ? "Dettagli progetto" : "Project details"}
             className={panelClass}
             compact
+            contentClassName="flex min-h-0 flex-1 flex-col !p-4 sm:!p-5 lg:!p-6"
           >
-            <div className="flex flex-col gap-3">
-              <div className="flex flex-col gap-1.5">
-                <span className={cn(textStyle.bodyMedium, "text-foreground")}>
+            <div className="flex min-h-0 flex-1 flex-col justify-between gap-6 lg:h-full">
+              <div className="flex min-w-0 flex-col gap-3">
+                <span className={cn(textStyle.sectionTitle, "text-muted-foreground")}>
                   {formatProjectCodeDisplay(project.code)}
                 </span>
-                <span className={cn(textStyle.bodyMedium, "text-foreground")}>
+                <h2
+                  className={cn(
+                    textStyle.pageTitle,
+                    "text-balance text-foreground leading-tight"
+                  )}
+                >
                   {project.name}
-                </span>
+                </h2>
                 {project.location ? (
-                  <span className={cn(textStyle.body, "text-muted-foreground")}>
+                  <p className={cn(textStyle.bodyLarge, "text-muted-foreground")}>
                     {project.location}
-                  </span>
+                  </p>
                 ) : null}
               </div>
 
-              <div className="flex items-center gap-2">
-                <span className={cn(textStyle.caption, "text-muted-foreground")}>
-                  {language === "it" ? "Creato" : "Created"}
-                </span>
-                <span className={cn(textStyle.captionMedium, "text-foreground")}>
-                  {formatDate(project.created_at)}
-                </span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <span className={cn(textStyle.caption, "text-muted-foreground")}>
-                  {language === "it" ? "Stato" : "Status"}
-                </span>
-                <EditableProjectStatusBadge
-                  projectId={project.id}
-                  status={project.status}
-                  onStatusUpdated={(status, updated) => {
-                    onProjectUpdated?.(updated ?? { ...project, status });
-                  }}
-                />
-              </div>
-
-              {projectMembers.length > 0 ? (
-                <div className="flex items-center gap-2">
-                  <span className={cn(textStyle.caption, "text-muted-foreground")}>
-                    {language === "it" ? "Referenti" : "Referents"}
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                <ProjectDetailField label={language === "it" ? "Creato" : "Created"}>
+                  <span className={cn(textStyle.bodyMedium, "text-foreground")}>
+                    {formatDate(project.created_at)}
                   </span>
-                  <MemberAvatarStack
-                    members={projectMembers}
-                    size="xxs"
-                    separated
-                    maxVisible={5}
+                </ProjectDetailField>
+
+                <ProjectDetailField label={language === "it" ? "Stato" : "Status"}>
+                  <EditableProjectStatusBadge
+                    projectId={project.id}
+                    status={project.status}
+                    onStatusUpdated={(status, updated) => {
+                      onProjectUpdated?.(updated ?? { ...project, status });
+                    }}
                   />
-                </div>
-              ) : null}
+                </ProjectDetailField>
+
+                {projectMembers.length > 0 ? (
+                  <ProjectDetailField
+                    label={language === "it" ? "Referenti" : "Referents"}
+                    className="sm:col-span-2"
+                  >
+                    <MemberAvatarStack
+                      members={projectMembers}
+                      size="sm"
+                      separated
+                      maxVisible={6}
+                    />
+                  </ProjectDetailField>
+                ) : null}
+              </div>
             </div>
           </DashboardSection>
 
