@@ -5,7 +5,6 @@ import { toast } from "sonner";
 import { PageContent, PageLayout } from "@/components/layout/page-layout";
 import {
   AddTaskDialog,
-  type TaskSavedContext,
 } from "@/components/projects/add-task-dialog";
 import { TaskCard } from "@/components/projects/task-card";
 import { Button } from "@/components/ui/button";
@@ -84,24 +83,9 @@ export function TasksContent() {
     setDialogOpen(true);
   }, []);
 
-  const handleTaskSaved = useCallback((task: Task, context?: TaskSavedContext) => {
-    setTasks((current) => {
-      const exists = current.some((item) => item.id === task.id);
-      const existing = current.find((item) => item.id === task.id);
-
-      const updated: WorkspaceTask = {
-        ...task,
-        projectName: existing?.projectName ?? context?.projectName ?? null,
-        projectCode: existing?.projectCode ?? context?.projectCode ?? null,
-      };
-
-      const next = exists
-        ? current.map((item) => (item.id === task.id ? updated : item))
-        : [...current, updated];
-
-      return sortTasksByDueDate(next);
-    });
-  }, []);
+  const handleTaskSaved = useCallback(() => {
+    void loadTasks();
+  }, [loadTasks]);
 
   const handleTaskDeleted = useCallback((taskId: string) => {
     setTasks((current) => current.filter((item) => item.id !== taskId));
@@ -144,7 +128,7 @@ export function TasksContent() {
       return;
     }
 
-    handleTaskSaved(result.task);
+    handleTaskSaved();
   }, [handleTaskSaved, language]);
 
   const filteredTasks = sortTasksByDueDate(
@@ -225,9 +209,10 @@ export function TasksContent() {
                   key={task.id}
                   task={task}
                   projectLabel={formatTaskProjectLabel(task)}
+                  assignee={task.assignee}
                   onClick={openEditDialog}
                   onToggleComplete={handleToggleComplete}
-                  onUrgencyUpdated={handleTaskSaved}
+                  onUrgencyUpdated={() => handleTaskSaved()}
                   toggling={togglingTaskId === task.id}
                 />
               ))
@@ -242,7 +227,7 @@ export function TasksContent() {
         projectId={editingProjectId ?? undefined}
         allowProjectSelection={!editingTask}
         task={editingTask}
-        onTaskSaved={handleTaskSaved}
+        onTaskSaved={() => handleTaskSaved()}
         onTaskDeleted={handleTaskDeleted}
       />
     </PageLayout>

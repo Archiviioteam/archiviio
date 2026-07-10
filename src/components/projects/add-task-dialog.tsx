@@ -6,6 +6,10 @@ import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { formatProjectCodeDisplay } from "@/lib/projects";
 import { projectListSelectColumns } from "@/lib/projects/schema";
+import {
+  fetchProjectMembers,
+  resolveDefaultAssigneeId,
+} from "@/lib/projects/project-members";
 import { createTask } from "@/lib/tasks/create-task";
 import { deleteTask } from "@/lib/tasks/delete-task";
 import {
@@ -31,7 +35,9 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { TaskAssigneePicker } from "@/components/tasks/task-assignee-picker";
 import { cn } from "@/lib/utils";
+import type { MemberProfile } from "@/lib/users/member-display";
 import type { Project, Task } from "@/types/database";
 
 export interface TaskSavedContext {
@@ -125,6 +131,9 @@ export function AddTaskDialog({
   const [dueDate, setDueDate] = useState("");
   const [urgency, setUrgency] = useState<TaskUrgencyLevel>("medium");
   const [notes, setNotes] = useState("");
+  const [assigneeUserId, setAssigneeUserId] = useState<string | null>(null);
+  const [projectMembers, setProjectMembers] = useState<MemberProfile[]>([]);
+  const [loadingMembers, setLoadingMembers] = useState(false);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
@@ -166,6 +175,46 @@ export function AddTaskDialog({
   }, [open, showProjectSelector]);
 
   useEffect(() => {
+    if (!open || !resolvedProjectId) {
+      setProjectMembers([]);
+      return;
+    }
+
+    let cancelled = false;
+
+    async function loadMembers() {
+      setLoadingMembers(true);
+      const supabase = createClient();
+      const members = await fetchProjectMembers(supabase, resolvedProjectId);
+
+      if (cancelled) return;
+
+      setProjectMembers(members);
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (task) {
+        setAssigneeUserId(
+          task.assignee_user_id ??
+            resolveDefaultAssigneeId(members, user?.id ?? null)
+        );
+      } else {
+        setAssigneeUserId(resolveDefaultAssigneeId(members, user?.id ?? null));
+      }
+
+      setLoadingMembers(false);
+    }
+
+    void loadMembers();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [open, resolvedProjectId, task]);
+
+  useEffect(() => {
     if (!open) {
       return;
     }
@@ -175,6 +224,7 @@ export function AddTaskDialog({
       setDueDate(toDateInputValue(task.due_date));
       setUrgency(normalizeTaskUrgency(task.urgency));
       setNotes(task.notes ?? "");
+      setAssigneeUserId(task.assignee_user_id);
       return;
     }
 
@@ -183,6 +233,7 @@ export function AddTaskDialog({
     setDueDate("");
     setUrgency("medium");
     setNotes("");
+    setAssigneeUserId(null);
   }, [open, task]);
 
   const handleSubmit = useCallback(
@@ -223,6 +274,10 @@ export function AddTaskDialog({
         return;
       }
 
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       const payload = {
         supabase,
         workspaceId,
@@ -231,6 +286,8 @@ export function AddTaskDialog({
         dueDate: parsedDueDate,
         urgency,
         notes: notes.trim() || null,
+        assigneeUserId,
+        currentUserId: user?.id ?? null,
       };
 
       const result = isEditing
@@ -278,6 +335,7 @@ export function AddTaskDialog({
       task,
       title,
       urgency,
+      assigneeUserId,
     ]
   );
 
@@ -396,6 +454,15 @@ export function AddTaskDialog({
               disabled={saving}
             />
           </div>
+
+          {!loadingMembers && projectMembers.length > 0 ? (
+            <TaskAssigneePicker
+              members={projectMembers}
+              selectedId={assigneeUserId}
+              onChange={setAssigneeUserId}
+              disabled={saving}
+            />
+          ) : null}
 
           <div className="flex flex-col gap-2">
             <Label htmlFor="task-deadline">

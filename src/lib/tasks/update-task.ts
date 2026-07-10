@@ -15,6 +15,7 @@ export interface UpdateTaskInput {
   dueDate?: string | null;
   urgency?: TaskUrgency | null;
   notes?: string | null;
+  assigneeUserId?: string | null;
 }
 
 export async function updateTask({
@@ -26,6 +27,7 @@ export async function updateTask({
   dueDate = null,
   urgency = null,
   notes = null,
+  assigneeUserId,
 }: UpdateTaskInput): Promise<UpdateTaskResult> {
   const trimmedTitle = title.trim();
   const trimmedNotes = notes?.trim() || null;
@@ -41,6 +43,9 @@ export async function updateTask({
       due_date: dueDate || null,
       urgency: urgency || null,
       notes: trimmedNotes,
+      ...(assigneeUserId !== undefined
+        ? { assignee_user_id: assigneeUserId }
+        : {}),
     })
     .eq("id", taskId)
     .eq("workspace_id", workspaceId)

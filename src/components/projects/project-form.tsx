@@ -2,14 +2,21 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { ProjectMemberPicker } from "@/components/projects/project-member-picker";
 import { logActivity } from "@/lib/activity";
 import { createClient } from "@/lib/supabase/client";
 import { generateProjectCode, formatProjectStatus, getProjectStatusPillClass } from "@/lib/projects";
+import {
+  fetchProjectMemberIds,
+  fetchWorkspaceMembers,
+  setProjectMembers,
+} from "@/lib/projects/project-members";
 import {
   buildProjectWritePayload,
   projectsHaveLocationColumn,
 } from "@/lib/projects/schema";
 import { getWorkspaceId } from "@/lib/workspace";
+import { type MemberProfile } from "@/lib/users/member-display";
 import { type Project, type ProjectStatus } from "@/types/database";
 import { statusPillSelectorClass } from "@/lib/status-pills";
 import { useAppLanguage } from "@/lib/settings/language";
@@ -46,6 +53,50 @@ export function ProjectForm({ project, onSaved, onCancel }: ProjectFormProps) {
   const [locationSupported, setLocationSupported] = useState<boolean | null>(
     null
   );
+  const [workspaceMembers, setWorkspaceMembers] = useState<MemberProfile[]>([]);
+  const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
+  const [membersLoading, setMembersLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadMembers() {
+      setMembersLoading(true);
+      const supabase = createClient();
+      const workspaceId = isEditing
+        ? project.workspace_id
+        : await getWorkspaceId(supabase);
+
+      if (!workspaceId) {
+        setWorkspaceMembers([]);
+        setSelectedMemberIds([]);
+        setMembersLoading(false);
+        return;
+      }
+
+      const members = await fetchWorkspaceMembers(supabase, workspaceId);
+      setWorkspaceMembers(members);
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (isEditing) {
+        const memberIds = await fetchProjectMemberIds(supabase, project.id);
+        setSelectedMemberIds(
+          memberIds.length > 0 ? memberIds : user ? [user.id] : []
+        );
+      } else if (user && members.some((member) => member.id === user.id)) {
+        setSelectedMemberIds([user.id]);
+      } else if (members[0]) {
+        setSelectedMemberIds([members[0].id]);
+      } else {
+        setSelectedMemberIds([]);
+      }
+
+      setMembersLoading(false);
+    }
+
+    void loadMembers();
+  }, [isEditing, project?.id, project?.workspace_id]);
 
   useEffect(() => {
     async function checkLocationColumn() {
@@ -104,6 +155,16 @@ export function ProjectForm({ project, onSaved, onCancel }: ProjectFormProps) {
       return;
     }
 
+    if (selectedMemberIds.length === 0) {
+      setError(
+        language === "it"
+          ? "Seleziona almeno un referente progetto."
+          : "Select at least one project referent."
+      );
+      setLoading(false);
+      return;
+    }
+
     const payload = buildProjectWritePayload(
       {
         workspace_id: workspaceId,
@@ -140,6 +201,19 @@ export function ProjectForm({ project, onSaved, onCancel }: ProjectFormProps) {
         metadata: { project_name: name },
       });
 
+      const membersResult = await setProjectMembers(
+        supabase,
+        workspaceId,
+        project.id,
+        selectedMemberIds
+      );
+
+      if (!membersResult.ok) {
+        setError(membersResult.error);
+        setLoading(false);
+        return;
+      }
+
       const updated = data as Project;
       onSaved?.(updated);
       setLoading(false);
@@ -172,6 +246,19 @@ export function ProjectForm({ project, onSaved, onCancel }: ProjectFormProps) {
       title: trimmedCode,
       metadata: { project_name: name },
     });
+
+    const membersResult = await setProjectMembers(
+      supabase,
+      workspaceId,
+      data.id,
+      selectedMemberIds
+    );
+
+    if (!membersResult.ok) {
+      setError(membersResult.error);
+      setLoading(false);
+      return;
+    }
 
     const created = data as Project;
 
@@ -301,12 +388,25 @@ export function ProjectForm({ project, onSaved, onCancel }: ProjectFormProps) {
         </div>
       </div>
 
+      {!membersLoading && workspaceMembers.length > 0 ? (
+        <ProjectMemberPicker
+          members={workspaceMembers}
+          selectedIds={selectedMemberIds}
+          onChange={setSelectedMemberIds}
+          disabled={loading}
+        />
+      ) : membersLoading ? (
+        <p className={cn(textStyle.caption, "text-muted-foreground")}>
+          {language === "it" ? "Caricamento team..." : "Loading team..."}
+        </p>
+      ) : null}
+
       {error && (
         <p className={cn(textStyle.body, "text-destructive")}>{error}</p>
       )}
 
       <div className="flex gap-3">
-        <Button type="submit" disabled={loading || codeLoading}>
+        <Button type="submit" disabled={loading || codeLoading || membersLoading}>
           {loading
             ? language === "it"
               ? "Salvataggio..."

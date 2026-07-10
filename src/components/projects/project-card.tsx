@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { Trash2 } from "lucide-react";
 import { EditableProjectStatusBadge } from "@/components/projects/editable-project-status-badge";
+import { MemberAvatarStack } from "@/components/users/member-avatar-stack";
 import { formatProjectCodeDisplay } from "@/lib/projects";
+import type { MemberProfile } from "@/lib/users/member-display";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { textStyle } from "@/lib/typography";
@@ -12,6 +14,7 @@ import type { Project } from "@/types/database";
 
 interface ProjectCardContentProps {
   project: Project;
+  members?: MemberProfile[];
   className?: string;
   hideStatus?: boolean;
   layout?: "card" | "inline";
@@ -20,6 +23,7 @@ interface ProjectCardContentProps {
 
 export function ProjectCardContent({
   project,
+  members = [],
   className,
   hideStatus = false,
   layout = "card",
@@ -67,6 +71,9 @@ export function ProjectCardContent({
             {project.location}
           </span>
         ) : null}
+        {members.length > 0 ? (
+          <MemberAvatarStack members={members} className="pt-1" />
+        ) : null}
       </div>
     </div>
   );
@@ -74,6 +81,7 @@ export function ProjectCardContent({
 
 interface ProjectCardProps {
   project: Project;
+  members?: MemberProfile[];
   className?: string;
   onDelete?: (project: Project) => void;
   deleteDisabled?: boolean;
@@ -82,6 +90,7 @@ interface ProjectCardProps {
 
 export function ProjectCard({
   project,
+  members = [],
   className,
   onDelete,
   deleteDisabled = false,
@@ -91,7 +100,7 @@ export function ProjectCard({
     <Card variant="interactive" className={className}>
       <CardContent className="flex items-center gap-2 p-4">
         <Link href={`/projects/${project.id}`} className="min-w-0 flex-1">
-          <ProjectCardContent project={project} hideStatus />
+          <ProjectCardContent project={project} members={members} hideStatus />
         </Link>
         <div className="flex shrink-0 items-center gap-2">
           <EditableProjectStatusBadge

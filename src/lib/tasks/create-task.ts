@@ -1,5 +1,9 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { logActivity } from "@/lib/activity";
+import {
+  fetchProjectMembers,
+  resolveDefaultAssigneeId,
+} from "@/lib/projects/project-members";
 import type { Task, TaskUrgency } from "@/types/database";
 
 type CreateTaskResult =
@@ -14,6 +18,8 @@ export interface CreateTaskInput {
   dueDate?: string | null;
   urgency?: TaskUrgency | null;
   notes?: string | null;
+  assigneeUserId?: string | null;
+  currentUserId?: string | null;
 }
 
 export async function createTask({
@@ -24,12 +30,21 @@ export async function createTask({
   dueDate = null,
   urgency = null,
   notes = null,
+  assigneeUserId,
+  currentUserId = null,
 }: CreateTaskInput): Promise<CreateTaskResult> {
   const trimmedTitle = title.trim();
   const trimmedNotes = notes?.trim() || null;
 
   if (!trimmedTitle) {
     return { ok: false, error: "Task name is required." };
+  }
+
+  let resolvedAssigneeId = assigneeUserId ?? null;
+
+  if (!resolvedAssigneeId) {
+    const members = await fetchProjectMembers(supabase, projectId);
+    resolvedAssigneeId = resolveDefaultAssigneeId(members, currentUserId);
   }
 
   const { data, error } = await supabase
@@ -43,6 +58,7 @@ export async function createTask({
       urgency: urgency || null,
       notes: trimmedNotes,
       tags: [],
+      assignee_user_id: resolvedAssigneeId,
     })
     .select("*")
     .single();

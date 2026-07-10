@@ -6,6 +6,7 @@ import { Check, CheckSquare, FileText, Pencil, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { DashboardSection } from "@/components/dashboard/dashboard-section";
 import { DocumentUploader } from "@/components/documents/document-uploader";
+import { MemberAvatarStack } from "@/components/users/member-avatar-stack";
 import { AddTaskDialog } from "@/components/projects/add-task-dialog";
 import { ProjectForm } from "@/components/projects/project-form";
 import { EditableProjectStatusBadge } from "@/components/projects/editable-project-status-badge";
@@ -38,8 +39,10 @@ import {
 } from "@/components/ui/dialog";
 import { formatDate } from "@/lib/date-format";
 import { formatProjectCodeDisplay } from "@/lib/projects";
+import { fetchProjectMembers } from "@/lib/projects/project-members";
 import { useAppLanguage } from "@/lib/settings/language";
 import { cn } from "@/lib/utils";
+import type { MemberProfile } from "@/lib/users/member-display";
 import type { Document, Project, Task } from "@/types/database";
 
 const UPLOADER_INPUT_ID = "project-overview-document-uploader";
@@ -154,6 +157,13 @@ export function ProjectOverviewTab({
   const [togglingTaskId, setTogglingTaskId] = useState<string | null>(null);
   const [recentDocuments, setRecentDocuments] = useState<Document[]>([]);
   const [loadingDocuments, setLoadingDocuments] = useState(true);
+  const [projectMembers, setProjectMembers] = useState<MemberProfile[]>([]);
+
+  const loadProjectMembers = useCallback(async () => {
+    const supabase = createClient();
+    const members = await fetchProjectMembers(supabase, project.id);
+    setProjectMembers(members);
+  }, [project.id]);
 
   const loadRecentTasks = useCallback(async () => {
     setLoadingTasks(true);
@@ -208,6 +218,10 @@ export function ProjectOverviewTab({
     );
     setLoadingDocuments(false);
   }, [project.id]);
+
+  useEffect(() => {
+    void loadProjectMembers();
+  }, [loadProjectMembers]);
 
   useEffect(() => {
     void loadRecentTasks();
@@ -357,6 +371,15 @@ export function ProjectOverviewTab({
                   }}
                 />
               </div>
+
+              {projectMembers.length > 0 ? (
+                <div className="flex flex-col gap-2">
+                  <span className={cn(textStyle.caption, "text-muted-foreground")}>
+                    {language === "it" ? "Referenti" : "Referents"}
+                  </span>
+                  <MemberAvatarStack members={projectMembers} size="sm" />
+                </div>
+              ) : null}
             </div>
           </DashboardSection>
 
@@ -512,6 +535,7 @@ export function ProjectOverviewTab({
             project={project}
             onSaved={(updated) => {
               onProjectUpdated?.(updated);
+              void loadProjectMembers();
               setEditOpen(false);
             }}
             onCancel={() => setEditOpen(false)}

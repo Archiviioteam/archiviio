@@ -147,8 +147,17 @@ export interface Task {
   urgency: TaskUrgency | null;
   notes: string | null;
   tags: string[];
+  assignee_user_id: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface ProjectMember {
+  id: string;
+  workspace_id: string;
+  project_id: string;
+  user_id: string;
+  created_at: string;
 }
 
 export interface NomenclatureRule {

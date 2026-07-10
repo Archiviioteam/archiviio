@@ -9,7 +9,9 @@ import { ProjectList } from "@/components/projects/project-list";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { createClient } from "@/lib/supabase/client";
+import { fetchProjectMembersMap } from "@/lib/projects/project-members";
 import { getEmptyStatePresets } from "@/lib/empty-states";
+import type { MemberProfile } from "@/lib/users/member-display";
 import { useAppLanguage } from "@/lib/settings/language";
 import { getWorkspaceId } from "@/lib/workspace";
 import type { Project } from "@/types/database";
@@ -20,6 +22,9 @@ export function ProjectsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [projects, setProjects] = useState<Project[]>([]);
+  const [projectMembersMap, setProjectMembersMap] = useState<
+    Map<string, MemberProfile[]>
+  >(new Map());
   const [loading, setLoading] = useState(true);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
@@ -29,6 +34,7 @@ export function ProjectsContent() {
 
     if (!workspaceId) {
       setProjects([]);
+      setProjectMembersMap(new Map());
       setLoading(false);
       return;
     }
@@ -39,7 +45,14 @@ export function ProjectsContent() {
       .eq("workspace_id", workspaceId)
       .order("created_at", { ascending: false });
 
-    setProjects((data as Project[]) ?? []);
+    const loadedProjects = (data as Project[]) ?? [];
+    const membersMap = await fetchProjectMembersMap(
+      supabase,
+      loadedProjects.map((project) => project.id)
+    );
+
+    setProjects(loadedProjects);
+    setProjectMembersMap(membersMap);
     setLoading(false);
   }, []);
 
@@ -60,6 +73,16 @@ export function ProjectsContent() {
 
   const handleProjectCreated = useCallback((project: Project) => {
     setProjects((current) => [project, ...current]);
+    void (async () => {
+      const supabase = createClient();
+      const membersMap = await fetchProjectMembersMap(supabase, [project.id]);
+      setProjectMembersMap((current) => {
+        const next = new Map(current);
+        const members = membersMap.get(project.id) ?? [];
+        next.set(project.id, members);
+        return next;
+      });
+    })();
   }, []);
 
   const handleProjectStatusUpdated = useCallback(
@@ -96,6 +119,7 @@ export function ProjectsContent() {
           ) : (
             <ProjectList
               projects={projects}
+              projectMembersMap={projectMembersMap}
               onCreateClick={openCreateDialog}
               onProjectDeleted={(projectId) =>
                 setProjects((current) =>

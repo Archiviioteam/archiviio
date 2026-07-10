@@ -4,6 +4,11 @@ import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { sortTasksByDueDate } from "@/lib/tasks/sort-tasks-by-due-date";
+import {
+  relatedTaskAssignee,
+  TASK_WITH_ASSIGNEE_SELECT,
+  type TaskAssignee,
+} from "@/lib/tasks/task-assignee";
 import { toggleTaskCompletion } from "@/lib/tasks/toggle-task-completion";
 import { useAppLanguage } from "@/lib/settings/language";
 import { getWorkspaceId } from "@/lib/workspace";
@@ -13,6 +18,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import type { Task } from "@/types/database";
+
+type ProjectTask = Task & {
+  assignee: TaskAssignee | null;
+};
+
+type TaskRow = Task & {
+  assignee: TaskAssignee | TaskAssignee[] | null;
+};
 
 interface AddTaskContainerProps {
   centered?: boolean;
@@ -50,7 +63,7 @@ interface ProjectTasksTabProps {
 export function ProjectTasksTab({ projectId }: ProjectTasksTabProps) {
   const language = useAppLanguage();
   const [loading, setLoading] = useState(true);
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const [tasks, setTasks] = useState<ProjectTask[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [togglingTaskId, setTogglingTaskId] = useState<string | null>(null);
@@ -67,13 +80,18 @@ export function ProjectTasksTab({ projectId }: ProjectTasksTabProps) {
 
     const { data } = await supabase
       .from("tasks")
-      .select("*")
+      .select(TASK_WITH_ASSIGNEE_SELECT)
       .eq("workspace_id", workspaceId)
       .eq("project_id", projectId)
       .order("due_date", { ascending: true, nullsFirst: false })
       .order("created_at", { ascending: false });
 
-    setTasks(sortTasksByDueDate((data as Task[]) ?? []));
+    const rows = ((data as TaskRow[]) ?? []).map((row) => ({
+      ...row,
+      assignee: relatedTaskAssignee(row.assignee),
+    }));
+
+    setTasks(sortTasksByDueDate(rows));
     setLoading(false);
   }, [projectId]);
 
@@ -98,16 +116,9 @@ export function ProjectTasksTab({ projectId }: ProjectTasksTabProps) {
     setDialogOpen(true);
   }, []);
 
-  const handleTaskSaved = useCallback((task: Task) => {
-    setTasks((current) => {
-      const exists = current.some((item) => item.id === task.id);
-      const next = exists
-        ? current.map((item) => (item.id === task.id ? task : item))
-        : [...current, task];
-
-      return sortTasksByDueDate(next);
-    });
-  }, []);
+  const handleTaskSaved = useCallback(() => {
+    void loadTasks();
+  }, [loadTasks]);
 
   const handleTaskDeleted = useCallback((taskId: string) => {
     setTasks((current) => current.filter((item) => item.id !== taskId));
@@ -142,7 +153,7 @@ export function ProjectTasksTab({ projectId }: ProjectTasksTabProps) {
         return;
       }
 
-      handleTaskSaved(result.task);
+      handleTaskSaved();
     },
     [handleTaskSaved, language, projectId]
   );
@@ -170,9 +181,10 @@ export function ProjectTasksTab({ projectId }: ProjectTasksTabProps) {
             <TaskCard
               key={task.id}
               task={task}
+              assignee={task.assignee}
               onClick={openEditDialog}
               onToggleComplete={handleToggleComplete}
-              onUrgencyUpdated={handleTaskSaved}
+              onUrgencyUpdated={() => handleTaskSaved()}
               toggling={togglingTaskId === task.id}
             />
           ))}
@@ -184,7 +196,7 @@ export function ProjectTasksTab({ projectId }: ProjectTasksTabProps) {
         onOpenChange={handleDialogOpenChange}
         projectId={projectId}
         task={editingTask}
-        onTaskSaved={handleTaskSaved}
+        onTaskSaved={() => handleTaskSaved()}
         onTaskDeleted={handleTaskDeleted}
       />
     </>

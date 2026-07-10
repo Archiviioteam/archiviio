@@ -1,15 +1,22 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { formatProjectCodeDisplay } from "@/lib/projects";
 import { sortTasksByDueDate } from "@/lib/tasks/sort-tasks-by-due-date";
+import {
+  relatedTaskAssignee,
+  TASK_WITH_ASSIGNEE_SELECT,
+  type TaskAssignee,
+} from "@/lib/tasks/task-assignee";
 import type { Task } from "@/types/database";
 
 export interface WorkspaceTask extends Task {
   projectName: string | null;
   projectCode: string | null;
+  assignee: TaskAssignee | null;
 }
 
 type TaskRow = Task & {
   projects: { name: string; code: string } | { name: string; code: string }[] | null;
+  assignee: TaskAssignee | TaskAssignee[] | null;
 };
 
 function relatedProject(
@@ -44,7 +51,7 @@ export async function fetchWorkspaceTasks(
 ): Promise<WorkspaceTask[]> {
   const { data } = await supabase
     .from("tasks")
-    .select("*, projects(name, code)")
+    .select(`${TASK_WITH_ASSIGNEE_SELECT}, projects(name, code)`)
     .eq("workspace_id", workspaceId)
     .order("due_date", { ascending: true, nullsFirst: false })
     .order("created_at", { ascending: false });
@@ -56,6 +63,7 @@ export async function fetchWorkspaceTasks(
       return {
         ...row,
         projects: undefined,
+        assignee: relatedTaskAssignee(row.assignee),
         projectName: project?.name ?? null,
         projectCode: project?.code ?? null,
       } as WorkspaceTask;
