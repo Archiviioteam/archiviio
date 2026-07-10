@@ -1,10 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import type { MouseEvent } from "react";
 import { toast } from "sonner";
 import { ProjectStatusBadge } from "@/components/projects/project-status-badge";
-import { StatusPickerSheet } from "@/components/status/status-picker-sheet";
+import { StatusPickerPopover } from "@/components/status/status-picker-popover";
 import { transition } from "@/lib/animation";
 import { t } from "@/lib/i18n/translations";
 import { getProjectStatusOptions } from "@/lib/projects";
@@ -38,11 +37,6 @@ export function EditableProjectStatusBadge({
       setCurrentStatus(status);
     }
   }, [status, saving]);
-
-  const handleOpen = useCallback((event: MouseEvent<HTMLButtonElement>) => {
-    event.stopPropagation();
-    setOpen(true);
-  }, []);
 
   const handleSelect = useCallback(
     async (nextStatus: ProjectStatus) => {
@@ -85,32 +79,30 @@ export function EditableProjectStatusBadge({
   );
 
   return (
-    <>
-      <button
-        type="button"
-        onPointerDown={(event) => event.stopPropagation()}
-        onClick={handleOpen}
-        className={cn(
-          "inline-flex h-auto min-h-0 shrink-0 items-center rounded-md border-0 bg-transparent p-0",
-          transition.hover,
-          "hover:opacity-80"
-        )}
-        aria-label={
-          language === "it" ? "Cambia stato progetto" : "Change project status"
-        }
-      >
-        <ProjectStatusBadge status={currentStatus} className={className} />
-      </button>
-
-      <StatusPickerSheet
-        open={open}
-        onOpenChange={setOpen}
-        title={language === "it" ? "Stato progetto" : "Project status"}
-        value={currentStatus}
-        options={getProjectStatusOptions(language)}
-        onSelect={(value) => void handleSelect(value)}
-        saving={saving}
-      />
-    </>
+    <StatusPickerPopover
+      open={open}
+      onOpenChange={setOpen}
+      value={currentStatus}
+      options={getProjectStatusOptions(language)}
+      onSelect={(value) => void handleSelect(value)}
+      saving={saving}
+      trigger={
+        <button
+          type="button"
+          onPointerDown={(event) => event.stopPropagation()}
+          onClick={(event) => event.stopPropagation()}
+          className={cn(
+            "inline-flex h-auto min-h-0 shrink-0 items-center rounded-md border-0 bg-transparent p-0",
+            transition.hover,
+            "hover:opacity-80"
+          )}
+          aria-label={
+            language === "it" ? "Cambia stato progetto" : "Change project status"
+          }
+        >
+          <ProjectStatusBadge status={currentStatus} className={className} />
+        </button>
+      }
+    />
   );
 }

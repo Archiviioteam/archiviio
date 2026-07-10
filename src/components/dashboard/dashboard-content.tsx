@@ -92,9 +92,7 @@ function DashboardTaskRow({
           href={deadlineHref(task)}
           className={cn(
             textStyle.bodyMedium,
-            "min-w-0 flex-1 truncate text-left text-foreground",
-            transition.hover,
-            "hover:underline"
+            "min-w-0 flex-1 truncate text-left text-foreground"
           )}
         >
           {formatDashboardTaskLabel(task)}
@@ -323,11 +321,7 @@ export function DashboardContent() {
                 <div className="flex flex-col gap-2 p-3 sm:flex-row sm:items-start sm:justify-between">
                   <Link
                     href={`/projects/${project.id}`}
-                    className={cn(
-                      "min-w-0 flex-1",
-                      transition.hover,
-                      "hover:underline"
-                    )}
+                    className="min-w-0 flex-1"
                   >
                     <span className={cn(textStyle.bodyMedium, "text-foreground")}>
                       {formatProjectCodeDisplay(project.code)} - {project.name}
