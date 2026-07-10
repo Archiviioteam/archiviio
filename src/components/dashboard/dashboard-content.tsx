@@ -12,7 +12,6 @@ import { AddTaskDialog } from "@/components/projects/add-task-dialog";
 import { UploadDocumentDialog } from "@/components/search/upload-document-dialog";
 import { CreateProjectDialog } from "@/components/projects/create-project-dialog";
 import { EditableProjectStatusBadge } from "@/components/projects/editable-project-status-badge";
-import { MemberAvatarStack } from "@/components/users/member-avatar-stack";
 import { AddSupplierDialog } from "@/components/suppliers/add-supplier-dialog";
 import { StatusPillBadge } from "@/components/status/status-pill-badge";
 import { EditableTaskUrgencyBadge } from "@/components/tasks/editable-task-urgency-badge";
@@ -33,7 +32,6 @@ import {
   deadlineHref,
   fetchDashboardData,
 } from "@/lib/dashboard";
-import { fetchProjectMembersMap } from "@/lib/projects/project-members";
 import { t } from "@/lib/i18n/translations";
 import { formatProjectCodeDisplay } from "@/lib/projects";
 import { radius } from "@/lib/theme";
@@ -50,7 +48,6 @@ import { getWorkspaceId } from "@/lib/workspace";
 import { textStyle } from "@/lib/typography";
 import { cn } from "@/lib/utils";
 import type { DashboardData, DashboardDeadline } from "@/lib/dashboard";
-import type { MemberProfile } from "@/lib/users/member-display";
 import type { Contact, Project, Supplier, Task } from "@/types/database";
 
 import { formatDate } from "@/lib/date-format";
@@ -146,9 +143,6 @@ export function DashboardContent() {
     deadlines: [],
     activity: [],
   });
-  const [projectMembersMap, setProjectMembersMap] = useState<
-    Map<string, MemberProfile[]>
-  >(new Map());
   const [loading, setLoading] = useState(true);
   const [projectDialogOpen, setProjectDialogOpen] = useState(false);
   const [contactDialogOpen, setContactDialogOpen] = useState(false);
@@ -163,7 +157,6 @@ export function DashboardContent() {
 
     if (!workspaceId) {
       setData({ projects: [], deadlines: [], activity: [] });
-      setProjectMembersMap(new Map());
       setLoading(false);
       return;
     }
@@ -172,13 +165,7 @@ export function DashboardContent() {
     const dashboardData = await fetchDashboardData(supabase, workspaceId, {
       recentlyOpened,
     });
-    const membersMap = await fetchProjectMembersMap(
-      supabase,
-      dashboardData.projects.map((project) => project.id)
-    );
-
     setData(dashboardData);
-    setProjectMembersMap(membersMap);
     setLoading(false);
   }, []);
 
@@ -329,6 +316,7 @@ export function DashboardContent() {
       <DashboardSection
         title={t(language, "dashboard.recentProjects")}
         className={panelClass}
+        list
         action={{ label: t(language, "dashboard.viewAll"), href: "/projects" }}
       >
         {loading ? (
@@ -341,11 +329,8 @@ export function DashboardContent() {
             action={{ label: t(language, "quickActions.createProject"), href: "/projects?action=create" }}
           />
         ) : (
-          <div className="dashboard-panel-list flex w-full flex-col gap-1.5 overflow-y-auto lg:h-full">
-            {visibleProjects.map((project) => {
-              const members = projectMembersMap.get(project.id) ?? [];
-
-              return (
+          <div className="dashboard-panel-list flex w-full flex-col gap-1.5 overflow-y-auto">
+            {visibleProjects.map((project) => (
                 <Card key={project.id} variant="nested">
                   <div className="flex items-center gap-2 px-2.5 py-2">
                     <Link
@@ -369,27 +354,16 @@ export function DashboardContent() {
                         {project.name}
                       </span>
                     </Link>
-                    <div className="flex shrink-0 items-center gap-1.5">
-                      {members.length > 0 ? (
-                        <MemberAvatarStack
-                          members={members}
-                          size="xxs"
-                          separated
-                          maxVisible={4}
-                        />
-                      ) : null}
-                      <EditableProjectStatusBadge
-                        projectId={project.id}
-                        status={project.status}
-                        onStatusUpdated={(status) =>
-                          handleProjectStatusUpdated(project.id, status)
-                        }
-                      />
-                    </div>
+                    <EditableProjectStatusBadge
+                      projectId={project.id}
+                      status={project.status}
+                      onStatusUpdated={(status) =>
+                        handleProjectStatusUpdated(project.id, status)
+                      }
+                    />
                   </div>
                 </Card>
-              );
-            })}
+            ))}
           </div>
         )}
       </DashboardSection>
@@ -397,6 +371,7 @@ export function DashboardContent() {
       <DashboardSection
         title={t(language, "dashboard.upcomingTasks")}
         className={panelClass}
+        list
         action={{ label: t(language, "tasks.addTask"), onClick: () => setTaskDialogOpen(true) }}
       >
         {loading ? (
@@ -409,7 +384,7 @@ export function DashboardContent() {
             action={{ label: t(language, "tasks.viewTasks"), href: "/tasks" }}
           />
         ) : (
-          <div className="dashboard-panel-list flex w-full flex-col gap-1.5 overflow-y-auto lg:h-full">
+          <div className="dashboard-panel-list flex w-full flex-col gap-1.5 overflow-y-auto">
             {visibleDeadlines.map((task) => (
               <DashboardTaskRow
                 key={task.id}

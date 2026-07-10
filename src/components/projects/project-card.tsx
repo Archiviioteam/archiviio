@@ -3,9 +3,7 @@
 import Link from "next/link";
 import { Trash2 } from "lucide-react";
 import { EditableProjectStatusBadge } from "@/components/projects/editable-project-status-badge";
-import { MemberAvatarStack } from "@/components/users/member-avatar-stack";
 import { formatProjectCodeDisplay } from "@/lib/projects";
-import type { MemberProfile } from "@/lib/users/member-display";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { textStyle } from "@/lib/typography";
@@ -76,7 +74,6 @@ export function ProjectCardContent({
 
 interface ProjectCardProps {
   project: Project;
-  members?: MemberProfile[];
   className?: string;
   onDelete?: (project: Project) => void;
   deleteDisabled?: boolean;
@@ -85,7 +82,6 @@ interface ProjectCardProps {
 
 export function ProjectCard({
   project,
-  members = [],
   className,
   onDelete,
   deleteDisabled = false,
@@ -98,14 +94,6 @@ export function ProjectCard({
           <ProjectCardContent project={project} hideStatus />
         </Link>
         <div className="flex shrink-0 items-center gap-2">
-          {members.length > 0 ? (
-            <MemberAvatarStack
-              members={members}
-              size="xxs"
-              separated
-              maxVisible={5}
-            />
-          ) : null}
           <EditableProjectStatusBadge
             projectId={project.id}
             status={project.status}

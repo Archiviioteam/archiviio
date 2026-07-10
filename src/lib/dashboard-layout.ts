@@ -60,7 +60,13 @@ export const dashboardPanelCompactHeaderClass = cn(
 
 export const dashboardPanelCompactContentClass = cn(
   "flex min-h-0 flex-1 flex-col overflow-hidden",
-  "p-3 pt-3"
+  "p-3 pt-1.5"
+);
+
+/** List panels (projects, tasks): tight header-to-list spacing. */
+export const dashboardPanelListContentClass = cn(
+  dashboardPanelCompactContentClass,
+  "justify-start"
 );
 
 export const projectOverviewGridGapClass = "gap-3";

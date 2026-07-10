@@ -6,6 +6,7 @@ import {
   dashboardPanelCompactContentClass,
   dashboardPanelCompactHeaderClass,
   dashboardPanelHeaderClass,
+  dashboardPanelListContentClass,
 } from "@/lib/dashboard-layout";
 import { stack } from "@/lib/spacing";
 import { textStyle } from "@/lib/typography";
@@ -22,6 +23,7 @@ interface DashboardSectionProps {
   className?: string;
   contentClassName?: string;
   compact?: boolean;
+  list?: boolean;
 }
 
 export function DashboardSection({
@@ -31,7 +33,9 @@ export function DashboardSection({
   className,
   contentClassName,
   compact = false,
+  list = false,
 }: DashboardSectionProps) {
+  const isCompact = compact || list;
   return (
     <Card
       data-dashboard-panel
@@ -42,12 +46,12 @@ export function DashboardSection({
       )}
     >
       <CardHeader
-        className={compact ? dashboardPanelCompactHeaderClass : dashboardPanelHeaderClass}
+        className={isCompact ? dashboardPanelCompactHeaderClass : dashboardPanelHeaderClass}
       >
         <div className={cn("flex min-w-0 flex-1 flex-col", stack.compact)}>
           <CardTitle
             className={cn(
-              compact ? "text-body font-medium" : "text-body-lg sm:text-heading",
+              isCompact ? "text-body font-medium" : "text-body-lg sm:text-heading",
               textStyle.truncate
             )}
           >
@@ -72,7 +76,11 @@ export function DashboardSection({
       </CardHeader>
       <CardContent
         className={cn(
-          compact ? dashboardPanelCompactContentClass : dashboardPanelContentClass,
+          list
+            ? dashboardPanelListContentClass
+            : isCompact
+              ? dashboardPanelCompactContentClass
+              : dashboardPanelContentClass,
           contentClassName
         )}
       >

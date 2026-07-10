@@ -23,12 +23,10 @@ import {
 import { deleteProject } from "@/lib/projects/project-actions";
 import { createClient } from "@/lib/supabase/client";
 import { getEmptyStatePresets } from "@/lib/empty-states";
-import type { MemberProfile } from "@/lib/users/member-display";
 import { useAppLanguage } from "@/lib/settings/language";
 
 interface ProjectListProps {
   projects: Project[];
-  projectMembersMap: Map<string, MemberProfile[]>;
   onCreateClick: () => void;
   onProjectDeleted: (projectId: string) => void;
   onProjectStatusUpdated?: (projectId: string, status: Project["status"]) => void;
@@ -36,7 +34,6 @@ interface ProjectListProps {
 
 export function ProjectList({
   projects,
-  projectMembersMap,
   onCreateClick,
   onProjectDeleted,
   onProjectStatusUpdated,
@@ -169,7 +166,6 @@ export function ProjectList({
               <ProjectCard
                 key={project.id}
                 project={project}
-                members={projectMembersMap.get(project.id) ?? []}
                 onDelete={setDeleteTarget}
                 deleteDisabled={deleting}
                 onStatusUpdated={onProjectStatusUpdated}
