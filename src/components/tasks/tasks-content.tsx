@@ -227,6 +227,7 @@ export function TasksContent() {
                   projectLabel={formatTaskProjectLabel(task)}
                   onClick={openEditDialog}
                   onToggleComplete={handleToggleComplete}
+                  onUrgencyUpdated={handleTaskSaved}
                   toggling={togglingTaskId === task.id}
                 />
               ))

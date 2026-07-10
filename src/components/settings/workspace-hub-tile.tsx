@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { Loader2, Pencil } from "lucide-react";
 import { toast } from "sonner";
@@ -10,7 +9,6 @@ import {
   settingsHubTileBodyClass,
   settingsHubTileClass,
 } from "@/lib/settings/hub-control-styles";
-import { settingsSectionHref } from "@/lib/settings/constants";
 import {
   isRequired,
   isValidEmail,
@@ -297,27 +295,48 @@ export function WorkspaceHubTile() {
     <Card
       data-dashboard-panel
       variant="nested"
-      className={cn(settingsHubTileClass, "justify-between gap-5 overflow-hidden")}
+      className={cn(settingsHubTileClass, "justify-between gap-4 overflow-hidden")}
     >
-      <div className="flex shrink-0 items-center justify-between gap-3">
-        <span className={textStyle.pageTitle}>
-          {t(language, "settings.workspace.label")}
-        </span>
-        {!loading && !isEditing ? (
-          <button
-            type="button"
-            onClick={() => setIsEditing(true)}
-            className={cn(
-              "flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground",
-              transition.hover,
-              "hover:bg-muted hover:text-foreground"
-            )}
-            aria-label={
-              language === "it" ? "Modifica workspace" : "Edit workspace"
-            }
-          >
-            <Pencil className="size-4" />
-          </button>
+      <div className="flex shrink-0 flex-col gap-1">
+        <div className="flex items-center justify-between gap-3">
+          {isEditing ? (
+            <Input
+              value={form.name}
+              disabled={fieldsDisabled}
+              aria-invalid={Boolean(errors.name)}
+              className="min-w-0 flex-1"
+              onChange={(event) =>
+                setForm((current) => ({ ...current, name: event.target.value }))
+              }
+            />
+          ) : (
+            <span className={cn(textStyle.pageTitle, "min-w-0 truncate")}>
+              {loading
+                ? t(language, "settings.workspace.loading")
+                : savedForm.name || t(language, "settings.workspace.label")}
+            </span>
+          )}
+          {!loading && !isEditing ? (
+            <button
+              type="button"
+              onClick={() => setIsEditing(true)}
+              className={cn(
+                "flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground",
+                transition.hover,
+                "hover:bg-muted hover:text-foreground"
+              )}
+              aria-label={
+                language === "it" ? "Modifica studio" : "Edit studio"
+              }
+            >
+              <Pencil className="size-4" />
+            </button>
+          ) : null}
+        </div>
+        {isEditing && errors.name ? (
+          <p className={cn(textStyle.caption, "text-destructive")}>
+            {errors.name}
+          </p>
         ) : null}
       </div>
 
@@ -327,19 +346,6 @@ export function WorkspaceHubTile() {
         </p>
       ) : (
         <div className={cn(settingsHubTileBodyClass, "grid gap-4 sm:grid-cols-2")}>
-          <div className="sm:col-span-2">
-            <HubField
-              label={t(language, "workspace.name")}
-              value={form.name}
-              isEditing={isEditing}
-              disabled={fieldsDisabled}
-              error={errors.name}
-              onChange={(value) =>
-                setForm((current) => ({ ...current, name: value }))
-              }
-            />
-          </div>
-
           <HubField
             label={t(language, "workspace.generalEmail")}
             value={form.email}
@@ -441,18 +447,6 @@ export function WorkspaceHubTile() {
             )}
           </Button>
         </div>
-      ) : !loading ? (
-        <Link
-          href={settingsSectionHref("workspace")}
-          className={cn(
-            textStyle.captionMedium,
-            "text-muted-foreground",
-            transition.hover,
-            "hover:text-foreground"
-          )}
-        >
-          {t(language, "workspace.manage")}
-        </Link>
       ) : null}
     </Card>
   );

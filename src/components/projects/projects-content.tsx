@@ -62,6 +62,17 @@ export function ProjectsContent() {
     setProjects((current) => [project, ...current]);
   }, []);
 
+  const handleProjectStatusUpdated = useCallback(
+    (projectId: string, status: Project["status"]) => {
+      setProjects((current) =>
+        current.map((project) =>
+          project.id === projectId ? { ...project, status } : project
+        )
+      );
+    },
+    []
+  );
+
   if (loading) {
     return <ProjectsSkeleton />;
   }
@@ -91,6 +102,7 @@ export function ProjectsContent() {
                   current.filter((project) => project.id !== projectId)
                 )
               }
+              onProjectStatusUpdated={handleProjectStatusUpdated}
             />
           )}
         </PageContent>

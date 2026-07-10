@@ -1,26 +1,28 @@
 import { Check } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { EditableTaskUrgencyBadge } from "@/components/tasks/editable-task-urgency-badge";
+import { StatusPillBadge } from "@/components/status/status-pill-badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { transition } from "@/lib/animation";
+import { t } from "@/lib/i18n/translations";
 import { radius } from "@/lib/theme";
-import { statusPillBadgeClass } from "@/lib/status-pills";
 import { textStyle } from "@/lib/typography";
 import { cn } from "@/lib/utils";
+import { useAppLanguage } from "@/lib/settings/language";
 import {
   getTaskUrgencyLabel,
   getTaskUrgencyPillClass,
   normalizeTaskUrgency,
 } from "@/lib/tasks/urgency";
-import { useAppLanguage } from "@/lib/settings/language";
-import { t } from "@/lib/i18n/translations";
-import type { Task } from "@/types/database";
+import type { Task, TaskUrgency } from "@/types/database";
 
 import { formatDate } from "@/lib/date-format";
+
 interface TaskCardProps {
   task: Task;
   projectLabel?: string;
   onClick?: (task: Task) => void;
   onToggleComplete?: (task: Task, completed: boolean) => void;
+  onUrgencyUpdated?: (task: Task) => void;
   toggling?: boolean;
 }
 
@@ -29,6 +31,7 @@ export function TaskCard({
   projectLabel,
   onClick,
   onToggleComplete,
+  onUrgencyUpdated,
   toggling = false,
 }: TaskCardProps) {
   const language = useAppLanguage();
@@ -110,17 +113,29 @@ export function TaskCard({
               {task.due_date ? formatDate(task.due_date) : "—"}
             </span>
 
-            {task.urgency ? (
-              <Badge
-                size="sm"
-                className={cn(
-                  statusPillBadgeClass,
-                  "text-black",
-                  getTaskUrgencyPillClass(normalizeTaskUrgency(task.urgency))
-                )}
+            {task.project_id ? (
+              <div
+                className="shrink-0"
+                onPointerDown={(event) => event.stopPropagation()}
+                onClick={(event) => event.stopPropagation()}
               >
-                {getTaskUrgencyLabel(task.urgency, language)}
-              </Badge>
+                <EditableTaskUrgencyBadge
+                  taskId={task.id}
+                  projectId={task.project_id}
+                  title={task.title}
+                  urgency={task.urgency}
+                  onUrgencyUpdated={(_urgency: TaskUrgency | null, updated) => {
+                    if (updated) {
+                      onUrgencyUpdated?.(updated);
+                    }
+                  }}
+                />
+              </div>
+            ) : task.urgency ? (
+              <StatusPillBadge
+                label={getTaskUrgencyLabel(task.urgency, language)}
+                pillClass={getTaskUrgencyPillClass(normalizeTaskUrgency(task.urgency))}
+              />
             ) : (
               <span
                 className={cn(textStyle.caption, "shrink-0 text-muted-foreground")}

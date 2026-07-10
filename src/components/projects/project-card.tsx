@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Trash2 } from "lucide-react";
-import { ProjectStatusBadge } from "@/components/projects/project-status-badge";
+import { EditableProjectStatusBadge } from "@/components/projects/editable-project-status-badge";
 import { formatProjectCodeDisplay } from "@/lib/projects";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -15,6 +15,7 @@ interface ProjectCardContentProps {
   className?: string;
   hideStatus?: boolean;
   layout?: "card" | "inline";
+  onStatusUpdated?: (status: Project["status"]) => void;
 }
 
 export function ProjectCardContent({
@@ -22,6 +23,7 @@ export function ProjectCardContent({
   className,
   hideStatus = false,
   layout = "card",
+  onStatusUpdated,
 }: ProjectCardContentProps) {
   if (layout === "inline") {
     return (
@@ -48,7 +50,11 @@ export function ProjectCardContent({
           {formatProjectCodeDisplay(project.code)}
         </span>
         {!hideStatus ? (
-          <ProjectStatusBadge status={project.status} />
+          <EditableProjectStatusBadge
+            projectId={project.id}
+            status={project.status}
+            onStatusUpdated={onStatusUpdated}
+          />
         ) : null}
       </div>
 
@@ -71,6 +77,7 @@ interface ProjectCardProps {
   className?: string;
   onDelete?: (project: Project) => void;
   deleteDisabled?: boolean;
+  onStatusUpdated?: (projectId: string, status: Project["status"]) => void;
 }
 
 export function ProjectCard({
@@ -78,16 +85,21 @@ export function ProjectCard({
   className,
   onDelete,
   deleteDisabled = false,
+  onStatusUpdated,
 }: ProjectCardProps) {
   return (
     <Card variant="interactive" className={className}>
       <CardContent className="flex items-center gap-2 p-4">
         <Link href={`/projects/${project.id}`} className="min-w-0 flex-1">
-          <ProjectCardContent project={project} hideStatus={!!onDelete} />
+          <ProjectCardContent project={project} hideStatus />
         </Link>
-        {onDelete ? (
-          <div className="flex shrink-0 items-center gap-2">
-            <ProjectStatusBadge status={project.status} />
+        <div className="flex shrink-0 items-center gap-2">
+          <EditableProjectStatusBadge
+            projectId={project.id}
+            status={project.status}
+            onStatusUpdated={(status) => onStatusUpdated?.(project.id, status)}
+          />
+          {onDelete ? (
             <Button
               type="button"
               variant="ghost"
@@ -99,8 +111,8 @@ export function ProjectCard({
             >
               <Trash2 className="h-4 w-4" />
             </Button>
-          </div>
-        ) : null}
+          ) : null}
+        </div>
       </CardContent>
     </Card>
   );

@@ -8,7 +8,7 @@ import { DashboardSection } from "@/components/dashboard/dashboard-section";
 import { DocumentUploader } from "@/components/documents/document-uploader";
 import { AddTaskDialog } from "@/components/projects/add-task-dialog";
 import { ProjectForm } from "@/components/projects/project-form";
-import { ProjectStatusBadge } from "@/components/projects/project-status-badge";
+import { EditableProjectStatusBadge } from "@/components/projects/editable-project-status-badge";
 import { textStyle } from "@/lib/typography";
 import { radius } from "@/lib/theme";
 import {
@@ -349,7 +349,13 @@ export function ProjectOverviewTab({
                 <span className={cn(textStyle.caption, "text-muted-foreground")}>
                   {language === "it" ? "Stato" : "Status"}
                 </span>
-                <ProjectStatusBadge status={project.status} />
+                <EditableProjectStatusBadge
+                  projectId={project.id}
+                  status={project.status}
+                  onStatusUpdated={(status, updated) => {
+                    onProjectUpdated?.(updated ?? { ...project, status });
+                  }}
+                />
               </div>
             </div>
           </DashboardSection>

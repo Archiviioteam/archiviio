@@ -3,10 +3,13 @@ import { radius } from "@/lib/radius";
 import { textStyle } from "@/lib/typography";
 import { cn } from "@/lib/utils";
 
+/** Shared display size for project status and task urgency pills. */
+export const statusPillBadgeSize = "sm" as const;
+
 /** Display pills on cards and lists (project status, task urgency). */
 export const statusPillBadgeClass = cn(
-  "px-2 py-px leading-none",
-  textStyle.captionMedium
+  textStyle.captionMedium,
+  "leading-none"
 );
 
 /** Selectable pills in create/edit forms. */

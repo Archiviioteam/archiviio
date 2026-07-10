@@ -52,6 +52,21 @@ export function getProjectStatusPillClass(status: ProjectStatus): string {
   return colors[status];
 }
 
+const projectStatusOrder: ProjectStatus[] = [
+  "active",
+  "on_hold",
+  "completed",
+  "archived",
+];
+
+export function getProjectStatusOptions(language: AppLanguage = "en") {
+  return projectStatusOrder.map((value) => ({
+    value,
+    label: formatProjectStatus(value, language),
+    pillClass: getProjectStatusPillClass(value),
+  }));
+}
+
 const CODE_PREFIX = "rif#";
 const CODE_PATTERN = /^rif#(\d{4})$/;
 

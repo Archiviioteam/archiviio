@@ -1,11 +1,9 @@
-import { Badge } from "@/components/ui/badge";
 import {
   formatProjectStatus,
   getProjectStatusPillClass,
 } from "@/lib/projects";
 import { useAppLanguage } from "@/lib/settings/language";
-import { statusPillBadgeClass } from "@/lib/status-pills";
-import { cn } from "@/lib/utils";
+import { StatusPillBadge } from "@/components/status/status-pill-badge";
 import type { ProjectStatus } from "@/types/database";
 
 interface ProjectStatusBadgeProps {
@@ -20,16 +18,10 @@ export function ProjectStatusBadge({
   const language = useAppLanguage();
 
   return (
-    <Badge
-      size="sm"
-      className={cn(
-        statusPillBadgeClass,
-        "text-black",
-        getProjectStatusPillClass(status),
-        className
-      )}
-    >
-      {formatProjectStatus(status, language)}
-    </Badge>
+    <StatusPillBadge
+      label={formatProjectStatus(status, language)}
+      pillClass={getProjectStatusPillClass(status)}
+      className={className}
+    />
   );
 }

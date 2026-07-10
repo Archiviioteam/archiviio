@@ -172,6 +172,7 @@ export function ProjectTasksTab({ projectId }: ProjectTasksTabProps) {
               task={task}
               onClick={openEditDialog}
               onToggleComplete={handleToggleComplete}
+              onUrgencyUpdated={handleTaskSaved}
               toggling={togglingTaskId === task.id}
             />
           ))}

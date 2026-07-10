@@ -5,6 +5,7 @@ import {
   type ActivityFeedItem,
 } from "@/lib/activity";
 import type { LastOpenedProjectSnapshot } from "@/lib/ai-command/last-opened-project-storage";
+import { formatProjectCodeDisplay } from "@/lib/projects";
 import { projectHref } from "@/lib/search/search-routes";
 import { compareTasksByPriorityAndDueDate } from "@/lib/tasks/sort-tasks-by-due-date";
 import type { Project, TaskUrgency } from "@/types/database";
@@ -163,4 +164,20 @@ export function deadlineHref(deadline: DashboardDeadline): string {
   }
 
   return "/tasks";
+}
+
+export function formatDashboardTaskLabel(deadline: DashboardDeadline): string {
+  const parts: string[] = [];
+
+  if (deadline.projectCode) {
+    parts.push(formatProjectCodeDisplay(deadline.projectCode));
+  }
+
+  if (deadline.projectName) {
+    parts.push(deadline.projectName);
+  }
+
+  parts.push(deadline.title);
+
+  return parts.join(" - ");
 }

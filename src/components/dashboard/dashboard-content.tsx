@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { FolderKanban, CheckSquare } from "lucide-react";
+import { CheckSquare, FolderKanban } from "lucide-react";
+import { toast } from "sonner";
 import { AddContactDialog } from "@/components/contacts/add-contact-dialog";
 import { DashboardNotesComposer } from "@/components/dashboard/dashboard-notes-composer";
 import { DashboardQuickActions } from "@/components/dashboard/dashboard-quick-actions";
@@ -10,12 +11,14 @@ import { DashboardSection } from "@/components/dashboard/dashboard-section";
 import { AddTaskDialog } from "@/components/projects/add-task-dialog";
 import { UploadDocumentDialog } from "@/components/search/upload-document-dialog";
 import { CreateProjectDialog } from "@/components/projects/create-project-dialog";
-import { ProjectStatusBadge } from "@/components/projects/project-status-badge";
+import { EditableProjectStatusBadge } from "@/components/projects/editable-project-status-badge";
 import { AddSupplierDialog } from "@/components/suppliers/add-supplier-dialog";
-import { Badge } from "@/components/ui/badge";
+import { StatusPillBadge } from "@/components/status/status-pill-badge";
+import { EditableTaskUrgencyBadge } from "@/components/tasks/editable-task-urgency-badge";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { readRecentlyOpenedProjects } from "@/lib/ai-command/last-opened-project-storage";
+import { transition } from "@/lib/animation";
 import {
   dashboardGridClassDesktop,
   dashboardGridClassMobile,
@@ -23,9 +26,14 @@ import {
   dashboardPanelClassDesktop,
   dashboardPanelClassMobile,
 } from "@/lib/dashboard-layout";
-import { deadlineHref, fetchDashboardData } from "@/lib/dashboard";
+import {
+  deadlineHref,
+  fetchDashboardData,
+  formatDashboardTaskLabel,
+} from "@/lib/dashboard";
 import { t } from "@/lib/i18n/translations";
 import { formatProjectCodeDisplay } from "@/lib/projects";
+import { radius } from "@/lib/theme";
 import { useAppLanguage } from "@/lib/settings/language";
 import { createClient } from "@/lib/supabase/client";
 import { useIsMobile } from "@/lib/layout/use-is-mobile";
@@ -34,10 +42,11 @@ import {
   getTaskUrgencyPillClass,
   normalizeTaskUrgency,
 } from "@/lib/tasks/urgency";
+import { toggleTaskCompletion } from "@/lib/tasks/toggle-task-completion";
 import { getWorkspaceId } from "@/lib/workspace";
 import { textStyle } from "@/lib/typography";
 import { cn } from "@/lib/utils";
-import type { DashboardData } from "@/lib/dashboard";
+import type { DashboardData, DashboardDeadline } from "@/lib/dashboard";
 import type { Contact, Project, Supplier, Task } from "@/types/database";
 
 import { formatDate } from "@/lib/date-format";
@@ -45,6 +54,75 @@ import { formatDate } from "@/lib/date-format";
 function formatDueDate(value: string | null): string {
   if (!value) return "";
   return formatDate(value);
+}
+
+interface DashboardTaskRowProps {
+  task: DashboardDeadline;
+  toggling: boolean;
+  onToggleComplete: (task: DashboardDeadline) => void;
+  onUrgencyUpdated: (taskId: string, urgency: DashboardDeadline["urgency"]) => void;
+}
+
+function DashboardTaskRow({
+  task,
+  toggling,
+  onToggleComplete,
+  onUrgencyUpdated,
+}: DashboardTaskRowProps) {
+  const language = useAppLanguage();
+
+  return (
+    <Card variant="nested">
+      <div className="flex items-center gap-2 p-3">
+        <button
+          type="button"
+          role="checkbox"
+          aria-checked={false}
+          aria-label={t(language, "tasks.markComplete")}
+          disabled={toggling}
+          onClick={() => onToggleComplete(task)}
+          className={cn(
+            "flex size-4 shrink-0 items-center justify-center border-2 border-input bg-card",
+            radius.control,
+            transition.hover,
+            toggling && "opacity-50"
+          )}
+        />
+        <Link
+          href={deadlineHref(task)}
+          className={cn(
+            textStyle.bodyMedium,
+            "min-w-0 flex-1 truncate text-left text-foreground",
+            transition.hover,
+            "hover:underline"
+          )}
+        >
+          {formatDashboardTaskLabel(task)}
+        </Link>
+        <div className="flex shrink-0 items-center gap-2">
+          <span className={cn(textStyle.caption, "whitespace-nowrap text-muted-foreground")}>
+            {formatDueDate(task.dueDate) || "—"}
+          </span>
+          {task.projectId ? (
+            <div className="shrink-0">
+              <EditableTaskUrgencyBadge
+                taskId={task.id}
+                projectId={task.projectId}
+                title={task.title}
+                urgency={task.urgency}
+                onUrgencyUpdated={(urgency) => onUrgencyUpdated(task.id, urgency)}
+              />
+            </div>
+          ) : task.urgency ? (
+            <StatusPillBadge
+              label={getTaskUrgencyLabel(task.urgency, language)}
+              pillClass={getTaskUrgencyPillClass(normalizeTaskUrgency(task.urgency))}
+            />
+          ) : null}
+        </div>
+      </div>
+    </Card>
+  );
 }
 
 export function DashboardContent() {
@@ -61,6 +139,7 @@ export function DashboardContent() {
   const [supplierDialogOpen, setSupplierDialogOpen] = useState(false);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
+  const [togglingTaskId, setTogglingTaskId] = useState<string | null>(null);
 
   const loadDashboard = useCallback(async () => {
     const supabase = createClient();
@@ -102,6 +181,78 @@ export function DashboardContent() {
       setUploadDialogOpen(true);
     }
   }, []);
+
+  const handleToggleComplete = useCallback(
+    async (task: DashboardDeadline) => {
+      if (!task.projectId) {
+        toast.error(
+          language === "it"
+            ? "Questa attività non è collegata a un progetto."
+            : "This task is not linked to a project."
+        );
+        return;
+      }
+
+      setTogglingTaskId(task.id);
+
+      const supabase = createClient();
+      const workspaceId = await getWorkspaceId(supabase);
+
+      if (!workspaceId) {
+        toast.error(
+          language === "it" ? "Workspace non trovato" : "Workspace not found"
+        );
+        setTogglingTaskId(null);
+        return;
+      }
+
+      const result = await toggleTaskCompletion({
+        supabase,
+        workspaceId,
+        taskId: task.id,
+        projectId: task.projectId,
+        title: task.title,
+        completed: true,
+      });
+
+      setTogglingTaskId(null);
+
+      if (!result.ok) {
+        toast.error(result.error);
+        return;
+      }
+
+      setData((current) => ({
+        ...current,
+        deadlines: current.deadlines.filter((item) => item.id !== task.id),
+      }));
+    },
+    [language]
+  );
+
+  const handleDeadlineUrgencyUpdated = useCallback(
+    (taskId: string, urgency: DashboardDeadline["urgency"]) => {
+      setData((current) => ({
+        ...current,
+        deadlines: current.deadlines.map((deadline) =>
+          deadline.id === taskId ? { ...deadline, urgency } : deadline
+        ),
+      }));
+    },
+    []
+  );
+
+  const handleProjectStatusUpdated = useCallback(
+    (projectId: string, status: Project["status"]) => {
+      setData((current) => ({
+        ...current,
+        projects: current.projects.map((project) =>
+          project.id === projectId ? { ...project, status } : project
+        ),
+      }));
+    },
+    []
+  );
 
   useEffect(() => {
     const supabase = createClient();
@@ -168,18 +319,29 @@ export function DashboardContent() {
         ) : (
           <div className="dashboard-panel-list flex w-full flex-col gap-2 overflow-y-auto lg:h-full">
             {visibleProjects.map((project) => (
-              <Card key={project.id} variant="nested" asChild>
-                <Link
-                  href={`/projects/${project.id}`}
-                  className="flex flex-col gap-2 p-3 sm:flex-row sm:items-start sm:justify-between"
-                >
-                  <div className="min-w-0 flex-1">
+              <Card key={project.id} variant="nested">
+                <div className="flex flex-col gap-2 p-3 sm:flex-row sm:items-start sm:justify-between">
+                  <Link
+                    href={`/projects/${project.id}`}
+                    className={cn(
+                      "min-w-0 flex-1",
+                      transition.hover,
+                      "hover:underline"
+                    )}
+                  >
                     <span className={cn(textStyle.bodyMedium, "text-foreground")}>
                       {formatProjectCodeDisplay(project.code)} - {project.name}
                     </span>
-                  </div>
-                  <ProjectStatusBadge status={project.status} className="self-start shrink-0" />
-                </Link>
+                  </Link>
+                  <EditableProjectStatusBadge
+                    projectId={project.id}
+                    status={project.status}
+                    className="self-start shrink-0"
+                    onStatusUpdated={(status) =>
+                      handleProjectStatusUpdated(project.id, status)
+                    }
+                  />
+                </div>
               </Card>
             ))}
           </div>
@@ -203,38 +365,13 @@ export function DashboardContent() {
         ) : (
           <div className="dashboard-panel-list flex w-full flex-col gap-2 overflow-y-auto lg:h-full">
             {visibleDeadlines.map((task) => (
-              <Card key={task.id} variant="nested" asChild>
-                <Link
-                  href={deadlineHref(task)}
-                  className="flex flex-col gap-2 p-3 sm:flex-row sm:items-start sm:justify-between"
-                >
-                  <div className="min-w-0 flex-1">
-                    <span className={cn(textStyle.bodyMedium, "text-foreground")}>
-                      {(task.projectCode
-                        ? formatProjectCodeDisplay(task.projectCode)
-                        : task.projectName ?? "—") +
-                        " - " +
-                        task.title}
-                    </span>
-                  </div>
-                  <div className="flex shrink-0 flex-wrap items-center gap-2 self-start">
-                    <span className={cn(textStyle.caption, "text-muted-foreground")}>
-                      {formatDueDate(task.dueDate) || "—"}
-                    </span>
-                    {task.urgency ? (
-                      <Badge
-                        size="sm"
-                        className={cn(
-                          "text-black",
-                          getTaskUrgencyPillClass(normalizeTaskUrgency(task.urgency))
-                        )}
-                      >
-                        {getTaskUrgencyLabel(task.urgency, language)}
-                      </Badge>
-                    ) : null}
-                  </div>
-                </Link>
-              </Card>
+              <DashboardTaskRow
+                key={task.id}
+                task={task}
+                toggling={togglingTaskId === task.id}
+                onToggleComplete={(deadline) => void handleToggleComplete(deadline)}
+                onUrgencyUpdated={handleDeadlineUrgencyUpdated}
+              />
             ))}
           </div>
         )}

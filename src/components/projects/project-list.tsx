@@ -29,12 +29,14 @@ interface ProjectListProps {
   projects: Project[];
   onCreateClick: () => void;
   onProjectDeleted: (projectId: string) => void;
+  onProjectStatusUpdated?: (projectId: string, status: Project["status"]) => void;
 }
 
 export function ProjectList({
   projects,
   onCreateClick,
   onProjectDeleted,
+  onProjectStatusUpdated,
 }: ProjectListProps) {
   const language = useAppLanguage();
   const emptyStatePresets = getEmptyStatePresets(language);
@@ -166,6 +168,7 @@ export function ProjectList({
                 project={project}
                 onDelete={setDeleteTarget}
                 deleteDisabled={deleting}
+                onStatusUpdated={onProjectStatusUpdated}
               />
             ))}
           </div>
