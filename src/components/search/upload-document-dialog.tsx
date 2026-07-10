@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
@@ -25,7 +24,6 @@ import { createClient } from "@/lib/supabase/client";
 import { projectListSelectColumns } from "@/lib/projects/schema";
 import { DOCUMENT_ALLOWED_EXTENSIONS } from "@/lib/supabase/storage";
 import { getWorkspaceId } from "@/lib/workspace";
-import { radius } from "@/lib/radius";
 import { cn } from "@/lib/utils";
 import type { Project } from "@/types/database";
 
@@ -35,10 +33,6 @@ interface UploadDocumentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onRequestCreateProject?: () => void;
-}
-
-function hasDraggedFiles(dataTransfer: DataTransfer | null): boolean {
-  return dataTransfer?.types.includes("Files") ?? false;
 }
 
 export function UploadDocumentDialog({
@@ -54,14 +48,10 @@ export function UploadDocumentDialog({
   const [loading, setLoading] = useState(true);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
-  const [dragOverProjectId, setDragOverProjectId] = useState<string | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
     if (!open) {
       setSelectedProjectId(null);
-      setDragOverProjectId(null);
-      setIsDragging(false);
       return;
     }
 
@@ -128,8 +118,6 @@ export function UploadDocumentDialog({
       }
 
       setUploading(false);
-      setDragOverProjectId(null);
-      setIsDragging(false);
 
       if (hadError) return;
 
@@ -156,43 +144,6 @@ export function UploadDocumentDialog({
   function handleProjectSelect(projectId: string) {
     setSelectedProjectId(projectId);
     inputRef.current?.click();
-  }
-
-  function handleProjectDragEnter(
-    event: React.DragEvent<HTMLButtonElement>,
-    projectId: string
-  ) {
-    event.preventDefault();
-    event.stopPropagation();
-    if (!uploading && hasDraggedFiles(event.dataTransfer)) {
-      setDragOverProjectId(projectId);
-      setIsDragging(true);
-    }
-  }
-
-  function handleProjectDragOver(event: React.DragEvent<HTMLButtonElement>) {
-    event.preventDefault();
-    event.stopPropagation();
-  }
-
-  function handleProjectDragLeave(event: React.DragEvent<HTMLButtonElement>) {
-    event.preventDefault();
-    event.stopPropagation();
-    if (event.currentTarget.contains(event.relatedTarget as Node)) return;
-    setDragOverProjectId(null);
-  }
-
-  function handleProjectDrop(
-    event: React.DragEvent<HTMLButtonElement>,
-    projectId: string
-  ) {
-    event.preventDefault();
-    event.stopPropagation();
-    setDragOverProjectId(null);
-    setIsDragging(false);
-
-    if (uploading) return;
-    void uploadFilesToProject(projectId, event.dataTransfer.files);
   }
 
   return (
@@ -243,63 +194,26 @@ export function UploadDocumentDialog({
                 />
               </div>
             ) : (
-              <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto">
-                <Card
-                  variant="dashed"
-                  className={cn(
-                    "flex items-center justify-center gap-3 p-4 text-center",
-                    isDragging && "border-primary bg-primary/10"
-                  )}
-                  onDragEnter={(event) => {
-                    event.preventDefault();
-                    if (!uploading && hasDraggedFiles(event.dataTransfer)) {
-                      setIsDragging(true);
-                    }
-                  }}
-                  onDragOver={(event) => event.preventDefault()}
-                  onDragLeave={(event) => {
-                    event.preventDefault();
-                    if (event.currentTarget.contains(event.relatedTarget as Node)) return;
-                    setIsDragging(false);
-                  }}
-                >
-                  <div className={cn("flex size-9 items-center justify-center bg-muted", radius.pill)}>
-                    <Upload className="size-4 text-muted-foreground" />
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    {isDragging
-                      ? t(language, "documents.dropzoneActive")
-                      : t(language, "elaborati.dropOnProject")}
-                  </p>
-                </Card>
-
-                <div className="flex flex-col gap-2">
-                  {projects.map((project) => (
-                    <Card key={project.id} variant="nested" asChild>
-                      <button
-                        type="button"
-                        className={cn(
-                          "flex w-full items-center justify-between gap-2 p-3 text-left sm:gap-3 sm:p-4",
-                          uploading && "pointer-events-none opacity-50",
-                          dragOverProjectId === project.id &&
-                            "border-primary bg-primary/10 ring-1 ring-primary/30"
-                        )}
-                        disabled={uploading}
-                        onClick={() => handleProjectSelect(project.id)}
-                        onDragEnter={(event) => handleProjectDragEnter(event, project.id)}
-                        onDragOver={handleProjectDragOver}
-                        onDragLeave={handleProjectDragLeave}
-                        onDrop={(event) => handleProjectDrop(event, project.id)}
-                      >
-                        <ProjectCardContent
-                          project={project}
-                          layout="inline"
-                          className="w-full"
-                        />
-                      </button>
-                    </Card>
-                  ))}
-                </div>
+              <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto">
+                {projects.map((project) => (
+                  <Card key={project.id} variant="nested" asChild>
+                    <button
+                      type="button"
+                      className={cn(
+                        "flex w-full items-center justify-between gap-2 p-3 text-left sm:gap-3 sm:p-4",
+                        uploading && "pointer-events-none opacity-50"
+                      )}
+                      disabled={uploading}
+                      onClick={() => handleProjectSelect(project.id)}
+                    >
+                      <ProjectCardContent
+                        project={project}
+                        layout="inline"
+                        className="w-full"
+                      />
+                    </button>
+                  </Card>
+                ))}
               </div>
             )}
           </div>

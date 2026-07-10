@@ -500,8 +500,7 @@ const translations: Record<AppLanguage, Record<TranslationKey, string>> = {
       "Delete {name}? This removes the file and all stored versions. This action cannot be undone.",
     "documents.deletedToast": "{name} deleted",
     "elaborati.uploadTitle": "Upload deliverable",
-    "elaborati.uploadDescription":
-      "Choose a project or drag files onto a project below.",
+    "elaborati.uploadDescription": "Choose a project below.",
     "elaborati.dropOnProject": "Drop to upload here",
     "elaborati.uploadedToast": "{name} uploaded",
     "elaborati.deleteTitle": "Delete deliverable",
@@ -861,8 +860,7 @@ const translations: Record<AppLanguage, Record<TranslationKey, string>> = {
       "Eliminare {name}? Verranno rimossi il file e tutte le versioni salvate. Questa azione non può essere annullata.",
     "documents.deletedToast": "{name} eliminato",
     "elaborati.uploadTitle": "Carica elaborato",
-    "elaborati.uploadDescription":
-      "Scegli un progetto o trascina i file su un progetto qui sotto.",
+    "elaborati.uploadDescription": "Scegli un progetto qui sotto.",
     "elaborati.dropOnProject": "Rilascia per caricare qui",
     "elaborati.uploadedToast": "{name} caricato",
     "elaborati.deleteTitle": "Elimina elaborato",

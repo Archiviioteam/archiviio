@@ -122,11 +122,11 @@ export function ProjectDetail() {
   const isOverview = activeTab === "overview";
 
   return (
-    <PageLayout className={isOverview ? "h-full min-h-0" : undefined}>
+    <PageLayout className={cn(isOverview ? "h-full min-h-0 gap-3" : undefined)}>
       <PageContent
         className={cn(
-          isOverview && "h-full min-h-0 flex-1",
-          !isOverview && "min-h-0 flex-1"
+          isOverview ? "h-full min-h-0 flex-1 gap-3" : "min-h-0 flex-1",
+          !isOverview && "gap-6"
         )}
       >
         <ProjectTabs activeTab={activeTab} onTabChange={setActiveTab} />

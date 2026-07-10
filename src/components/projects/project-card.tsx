@@ -14,7 +14,6 @@ import type { Project } from "@/types/database";
 
 interface ProjectCardContentProps {
   project: Project;
-  members?: MemberProfile[];
   className?: string;
   hideStatus?: boolean;
   layout?: "card" | "inline";
@@ -23,7 +22,6 @@ interface ProjectCardContentProps {
 
 export function ProjectCardContent({
   project,
-  members = [],
   className,
   hideStatus = false,
   layout = "card",
@@ -71,9 +69,6 @@ export function ProjectCardContent({
             {project.location}
           </span>
         ) : null}
-        {members.length > 0 ? (
-          <MemberAvatarStack members={members} className="pt-1" />
-        ) : null}
       </div>
     </div>
   );
@@ -100,9 +95,17 @@ export function ProjectCard({
     <Card variant="interactive" className={className}>
       <CardContent className="flex items-center gap-2 p-4">
         <Link href={`/projects/${project.id}`} className="min-w-0 flex-1">
-          <ProjectCardContent project={project} members={members} hideStatus />
+          <ProjectCardContent project={project} hideStatus />
         </Link>
         <div className="flex shrink-0 items-center gap-2">
+          {members.length > 0 ? (
+            <MemberAvatarStack
+              members={members}
+              size="xxs"
+              separated
+              maxVisible={5}
+            />
+          ) : null}
           <EditableProjectStatusBadge
             projectId={project.id}
             status={project.status}

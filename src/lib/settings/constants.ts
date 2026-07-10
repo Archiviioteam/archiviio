@@ -11,8 +11,8 @@ export type SettingsSectionId =
   | "preferences";
 
 const SETTINGS_SECTION_IDS: SettingsSectionId[] = [
-  "profile",
   "workspace",
+  "profile",
   "team",
   "preferences",
 ];

@@ -46,7 +46,7 @@ export function ProjectTabs({ activeTab, onTabChange }: ProjectTabsProps) {
   };
 
   return (
-    <div className="space-y-2 pb-1">
+    <div className="space-y-1 pb-0">
       <div className="sm:hidden">
         <label
           htmlFor="project-tab-select"

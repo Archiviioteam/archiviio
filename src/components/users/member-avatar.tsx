@@ -8,13 +8,14 @@ import { cn } from "@/lib/utils";
 
 interface MemberAvatarProps {
   member: MemberProfile;
-  size?: "xs" | "sm" | "md";
+  size?: "xxs" | "xs" | "sm" | "md";
   selected?: boolean;
   className?: string;
   title?: string;
 }
 
 const sizeClasses = {
+  xxs: "size-6 text-[9px]",
   xs: "size-7 text-[10px]",
   sm: "size-8 text-xs",
   md: "size-10 text-sm",

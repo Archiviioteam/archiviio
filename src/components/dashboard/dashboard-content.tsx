@@ -73,7 +73,7 @@ function DashboardTaskRow({
 
   return (
     <Card variant="nested">
-      <div className="flex items-center gap-2 p-3">
+      <div className="flex items-center gap-1.5 px-2.5 py-2">
         <button
           type="button"
           role="checkbox"
@@ -82,7 +82,7 @@ function DashboardTaskRow({
           disabled={toggling}
           onClick={() => onToggleComplete(task)}
           className={cn(
-            "flex size-4 shrink-0 items-center justify-center border-2 border-input bg-card",
+            "flex size-3.5 shrink-0 items-center justify-center border-2 border-input bg-card",
             radius.control,
             transition.hover,
             toggling && "opacity-50"
@@ -91,14 +91,19 @@ function DashboardTaskRow({
         <Link
           href={deadlineHref(task)}
           className={cn(
-            textStyle.bodyMedium,
-            "min-w-0 flex-1 truncate text-left text-foreground"
+            textStyle.captionMedium,
+            "min-w-0 flex-1 truncate text-left leading-snug text-foreground"
           )}
         >
           {formatDashboardTaskLabel(task)}
         </Link>
-        <div className="flex shrink-0 items-center gap-2">
-          <span className={cn(textStyle.caption, "whitespace-nowrap text-muted-foreground")}>
+        <div className="flex shrink-0 items-center gap-1.5">
+          <span
+            className={cn(
+              textStyle.caption,
+              "whitespace-nowrap text-[11px] text-muted-foreground"
+            )}
+          >
             {formatDueDate(task.dueDate) || "—"}
           </span>
           {task.projectId ? (
@@ -108,6 +113,7 @@ function DashboardTaskRow({
                 projectId={task.projectId}
                 title={task.title}
                 urgency={task.urgency}
+                className="px-1.5 py-0 text-[10px] leading-tight"
                 onUrgencyUpdated={(urgency) => onUrgencyUpdated(task.id, urgency)}
               />
             </div>
@@ -115,6 +121,7 @@ function DashboardTaskRow({
             <StatusPillBadge
               label={getTaskUrgencyLabel(task.urgency, language)}
               pillClass={getTaskUrgencyPillClass(normalizeTaskUrgency(task.urgency))}
+              className="px-1.5 py-0 text-[10px] leading-tight"
             />
           ) : null}
         </div>

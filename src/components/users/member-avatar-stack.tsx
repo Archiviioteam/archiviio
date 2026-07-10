@@ -6,7 +6,8 @@ import { cn } from "@/lib/utils";
 interface MemberAvatarStackProps {
   members: MemberProfile[];
   maxVisible?: number;
-  size?: "xs" | "sm" | "md";
+  size?: "xxs" | "xs" | "sm" | "md";
+  separated?: boolean;
   className?: string;
 }
 
@@ -14,6 +15,7 @@ export function MemberAvatarStack({
   members,
   maxVisible = 4,
   size = "xs",
+  separated = false,
   className,
 }: MemberAvatarStackProps) {
   if (members.length === 0) {
@@ -24,21 +26,30 @@ export function MemberAvatarStack({
   const overflow = members.length - visible.length;
 
   return (
-    <div className={cn("flex items-center", className)}>
+    <div
+      className={cn(
+        "flex items-center",
+        separated ? "gap-1" : "",
+        className
+      )}
+    >
       {visible.map((member, index) => (
         <MemberAvatar
           key={member.id}
           member={member}
           size={size}
           title={getMemberDisplayName(member)}
-          className={cn(index > 0 && "-ml-2")}
+          className={cn(
+            !separated && index > 0 && "-ml-2",
+            separated && "ring-1"
+          )}
         />
       ))}
       {overflow > 0 ? (
         <span
           className={cn(
             textStyle.captionMedium,
-            "-ml-1 text-muted-foreground"
+            separated ? "text-muted-foreground" : "-ml-1 text-muted-foreground"
           )}
           title={members
             .slice(maxVisible)

@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   dashboardPanelContentClass,
+  dashboardPanelCompactContentClass,
+  dashboardPanelCompactHeaderClass,
   dashboardPanelHeaderClass,
 } from "@/lib/dashboard-layout";
 import { stack } from "@/lib/spacing";
@@ -19,6 +21,7 @@ interface DashboardSectionProps {
   children: React.ReactNode;
   className?: string;
   contentClassName?: string;
+  compact?: boolean;
 }
 
 export function DashboardSection({
@@ -27,6 +30,7 @@ export function DashboardSection({
   children,
   className,
   contentClassName,
+  compact = false,
 }: DashboardSectionProps) {
   return (
     <Card
@@ -37,9 +41,16 @@ export function DashboardSection({
         className
       )}
     >
-      <CardHeader className={dashboardPanelHeaderClass}>
+      <CardHeader
+        className={compact ? dashboardPanelCompactHeaderClass : dashboardPanelHeaderClass}
+      >
         <div className={cn("flex min-w-0 flex-1 flex-col", stack.compact)}>
-          <CardTitle className={cn("text-body-lg sm:text-heading", textStyle.truncate)}>
+          <CardTitle
+            className={cn(
+              compact ? "text-body font-medium" : "text-body-lg sm:text-heading",
+              textStyle.truncate
+            )}
+          >
             {title}
           </CardTitle>
         </div>
@@ -60,7 +71,10 @@ export function DashboardSection({
         ) : null}
       </CardHeader>
       <CardContent
-        className={cn(dashboardPanelContentClass, contentClassName)}
+        className={cn(
+          compact ? dashboardPanelCompactContentClass : dashboardPanelContentClass,
+          contentClassName
+        )}
       >
         {children}
       </CardContent>

@@ -15,10 +15,10 @@ import { radius } from "@/lib/theme";
 import {
   dashboardGridClassDesktop,
   dashboardGridClassMobile,
-  dashboardGridGapClass,
   dashboardPanelClassDesktop,
   dashboardPanelClassMobile,
-  dashboardPanelContentClass,
+  dashboardPanelCompactContentClass,
+  projectOverviewGridGapClass,
 } from "@/lib/dashboard-layout";
 import { transition } from "@/lib/animation";
 import {
@@ -133,12 +133,12 @@ function OverviewActionButton({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex flex-col items-center justify-center gap-2 text-muted-foreground hover:text-foreground",
+        "flex flex-col items-center justify-center gap-1 text-muted-foreground hover:text-foreground",
         transition.hover
       )}
     >
-      <Icon className="size-6" />
-      <span className={cn(textStyle.bodyMedium, "text-center text-foreground")}>
+      <Icon className="size-5" />
+      <span className={cn(textStyle.captionMedium, "text-center text-foreground")}>
         {label}
       </span>
     </button>
@@ -323,20 +323,20 @@ export function ProjectOverviewTab({
           className={cn(
             dashboardGridClassMobile,
             dashboardGridClassDesktop,
-            dashboardGridGapClass,
+            projectOverviewGridGapClass,
             "min-h-0 flex-1"
           )}
         >
           <DashboardSection
             title={language === "it" ? "Dettagli progetto" : "Project details"}
             className={panelClass}
+            compact
           >
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
               <p
                 className={cn(
-                  "w-full text-foreground",
-                  textStyle.bodyLarge,
-                  "font-medium leading-relaxed"
+                  textStyle.bodyMedium,
+                  "w-full leading-snug text-foreground"
                 )}
               >
                 {formatProjectCodeDisplay(project.code)}
@@ -354,7 +354,7 @@ export function ProjectOverviewTab({
                 <span className={cn(textStyle.caption, "text-muted-foreground")}>
                   {language === "it" ? "Creato" : "Created"}
                 </span>
-                <span className={cn(textStyle.bodyMedium, "text-foreground")}>
+                <span className={cn(textStyle.captionMedium, "text-foreground")}>
                   {formatDate(project.created_at)}
                 </span>
               </div>
@@ -373,11 +373,16 @@ export function ProjectOverviewTab({
               </div>
 
               {projectMembers.length > 0 ? (
-                <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2">
                   <span className={cn(textStyle.caption, "text-muted-foreground")}>
                     {language === "it" ? "Referenti" : "Referents"}
                   </span>
-                  <MemberAvatarStack members={projectMembers} size="sm" />
+                  <MemberAvatarStack
+                    members={projectMembers}
+                    size="xxs"
+                    separated
+                    maxVisible={5}
+                  />
                 </div>
               ) : null}
             </div>
@@ -393,11 +398,11 @@ export function ProjectOverviewTab({
           >
             <CardContent
               className={cn(
-                dashboardPanelContentClass,
-                "flex min-h-0 flex-1 items-center justify-center"
+                dashboardPanelCompactContentClass,
+                "flex min-h-0 flex-1 items-center justify-center py-2"
               )}
             >
-              <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-3 lg:h-full">
+              <div className="grid w-full grid-cols-1 gap-1 sm:grid-cols-3 lg:h-full">
                 <OverviewActionButton
                   icon={Pencil}
                   label={language === "it" ? "Modifica progetto" : "Edit project"}
@@ -420,6 +425,7 @@ export function ProjectOverviewTab({
           <DashboardSection
             title={language === "it" ? "Ultime attività" : "Recent tasks"}
             className={panelClass}
+            compact
             action={{
               label: t(language, "dashboard.viewAll"),
               href: projectHref(project.id, "tasks"),
@@ -451,6 +457,7 @@ export function ProjectOverviewTab({
           <DashboardSection
             title={language === "it" ? "Ultimi file caricati" : "Latest uploads"}
             className={panelClass}
+            compact
             action={{
               label: t(language, "dashboard.viewAll"),
               href: projectHref(project.id, "documents"),
