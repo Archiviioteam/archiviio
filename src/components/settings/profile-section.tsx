@@ -27,7 +27,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ImageUploadField } from "@/components/settings/image-upload-field";
-import { MailboxConnectionCard } from "@/components/mail/mailbox-connection-card";
 import {
   SettingsField,
   SettingsSectionCard,
@@ -369,8 +368,6 @@ export function ProfileSection() {
           />
         </SettingsField>
       </SettingsSectionCard>
-
-      <MailboxConnectionCard />
     </div>
   );
 }

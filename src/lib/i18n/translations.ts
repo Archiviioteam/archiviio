@@ -9,7 +9,6 @@ export type TranslationKey =
   | "navigation.contacts"
   | "navigation.suppliers"
   | "navigation.documents"
-  | "navigation.mail"
   | "navigation.notes"
   | "navigation.nomenclature"
   | "navigation.settings"
@@ -331,7 +330,6 @@ const translations: Record<AppLanguage, Record<TranslationKey, string>> = {
     "navigation.contacts": "Contacts",
     "navigation.suppliers": "Suppliers",
     "navigation.documents": "Studio documents",
-    "navigation.mail": "Mail",
     "navigation.notes": "Notes",
     "navigation.nomenclature": "Nomenclature",
     "navigation.settings": "Settings",
@@ -691,7 +689,6 @@ const translations: Record<AppLanguage, Record<TranslationKey, string>> = {
     "navigation.contacts": "Contatti",
     "navigation.suppliers": "Fornitori",
     "navigation.documents": "Documenti di studio",
-    "navigation.mail": "Mail",
     "navigation.notes": "Note",
     "navigation.nomenclature": "Nomenclatura",
     "navigation.settings": "Impostazioni",

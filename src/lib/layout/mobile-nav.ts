@@ -5,7 +5,6 @@ import {
   FileText,
   FolderKanban,
   LayoutDashboard,
-  Mail,
   MoreHorizontal,
   Settings,
   StickyNote,
@@ -74,11 +73,6 @@ export function getMobileMoreItems(language: AppLanguage): MobileMoreItem[] {
       href: "/documents",
       label: t(language, "navigation.documents"),
       icon: FileText,
-    },
-    {
-      href: "/mail",
-      label: t(language, "navigation.mail"),
-      icon: Mail,
     },
     {
       href: "/notes",

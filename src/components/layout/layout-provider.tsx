@@ -10,6 +10,7 @@ import {
   type ReactNode,
 } from "react";
 import { CommandPalette } from "@/components/search/command-palette";
+import { purgeDeprecatedNavHrefs } from "@/lib/layout/nav-order-storage";
 import { mediaQueries } from "@/lib/layout/responsive";
 import { writeSidebarOpen } from "@/lib/layout/sidebar-storage";
 
@@ -43,6 +44,10 @@ export function LayoutProvider({ children }: { children: ReactNode }) {
 
   const openCommandPalette = useCallback(() => {
     setCommandPaletteOpen(true);
+  }, []);
+
+  useEffect(() => {
+    purgeDeprecatedNavHrefs();
   }, []);
 
   useEffect(() => {

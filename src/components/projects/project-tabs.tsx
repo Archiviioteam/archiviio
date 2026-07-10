@@ -9,12 +9,26 @@ export const PROJECT_TABS = [
   { id: "overview", label: "Overview" },
   { id: "tasks", label: "Tasks" },
   { id: "documents", label: "Deliverables" },
-  { id: "mail", label: "Mail" },
   { id: "contacts", label: "Contacts" },
   { id: "suppliers", label: "Suppliers" },
 ] as const;
 
 export type ProjectTabId = (typeof PROJECT_TABS)[number]["id"];
+
+const DEPRECATED_PROJECT_TAB_IDS = new Set(["mail"]);
+
+export function isDeprecatedProjectTab(value: string | null): boolean {
+  return value !== null && DEPRECATED_PROJECT_TAB_IDS.has(value);
+}
+
+export function parseProjectTab(value: string | null): ProjectTabId {
+  const validTabs = new Set(PROJECT_TABS.map((tab) => tab.id));
+  if (value && validTabs.has(value as ProjectTabId)) {
+    return value as ProjectTabId;
+  }
+
+  return "overview";
+}
 
 interface ProjectTabsProps {
   activeTab: ProjectTabId;
@@ -27,7 +41,6 @@ export function ProjectTabs({ activeTab, onTabChange }: ProjectTabsProps) {
     overview: language === "it" ? "Panoramica" : "Overview",
     tasks: language === "it" ? "Attività" : "Tasks",
     documents: language === "it" ? "Elaborati" : "Deliverables",
-    mail: language === "it" ? "Mail" : "Mail",
     contacts: language === "it" ? "Contatti" : "Contacts",
     suppliers: language === "it" ? "Fornitori" : "Suppliers",
   };

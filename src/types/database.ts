@@ -186,62 +186,6 @@ export interface ProjectNomenclature {
   updated_at: string;
 }
 
-export type EmailDirection = "inbound" | "outbound";
-export type EmailMatchStatus = "auto" | "manual" | "unmatched";
-
-export interface MailboxConnection {
-  id: string;
-  user_id: string;
-  workspace_id: string;
-  email: string;
-  imap_host: string;
-  imap_port: number;
-  imap_secure: boolean;
-  imap_username: string;
-  password_encrypted: string;
-  sent_folder: string;
-  sync_enabled: boolean;
-  last_sync_at: string | null;
-  last_sync_error: string | null;
-  last_uid_inbox: number;
-  last_uid_sent: number;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface ArchivedEmail {
-  id: string;
-  workspace_id: string;
-  project_id: string | null;
-  mailbox_connection_id: string;
-  mailbox_user_id: string;
-  direction: EmailDirection;
-  message_id: string | null;
-  imap_uid: number;
-  imap_folder: string;
-  subject: string;
-  from_address: string;
-  from_name: string | null;
-  to_addresses: string[];
-  cc_addresses: string[];
-  sent_at: string;
-  snippet: string;
-  body_text: string | null;
-  match_status: EmailMatchStatus;
-  match_confidence: number;
-  matched_rule: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface ProjectEmailKeyword {
-  id: string;
-  workspace_id: string;
-  project_id: string;
-  keyword: string;
-  created_at: string;
-}
-
 export type ActivityAction =
   | "project.created"
   | "project.updated"

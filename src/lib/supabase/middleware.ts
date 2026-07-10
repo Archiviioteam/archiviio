@@ -29,6 +29,11 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const { pathname, search } = request.nextUrl;
+
+  if (pathname === "/mail" || pathname.startsWith("/mail/")) {
+    return NextResponse.redirect(new URL("/dashboard", request.nextUrl));
+  }
+
   const redirectPath = getSessionRedirect(
     pathname,
     search,

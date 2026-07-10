@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
 import { recordLastOpenedProject } from "@/lib/ai-command/last-opened-project-storage";
 import { createClient } from "@/lib/supabase/client";
 import { getWorkspaceId } from "@/lib/workspace";
@@ -14,10 +14,10 @@ import { ProjectOverviewTab } from "@/components/projects/project-overview-tab";
 import { ProjectContactsTab } from "@/components/projects/project-contacts-tab";
 import { ProjectSuppliersTab } from "@/components/projects/project-suppliers-tab";
 import { ProjectDocumentsTab } from "@/components/projects/project-documents-tab";
-import { ProjectMailsTab } from "@/components/projects/project-mails-tab";
 import { ProjectTasksTab } from "@/components/projects/project-tasks-tab";
 import {
-  PROJECT_TABS,
+  isDeprecatedProjectTab,
+  parseProjectTab,
   ProjectTabs,
   type ProjectTabId,
 } from "@/components/projects/project-tabs";
@@ -26,29 +26,36 @@ import { Button } from "@/components/ui/button";
 import type { Project } from "@/types/database";
 import { cn } from "@/lib/utils";
 
-function parseProjectTab(value: string | null): ProjectTabId {
-  const validTabs = new Set(PROJECT_TABS.map((tab) => tab.id));
-  if (value && validTabs.has(value as ProjectTabId)) {
-    return value as ProjectTabId;
-  }
-
-  return "overview";
+function parseProjectTabFromSearch(value: string | null): ProjectTabId {
+  return parseProjectTab(value);
 }
 
 export function ProjectDetail() {
   const language = useAppLanguage();
   const params = useParams<{ id: string }>();
+  const pathname = usePathname();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [activeTab, setActiveTab] = useState<ProjectTabId>(() =>
-    parseProjectTab(searchParams.get("tab"))
+    parseProjectTabFromSearch(searchParams.get("tab"))
   );
 
   useEffect(() => {
-    setActiveTab(parseProjectTab(searchParams.get("tab")));
-  }, [searchParams]);
+    const tab = searchParams.get("tab");
+    if (isDeprecatedProjectTab(tab)) {
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete("tab");
+      const query = params.toString();
+      router.replace(query ? `${pathname}?${query}` : pathname);
+      setActiveTab("overview");
+      return;
+    }
+
+    setActiveTab(parseProjectTabFromSearch(tab));
+  }, [pathname, router, searchParams]);
 
   usePageTitleOverride(
     project
@@ -141,7 +148,6 @@ export function ProjectDetail() {
           {activeTab === "documents" && (
             <ProjectDocumentsTab projectId={project.id} />
           )}
-          {activeTab === "mail" && <ProjectMailsTab projectId={project.id} />}
           {activeTab === "contacts" && (
             <ProjectContactsTab projectId={project.id} />
           )}

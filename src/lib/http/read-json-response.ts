@@ -11,7 +11,7 @@ function htmlResponseMessage(status: number): string {
     return "Sessione scaduta. Ricarica la pagina e accedi di nuovo.";
   }
   if (status === 504 || status === 524) {
-    return "Sincronizzazione troppo lunga. Clicca di nuovo Sincronizza per continuare a importare le mail.";
+    return "Operazione troppo lunga. Riprova tra qualche minuto.";
   }
   if (status >= 500) {
     return "Errore del server. Riprova tra qualche minuto.";
