@@ -171,18 +171,3 @@ export async function setProjectMembers(
 
   return { ok: true };
 }
-
-export function resolveDefaultAssigneeId(
-  members: MemberProfile[],
-  currentUserId: string | null
-): string | null {
-  if (members.length === 0) {
-    return null;
-  }
-
-  if (currentUserId && members.some((member) => member.id === currentUserId)) {
-    return currentUserId;
-  }
-
-  return members[0]?.id ?? null;
-}

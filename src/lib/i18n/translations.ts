@@ -277,6 +277,7 @@ export type TranslationKey =
   | "tasks.urgencyLow"
   | "tasks.urgencyMedium"
   | "tasks.urgencyHigh"
+  | "tasks.completedTasks"
   | "projects.statusActive"
   | "projects.statusOnHold"
   | "projects.statusCompleted"
@@ -630,6 +631,7 @@ const translations: Record<AppLanguage, Record<TranslationKey, string>> = {
     "tasks.urgencyLow": "Low",
     "tasks.urgencyMedium": "Medium",
     "tasks.urgencyHigh": "High",
+    "tasks.completedTasks": "Completed tasks",
     "projects.statusActive": "Active",
     "projects.statusOnHold": "On hold",
     "projects.statusCompleted": "Completed",
@@ -991,6 +993,7 @@ const translations: Record<AppLanguage, Record<TranslationKey, string>> = {
     "tasks.urgencyLow": "Bassa",
     "tasks.urgencyMedium": "Media",
     "tasks.urgencyHigh": "Alta",
+    "tasks.completedTasks": "Attività completate",
     "projects.statusActive": "Attivo",
     "projects.statusOnHold": "In pausa",
     "projects.statusCompleted": "Completato",

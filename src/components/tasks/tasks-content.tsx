@@ -7,6 +7,7 @@ import {
   AddTaskDialog,
 } from "@/components/projects/add-task-dialog";
 import { TaskCard } from "@/components/projects/task-card";
+import { CompletedTasksSection } from "@/components/tasks/completed-tasks-section";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -147,6 +148,9 @@ export function TasksContent() {
     })
   );
 
+  const activeTasks = filteredTasks.filter((task) => task.status !== "done");
+  const completedTasks = filteredTasks.filter((task) => task.status === "done");
+
   if (loading) {
     return (
       <PageLayout>
@@ -209,18 +213,32 @@ export function TasksContent() {
                 }}
               />
             ) : (
-              filteredTasks.map((task) => (
-                <TaskCard
-                  key={task.id}
-                  task={task}
-                  projectLabel={formatTaskProjectLabel(task)}
-                  assignee={task.assignee}
-                  onClick={openEditDialog}
-                  onToggleComplete={handleToggleComplete}
-                  onUrgencyUpdated={() => handleTaskSaved()}
-                  toggling={togglingTaskId === task.id}
-                />
-              ))
+              <>
+                {activeTasks.map((task) => (
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    projectLabel={formatTaskProjectLabel(task)}
+                    onClick={openEditDialog}
+                    onToggleComplete={handleToggleComplete}
+                    onUrgencyUpdated={() => handleTaskSaved()}
+                    toggling={togglingTaskId === task.id}
+                  />
+                ))}
+                <CompletedTasksSection count={completedTasks.length}>
+                  {completedTasks.map((task) => (
+                    <TaskCard
+                      key={task.id}
+                      task={task}
+                      projectLabel={formatTaskProjectLabel(task)}
+                      onClick={openEditDialog}
+                      onToggleComplete={handleToggleComplete}
+                      onUrgencyUpdated={() => handleTaskSaved()}
+                      toggling={togglingTaskId === task.id}
+                    />
+                  ))}
+                </CompletedTasksSection>
+              </>
             )}
           </div>
         )}

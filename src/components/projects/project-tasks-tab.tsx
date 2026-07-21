@@ -4,28 +4,16 @@ import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { sortTasksByDueDate } from "@/lib/tasks/sort-tasks-by-due-date";
-import {
-  relatedTaskAssignee,
-  TASK_WITH_ASSIGNEE_SELECT,
-  type TaskAssignee,
-} from "@/lib/tasks/task-assignee";
 import { toggleTaskCompletion } from "@/lib/tasks/toggle-task-completion";
 import { useAppLanguage } from "@/lib/settings/language";
 import { getWorkspaceId } from "@/lib/workspace";
 import { AddTaskDialog } from "@/components/projects/add-task-dialog";
 import { TaskCard } from "@/components/projects/task-card";
+import { CompletedTasksSection } from "@/components/tasks/completed-tasks-section";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import type { Task } from "@/types/database";
-
-type ProjectTask = Task & {
-  assignee: TaskAssignee | null;
-};
-
-type TaskRow = Task & {
-  assignee: TaskAssignee | TaskAssignee[] | null;
-};
 
 interface AddTaskContainerProps {
   centered?: boolean;
@@ -63,7 +51,7 @@ interface ProjectTasksTabProps {
 export function ProjectTasksTab({ projectId }: ProjectTasksTabProps) {
   const language = useAppLanguage();
   const [loading, setLoading] = useState(true);
-  const [tasks, setTasks] = useState<ProjectTask[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [togglingTaskId, setTogglingTaskId] = useState<string | null>(null);
@@ -80,18 +68,13 @@ export function ProjectTasksTab({ projectId }: ProjectTasksTabProps) {
 
     const { data } = await supabase
       .from("tasks")
-      .select(TASK_WITH_ASSIGNEE_SELECT)
+      .select("*")
       .eq("workspace_id", workspaceId)
       .eq("project_id", projectId)
       .order("due_date", { ascending: true, nullsFirst: false })
       .order("created_at", { ascending: false });
 
-    const rows = ((data as TaskRow[]) ?? []).map((row) => ({
-      ...row,
-      assignee: relatedTaskAssignee(row.assignee),
-    }));
-
-    setTasks(sortTasksByDueDate(rows));
+    setTasks(sortTasksByDueDate((data as Task[]) ?? []));
     setLoading(false);
   }, [projectId]);
 
@@ -166,6 +149,9 @@ export function ProjectTasksTab({ projectId }: ProjectTasksTabProps) {
     );
   }
 
+  const activeTasks = tasks.filter((task) => task.status !== "done");
+  const completedTasks = tasks.filter((task) => task.status === "done");
+
   return (
     <>
       {tasks.length === 0 ? (
@@ -177,17 +163,28 @@ export function ProjectTasksTab({ projectId }: ProjectTasksTabProps) {
       ) : (
         <div className="flex flex-col gap-3">
           <AddTaskContainer onAddClick={openCreateDialog} />
-          {tasks.map((task) => (
+          {activeTasks.map((task) => (
             <TaskCard
               key={task.id}
               task={task}
-              assignee={task.assignee}
               onClick={openEditDialog}
               onToggleComplete={handleToggleComplete}
               onUrgencyUpdated={() => handleTaskSaved()}
               toggling={togglingTaskId === task.id}
             />
           ))}
+          <CompletedTasksSection count={completedTasks.length}>
+            {completedTasks.map((task) => (
+              <TaskCard
+                key={task.id}
+                task={task}
+                onClick={openEditDialog}
+                onToggleComplete={handleToggleComplete}
+                onUrgencyUpdated={() => handleTaskSaved()}
+                toggling={togglingTaskId === task.id}
+              />
+            ))}
+          </CompletedTasksSection>
         </div>
       )}
 

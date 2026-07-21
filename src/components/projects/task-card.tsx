@@ -1,7 +1,6 @@
 import { Check } from "lucide-react";
 import { EditableTaskUrgencyBadge } from "@/components/tasks/editable-task-urgency-badge";
 import { StatusPillBadge } from "@/components/status/status-pill-badge";
-import { MemberAvatar } from "@/components/users/member-avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { transition } from "@/lib/animation";
 import { t } from "@/lib/i18n/translations";
@@ -15,14 +14,12 @@ import {
   normalizeTaskUrgency,
 } from "@/lib/tasks/urgency";
 import type { Task, TaskUrgency } from "@/types/database";
-import type { TaskAssignee } from "@/lib/tasks/task-assignee";
 
 import { formatDate } from "@/lib/date-format";
 
 interface TaskCardProps {
   task: Task;
   projectLabel?: string;
-  assignee?: TaskAssignee | null;
   onClick?: (task: Task) => void;
   onToggleComplete?: (task: Task, completed: boolean) => void;
   onUrgencyUpdated?: (task: Task) => void;
@@ -32,7 +29,6 @@ interface TaskCardProps {
 export function TaskCard({
   task,
   projectLabel,
-  assignee = null,
   onClick,
   onToggleComplete,
   onUrgencyUpdated,
@@ -116,10 +112,6 @@ export function TaskCard({
             >
               {task.due_date ? formatDate(task.due_date) : "—"}
             </span>
-
-            {assignee ? (
-              <MemberAvatar member={assignee} size="xs" className="shrink-0" />
-            ) : null}
 
             {task.project_id ? (
               <div
