@@ -4,7 +4,6 @@ import {
   CheckSquare,
   FileText,
   FolderKanban,
-  LayoutDashboard,
   MoreHorizontal,
   Settings,
   StickyNote,
@@ -14,7 +13,7 @@ import {
 import type { AppLanguage } from "@/lib/settings/preferences-storage";
 import { t } from "@/lib/i18n/translations";
 
-export type MobileTabId = "dashboard" | "projects" | "tasks" | "more";
+export type MobileTabId = "projects" | "tasks" | "more";
 
 export type MobileTabItem = {
   id: MobileTabId;
@@ -31,12 +30,6 @@ export type MobileMoreItem = {
 
 export function getMobileTabItems(language: AppLanguage): MobileTabItem[] {
   return [
-    {
-      id: "dashboard",
-      href: "/dashboard",
-      label: t(language, "navigation.dashboard"),
-      icon: LayoutDashboard,
-    },
     {
       id: "projects",
       href: "/projects",
@@ -96,7 +89,6 @@ export function getMobileMoreItems(language: AppLanguage): MobileMoreItem[] {
 export function getActiveMobileTabId(pathname: string): MobileTabId {
   const path = pathname.split("?")[0]?.replace(/\/+$/, "") || "/";
 
-  if (path === "/dashboard" || path === "/") return "dashboard";
   if (path.startsWith("/projects")) return "projects";
   if (path.startsWith("/tasks")) return "tasks";
 
