@@ -1,6 +1,7 @@
 "use client";
 
 import { transition } from "@/lib/animation";
+import { useIsMobile } from "@/lib/layout/use-is-mobile";
 import { useAppLanguage } from "@/lib/settings/language";
 import { textStyle } from "@/lib/typography";
 import { cn } from "@/lib/utils";
@@ -13,6 +14,11 @@ export const PROJECT_TABS = [
   { id: "suppliers", label: "Suppliers" },
 ] as const;
 
+/** Tabs available on phone — overview (project editing) is desktop/tablet only. */
+export const MOBILE_PROJECT_TABS = PROJECT_TABS.filter(
+  (tab) => tab.id !== "overview"
+);
+
 export type ProjectTabId = (typeof PROJECT_TABS)[number]["id"];
 
 const DEPRECATED_PROJECT_TAB_IDS = new Set(["mail"]);
@@ -21,13 +27,19 @@ export function isDeprecatedProjectTab(value: string | null): boolean {
   return value !== null && DEPRECATED_PROJECT_TAB_IDS.has(value);
 }
 
-export function parseProjectTab(value: string | null): ProjectTabId {
-  const validTabs = new Set(PROJECT_TABS.map((tab) => tab.id));
+export function parseProjectTab(
+  value: string | null,
+  options?: { mobile?: boolean }
+): ProjectTabId {
+  const defaultTab: ProjectTabId = options?.mobile ? "tasks" : "overview";
+  const allowedTabs = options?.mobile ? MOBILE_PROJECT_TABS : PROJECT_TABS;
+  const validTabs = new Set(allowedTabs.map((tab) => tab.id));
+
   if (value && validTabs.has(value as ProjectTabId)) {
     return value as ProjectTabId;
   }
 
-  return "overview";
+  return defaultTab;
 }
 
 interface ProjectTabsProps {
@@ -37,6 +49,8 @@ interface ProjectTabsProps {
 
 export function ProjectTabs({ activeTab, onTabChange }: ProjectTabsProps) {
   const language = useAppLanguage();
+  const isMobile = useIsMobile();
+  const visibleTabs = isMobile ? MOBILE_PROJECT_TABS : PROJECT_TABS;
   const tabLabelById: Record<ProjectTabId, string> = {
     overview: language === "it" ? "Panoramica" : "Overview",
     tasks: language === "it" ? "Attività" : "Tasks",
@@ -56,7 +70,7 @@ export function ProjectTabs({ activeTab, onTabChange }: ProjectTabsProps) {
         </label>
         <select
           id="project-tab-select"
-          value={activeTab}
+          value={activeTab === "overview" ? "tasks" : activeTab}
           onChange={(event) => onTabChange(event.target.value as ProjectTabId)}
           className={cn(
             "h-10 w-full rounded-md border border-input bg-background px-3 text-foreground outline-none",
@@ -64,7 +78,7 @@ export function ProjectTabs({ activeTab, onTabChange }: ProjectTabsProps) {
             "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           )}
         >
-          {PROJECT_TABS.map((tab) => (
+          {visibleTabs.map((tab) => (
             <option key={tab.id} value={tab.id}>
               {tabLabelById[tab.id]}
             </option>

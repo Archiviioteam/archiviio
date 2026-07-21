@@ -12,6 +12,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { SearchInput } from "@/components/ui/search-input";
 import { getEmptyStatePresets } from "@/lib/empty-states";
+import { t } from "@/lib/i18n/translations";
+import { useIsMobile } from "@/lib/layout/use-is-mobile";
 import { useAppLanguage } from "@/lib/settings/language";
 import {
   fetchWorkspaceTasks,
@@ -26,6 +28,7 @@ import type { Task } from "@/types/database";
 
 export function TasksContent() {
   const language = useAppLanguage();
+  const isMobile = useIsMobile();
   const emptyStatePresets = getEmptyStatePresets(language);
   const [tasks, setTasks] = useState<WorkspaceTask[]>([]);
   const [search, setSearch] = useState("");
@@ -177,9 +180,11 @@ export function TasksContent() {
             <div className="flex items-center gap-3">
               <SearchInput
                 placeholder={
-                  language === "it"
-                    ? "Cerca per titolo, note o progetto..."
-                    : "Search by title, notes, or project..."
+                  isMobile
+                    ? t(language, "search.trigger")
+                    : language === "it"
+                      ? "Cerca per titolo, note o progetto..."
+                      : "Search by title, notes, or project..."
                 }
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}

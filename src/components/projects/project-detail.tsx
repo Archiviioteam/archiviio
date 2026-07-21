@@ -23,15 +23,13 @@ import {
 } from "@/components/projects/project-tabs";
 import { usePageTitleOverride } from "@/components/layout/layout-provider";
 import { Button } from "@/components/ui/button";
+import { useIsMobile } from "@/lib/layout/use-is-mobile";
 import type { Project } from "@/types/database";
 import { cn } from "@/lib/utils";
 
-function parseProjectTabFromSearch(value: string | null): ProjectTabId {
-  return parseProjectTab(value);
-}
-
 export function ProjectDetail() {
   const language = useAppLanguage();
+  const isMobile = useIsMobile();
   const params = useParams<{ id: string }>();
   const pathname = usePathname();
   const router = useRouter();
@@ -40,22 +38,23 @@ export function ProjectDetail() {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [activeTab, setActiveTab] = useState<ProjectTabId>(() =>
-    parseProjectTabFromSearch(searchParams.get("tab"))
+    parseProjectTab(searchParams.get("tab"), { mobile: false })
   );
 
   useEffect(() => {
     const tab = searchParams.get("tab");
-    if (isDeprecatedProjectTab(tab)) {
-      const params = new URLSearchParams(searchParams.toString());
-      params.delete("tab");
-      const query = params.toString();
+
+    if (isDeprecatedProjectTab(tab) || (isMobile && tab === "overview")) {
+      const nextParams = new URLSearchParams(searchParams.toString());
+      nextParams.delete("tab");
+      const query = nextParams.toString();
       router.replace(query ? `${pathname}?${query}` : pathname);
-      setActiveTab("overview");
+      setActiveTab(isMobile ? "tasks" : "overview");
       return;
     }
 
-    setActiveTab(parseProjectTabFromSearch(tab));
-  }, [pathname, router, searchParams]);
+    setActiveTab(parseProjectTab(tab, { mobile: isMobile }));
+  }, [isMobile, pathname, router, searchParams]);
 
   usePageTitleOverride(
     project
@@ -119,7 +118,7 @@ export function ProjectDetail() {
     );
   }
 
-  const isOverview = activeTab === "overview";
+  const isOverview = !isMobile && activeTab === "overview";
 
   return (
     <PageLayout className={cn(isOverview ? "h-full min-h-0 gap-3" : undefined)}>
@@ -144,7 +143,9 @@ export function ProjectDetail() {
               onProjectUpdated={setProject}
             />
           )}
-          {activeTab === "tasks" && <ProjectTasksTab projectId={project.id} />}
+          {(activeTab === "tasks" || (isMobile && activeTab === "overview")) && (
+            <ProjectTasksTab projectId={project.id} />
+          )}
           {activeTab === "documents" && (
             <ProjectDocumentsTab projectId={project.id} />
           )}

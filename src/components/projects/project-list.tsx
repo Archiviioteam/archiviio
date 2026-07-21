@@ -23,6 +23,8 @@ import {
 import { deleteProject } from "@/lib/projects/project-actions";
 import { createClient } from "@/lib/supabase/client";
 import { getEmptyStatePresets } from "@/lib/empty-states";
+import { t } from "@/lib/i18n/translations";
+import { useIsMobile } from "@/lib/layout/use-is-mobile";
 import { useAppLanguage } from "@/lib/settings/language";
 
 interface ProjectListProps {
@@ -39,6 +41,7 @@ export function ProjectList({
   onProjectStatusUpdated,
 }: ProjectListProps) {
   const language = useAppLanguage();
+  const isMobile = useIsMobile();
   const emptyStatePresets = getEmptyStatePresets(language);
   const [search, setSearch] = useState("");
   const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
@@ -98,9 +101,11 @@ export function ProjectList({
         <div className="flex items-center gap-3">
           <SearchInput
             placeholder={
-              language === "it"
-                ? "Cerca per nome, codice o localita..."
-                : "Search by name, code, or location..."
+              isMobile
+                ? t(language, "search.trigger")
+                : language === "it"
+                  ? "Cerca per nome, codice o localita..."
+                  : "Search by name, code, or location..."
             }
             value={search}
             onChange={(e) => setSearch(e.target.value)}
